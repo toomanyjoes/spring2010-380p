@@ -17,7 +17,6 @@ intArray *readArray(char *fname)
 		fprintf(stderr,"Error reading size of array\n");
 		exit(1);
 	}
-	printf("size of array: %d\n",array->size);
 	array->data = (int*)malloc(sizeof(int)*array->size);
 	int i;
 	for(i=0; i<array->size; i++) {

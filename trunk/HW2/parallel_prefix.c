@@ -92,7 +92,6 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 			nodeval[i],nodeval_elem,MPI_INT,i,i,
 			MPI_COMM_WORLD,&status);
 		}
-//	MPI_Barrier(MPI_COMM_WORLD);
 	int dummy;
 	while(stride < numtasks)
 	{
@@ -100,47 +99,90 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 		{
 			copyArray(nodeval[id],ltally[id+stride]);
 			combine(ltally[id+stride], nodeval[id+stride], nodeval[id]);
-
+			
+			// check if another process needs this value later in this loop
 			for(i = 0; i < numtasks; i++)
 			{
 				if(i != id)
 				{
+					dummy = stride;
+					while(dummy < numtasks)
+					{
+						if(i % (2*dummy) == 0 && id == i+dummy) // Send only to processes that will need the value later
+						{
+							MPI_Send(nodeval[id],nodeval_elem,MPI_INT,i,id*dummy,MPI_COMM_WORLD);
+							break;
+						}
+						dummy = 2*dummy;
+					}
+				}
+			}
+
+			// check which process will need this value after this loop
+			if(2*stride >= numtasks) // this means this is the last iteration of this loop
+			{
+				for(i = 0; i < numtasks; i++)
+				{
 					dummy = numtasks/2;
 					while(dummy >= 1)
 					{
-						if(i % (2*dummy) == 0) // Send only to processes that will need the value later
+						if(i % (2*dummy) == 0 && id == i+dummy)
 						{
-							MPI_Send(nodeval[id],nodeval_elem,MPI_INT,i,id*dummy,MPI_COMM_WORLD);
+							MPI_Send(ltally[id+stride],nodeval_elem,MPI_INT,i,id*dummy,MPI_COMM_WORLD);
+							MPI_Send(nodeval[id],nodeval_elem,MPI_INT,i,id*dummy+1,MPI_COMM_WORLD);
+							break;
 						}
 						dummy = dummy / 2;
 					}
 				}
 			}
 		}
-//		else
-//		{
-			for(i=0; i<numtasks; i++)
+
+		// receive the values that are needed later in this loop
+		for(i=0; i<numtasks; i++)
+		{
+			if(id != i && i % (2*stride) == 0) // some other process changed/will change ltally and nodeval
 			{
-				if(id != i && i % (2*stride) == 0) // some other process changed/will change ltally and nodeval
+				dummy = stride;
+				while(dummy < numtasks)
+				{
+					if(id % (2*dummy) == 0 && i == id+dummy)
+					{
+						copyArray(nodeval[i],ltally[i+stride]);
+						MPI_Recv(nodeval[i],nodeval_elem,MPI_INT,i,i*dummy,MPI_COMM_WORLD,&status);
+						break;
+					}
+					dummy = 2*dummy;
+				}
+			}
+		}
+
+		// receive the values that are needed after this loop
+		if(2*stride >= numtasks) // this means that this is the last iteration of this loop
+		{
+			for(i = 0; i < numtasks; i++)
+			{
+				if(id != i && i % (2*stride) == 0)
 				{
 					dummy = numtasks/2;
 					while(dummy >= 1)
 					{
-						if(id % (2*dummy) == 0) // I will need the value later
+						if(id % (2*dummy) == 0 && i == id+dummy)
 						{
-							copyArray(nodeval[i],ltally[i+stride]);
-							MPI_Recv(nodeval[i],nodeval_elem,MPI_INT,i,i*dummy,MPI_COMM_WORLD,&status);
+							MPI_Recv(ltally[i+stride],nodeval_elem,MPI_INT,i,id*dummy,MPI_COMM_WORLD,&status);
+							MPI_Recv(nodeval[i],nodeval_elem,MPI_INT,i,i*dummy+1,MPI_COMM_WORLD,&status);
+							break;
 						}
 						dummy = dummy / 2;
 					}
 				}
-				//else
-					//break;
-//			}
+			}
 		}
-//		MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Barrier(MPI_COMM_WORLD); // make sure everyone has completed this round
 		stride = 2*stride;
 	}
+
+
 
 	stride = numtasks/2;
 	if(id == 0)
@@ -156,17 +198,13 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 			combine(ptally, ltally[id+stride], nodeval[id+stride]);
 			MPI_Send(nodeval[id+stride],nodeval_elem,MPI_INT,id+stride,(id+1)*stride,MPI_COMM_WORLD);
 		}
-//		else
-//		{
-			for(i=0; i<numtasks; i++)
+		for(i=0; i<numtasks; i++)
+		{
+			if(i % (2*stride) == 0 && id == i+stride) // some other process changed/will change nodeval
 			{
-				if(i % (2*stride) == 0 && id == i+stride) // some other process changed/will change nodeval
-				{
-					MPI_Recv(nodeval[i+stride],nodeval_elem,MPI_INT,i,(i+1)*stride,MPI_COMM_WORLD,&status);
-				}
+				MPI_Recv(nodeval[i+stride],nodeval_elem,MPI_INT,i,(i+1)*stride,MPI_COMM_WORLD,&status);
 			}
-//		}
-//		MPI_Barrier(MPI_COMM_WORLD);
+		}
 		stride = stride / 2;
 	}
 
@@ -211,7 +249,6 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 	free(ltally);
 	free(tally);
 	free(ptally);
-//	MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
