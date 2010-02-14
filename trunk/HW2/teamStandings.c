@@ -119,7 +119,6 @@ int main(int argc, char* argv[]) {
 	gettimeofday(&begin, NULL);
 	parallel_prefix((void *)inputArray, inputArraySize, numTeams);
 	gettimeofday(&end, NULL);
-	printf("back in main\n");
 
 	int i;
 	for(i = 0;i<inputArraySize; i++)

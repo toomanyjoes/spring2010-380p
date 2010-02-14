@@ -92,7 +92,7 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 			nodeval[i],nodeval_elem,MPI_INT,i,i,
 			MPI_COMM_WORLD,&status);
 		}
-	MPI_Barrier(MPI_COMM_WORLD);
+//	MPI_Barrier(MPI_COMM_WORLD);
 	int dummy;
 	while(stride < numtasks)
 	{
