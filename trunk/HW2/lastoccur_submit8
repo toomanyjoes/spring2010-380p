@@ -1,0 +1,12 @@
+
+#$ -V	# Inherit the submission environment
+#$ -cwd	# cwd indicates that the job has to run in the submission directory.(it can be modified to specify a different directory)
+#$ -N lastoccur8 	# Job Name
+#$ -j y 	# combine stderr & stdout into stdout
+#$ -o $JOB_NAME.o$JOB_ID	# Name of the output file (eg. myMPI.oJobID)
+#$ -pe 1way 128	# (CHANGE)Requests. This is little tricky. See REQUESTS below for more info.
+#$ -q development	# (CHANGE)Queue name.
+#$ -l h_rt=00:03:00	# Run time (hh:mm:ss) - 1.5 hours
+#$ -M spalmer@mail.utexas.edu	
+#$ -A A-cs41	#DO NOT MODIFY THIS LINE
+ibrun ./lastoccur lastoccurtest.txt
