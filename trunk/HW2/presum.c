@@ -50,7 +50,6 @@ int scanGen(void *tally, void *i)
 
 int main(int argc, char* argv[]) {
 	struct timeval begin, end;
-	MPI_Init(NULL,NULL);
 	int *inputArray;
 	int inputArraySize;
 	intArray *tmpArray = readArray(argv[1]);
