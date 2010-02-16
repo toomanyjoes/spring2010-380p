@@ -6,11 +6,8 @@
 #include "parallel_prefix.h"
 #include "mpi.h"
 
-//int *inputArray;
-//int inputArraySize;
+
 int *outputArray;
-//void **nodeval;
-//void **ltally;
 
 void *init();
 void accum(void *, void *);
@@ -20,22 +17,14 @@ int scanGen(void *, void *);
 void parallel_prefix(void *data, int num_elem, int nodeval_elem)
 {
 	int numtasks,rank,i,j;
-//printf("about to call mpi init\n\n");
 	MPI_Init(NULL,NULL);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 
-//printf("numtasks: %d\n",numtasks);
-
 	if(rank == 0)
 		outputArray = (int *)malloc(sizeof(int)*num_elem);
-//printf("Hello World from proc %d\n",rank);
 	calculate(data, rank, numtasks, num_elem, nodeval_elem);
 
-//MPI_Barrier(MPI_COMM_WORLD);
-//printf("proc %d calling finalize\n",rank);
-//fflush(stdout);
-//if(rank == 0)
 	MPI_Finalize();
 	if(rank != 0)
 		exit(0);
@@ -110,7 +99,6 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 					{
 						if(id == i+dummy && i % (2*dummy) == 0) // Send only to processes that will need the value later
 						{
-//printf("1 proc %d send to %d\n",id,i);
 							MPI_Send(nodeval[id],nodeval_elem,MPI_INT,i,id*dummy,MPI_COMM_WORLD);
 							break;
 						}
@@ -118,26 +106,6 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 					}
 				}
 			}
-
-// 			// check which process will need this value after this loop
-// 			if(2*stride >= numtasks) // this means this is the last iteration of this loop
-// 			{
-// 				for(i = 0; i < numtasks; i++)
-// 				{
-// 					dummy = numtasks/2;
-// 					while(dummy >= 1)
-// 					{
-// 						if(i % (2*dummy) == 0 && id == i+dummy)
-// 						{
-// printf("2 proc %d send to %d\n",id,i);
-// 							MPI_Send(ltally[id+stride],nodeval_elem,MPI_INT,i,id*dummy,MPI_COMM_WORLD);
-// 							MPI_Send(nodeval[id],nodeval_elem,MPI_INT,i,id*dummy+1,MPI_COMM_WORLD);
-// 							break;
-// 						}
-// 						dummy = dummy / 2;
-// 					}
-// 				}
-// 			}
 		}
 
 		// receive the values that are needed later in this loop
@@ -150,7 +118,6 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 				{
 					if(i == id+dummy && id % (2*dummy) == 0)
 					{
-//printf("1 proc %d recv from %d\n",id,i);
 						copyArray(nodeval[i],ltally[i+stride]);
 						MPI_Recv(nodeval[i],nodeval_elem,MPI_INT,i,i*dummy,MPI_COMM_WORLD,&status);
 						break;
@@ -159,30 +126,6 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 				}
 			}
 		}
-
-// 		// receive the values that are needed after this loop
-// 		if(2*stride >= numtasks) // this means that this is the last iteration of this loop
-// 		{
-// 			for(i = 0; i < numtasks; i++)
-// 			{
-// 				if(id != i && i % (2*stride) == 0)
-// 				{
-// 					dummy = numtasks/2;
-// 					while(dummy >= 1)
-// 					{
-// 						if(id % (2*dummy) == 0 && i == id+dummy)
-// 						{
-// printf("2 proc %d recv from %d\n",id,i);
-// 							MPI_Recv(ltally[i+stride],nodeval_elem,MPI_INT,i,id*dummy,MPI_COMM_WORLD,&status);
-// 							MPI_Recv(nodeval[i],nodeval_elem,MPI_INT,i,i*dummy+1,MPI_COMM_WORLD,&status);
-// 							break;
-// 						}
-// 						dummy = dummy / 2;
-// 					}
-// 				}
-// 			}
-// 		}
-//		MPI_Barrier(MPI_COMM_WORLD); // make sure everyone has completed this round
 		stride = 2*stride;
 	}
 
@@ -200,14 +143,12 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 		{
 			copyArray(nodeval[id],ptally);
 			combine(ptally, ltally[id+stride], nodeval[id+stride]);
-//printf("1 proc %d send to %d\n",id,id+stride);
 			MPI_Send(nodeval[id+stride],nodeval_elem,MPI_INT,id+stride,id,MPI_COMM_WORLD);
 		}
 		for(i=0; i<numtasks; i++)
 		{
 			if(id == i+stride && i % (2*stride) == 0) // some other process changed/will change nodeval
 			{
-//printf("1 proc %d recv from %d\n",id,i);
 				MPI_Recv(nodeval[i+stride],nodeval_elem,MPI_INT,i,i,MPI_COMM_WORLD,&status);
 			}
 		}
@@ -255,8 +196,6 @@ void calculate(void *inputArray, int id, int numtasks, int inputArraySize, int n
 	free(ltally);
 	free(tally);
 	free(ptally);
-fflush(stdout);
-MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
