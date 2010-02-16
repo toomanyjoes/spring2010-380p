@@ -90,9 +90,6 @@ void *init()
 
 void accum(void *tally, void *i)
 {
-	// val[0] = number from 1...k   val[1] = thread id    val[2] = count of numbers processed by this thread  val[3] = input array size val[4] = number of tasks
-	//int *val = (int *)i;
-	//((int *)tally)[val[0]-1] = val[1] * (val[3] / val[4]) + val[2];
 	dataStruct *val = (dataStruct *)i;
 	((int *)tally)[val->myData-1] = val->id * (val->inputArraySize / val->numtasks) + val->processed;
 }
@@ -109,9 +106,6 @@ void combine(void *vleft, void *vright, void *vassignmentVal)
 
 int scanGen(void *tally, void *i)
 {
-	//int *val = (int *)i;
-	//int returnval = ((int *)tally)[val[0]-1];
-	//((int *)tally)[val[0]-1] = val[1] * (val[3] / val[4]) + val[2];
 	dataStruct *val = (dataStruct *)i;
 	int returnval = ((int *)tally)[val->myData-1];
 	((int *)tally)[val->myData-1] = val->id * (val->inputArraySize / val->numtasks) + val->processed;

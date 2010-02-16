@@ -15,6 +15,7 @@ FILE *openFile(char *fname)
 
 int main(int argc, char *argv[])
 {
+	struct timeval begin, end;
 	int numValues = atoi(argv[1]);
 	int stringLength = atoi(argv[2]);
 	FILE *infile = openFile(argv[3]); // input file
@@ -27,15 +28,20 @@ int main(int argc, char *argv[])
 	srand(time(NULL));
 	
 	int index = 0;
+	gettimeofday(&begin, NULL);
 	for(i=0;i<stringLength;i++) {
 		int num = 1 + (int)( (double)numValues * rand() / ( RAND_MAX + 1.0 ) );
 		fprintf(infile,"%d ",num);
 		fprintf(outfile,"%d ",array[num-1]);
 		array[num-1] = index++;
 	}
+	gettimeofday(&end, NULL);
 	fprintf(outfile,"\n");
 	fclose(infile);
 	fclose(outfile);
+	double beginsec = (double)begin.tv_sec + ((double)begin.tv_usec/1000000.0);
+	double endsec = (double)end.tv_sec + ((double)end.tv_usec/1000000.0);
+	printf("Time: %lf\n",endsec-beginsec);
 	return 0;
 }
 
