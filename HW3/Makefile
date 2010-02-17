@@ -1,5 +1,5 @@
-SRCS = inout.c matrixmult.c
-OBJS = inout.o
+SRCS = inout.c mmio.c matrixmult.c
+OBJS = inout.o mmio.o
 
 CCFLAGS = -Wall -O0 -g -pthread
 CC=cc
