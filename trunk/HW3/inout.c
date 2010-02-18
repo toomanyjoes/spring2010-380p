@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <bebop/smc/read_mm.h>
 #include "inout.h"
 #include "mmio.h"
 
@@ -14,32 +15,37 @@ FILE *openFile(char *fname, char *mode)
 	return file;
 }
 
-void read_MMEF(char *filename, matrix *out_matrix)
+void read_MMEF(char *filename, coo_matrix_t *out_matrix)
 {
-	MM_typecode matcode;
-	int i;
-	FILE *file = openFile(filename,"r");
-	if(mm_read_banner(file, &matcode) != 0 ||
-	   mm_read_mtx_crd_size(file, &out_matrix->rows, &out_matrix->columns, &out_matrix->non_zero_entries) != 0)
+//	MM_typecode matcode;
+//	int i;
+//	FILE *file = openFile(filename,"r");
+// 	if(mm_read_banner(file, &matcode) != 0 ||
+// 	   mm_read_mtx_crd_size(file, &out_matrix->rows, &out_matrix->columns, &out_matrix->non_zero_entries) != 0)
+// 	{
+// 		fprintf(stderr, "Error reading MMEF file\n");
+// 		if(file) fclose(file);
+// 		exit(1);
+// 	}
+// 	
+// // 	fscanf(file, "%d", &out_matrix->rows);
+// // 	fscanf(file, "%d", &out_matrix->columns);
+// // 	fscanf(file, "%d", &out_matrix->non_zero_entries);
+// 	out_matrix->row_coord = (int *)malloc(sizeof(int)*out_matrix->non_zero_entries);
+// 	out_matrix->col_coord = (int *)malloc(sizeof(int)*out_matrix->non_zero_entries);
+// 	out_matrix->entry = (double *)malloc(sizeof(double)*out_matrix->non_zero_entries);
+// 	for(i=0; i < out_matrix->non_zero_entries; i++)
+// 	{
+// 		fscanf(file, "%d", &out_matrix->row_coord[i]);
+// 		fscanf(file, "%d", &out_matrix->col_coord[i]);
+// 		fscanf(file, "%lf", &out_matrix->entry[i]);
+// 	}
+//	fclose(file);
+	if(read_matrix_market_real_sparse(filename, out_matrix) != 0)
 	{
 		fprintf(stderr, "Error reading MMEF file\n");
-		if(file) fclose(file);
 		exit(1);
 	}
-	
-// 	fscanf(file, "%d", &out_matrix->rows);
-// 	fscanf(file, "%d", &out_matrix->columns);
-// 	fscanf(file, "%d", &out_matrix->non_zero_entries);
-	out_matrix->row_coord = (int *)malloc(sizeof(int)*out_matrix->non_zero_entries);
-	out_matrix->col_coord = (int *)malloc(sizeof(int)*out_matrix->non_zero_entries);
-	out_matrix->entry = (double *)malloc(sizeof(double)*out_matrix->non_zero_entries);
-	for(i=0; i < out_matrix->non_zero_entries; i++)
-	{
-		fscanf(file, "%d", &out_matrix->row_coord[i]);
-		fscanf(file, "%d", &out_matrix->col_coord[i]);
-		fscanf(file, "%lf", &out_matrix->entry[i]);
-	}
-	fclose(file);
 }
 
 void read_vector(char *filename, matrix *out_vector)
