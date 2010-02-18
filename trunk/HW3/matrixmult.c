@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
 		printf("Usage:\n   %s [MMEF in file] [vector in file] [out file] <[num threads]>\n",argv[0]);
 		exit(1);
 	}
-	matrix invector;
+	vector invector;
 	struct coo_matrix_t cooMatrix;
 	read_MMEF(argv[1], &cooMatrix);
 	//save_coo_matrix_in_matrix_market_format(argv[3],&inMatrix);
@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 	
-	//write_vector(outfile, &invector);
+	write_vector(outfile, &invector);
 
 
 	return 0;
