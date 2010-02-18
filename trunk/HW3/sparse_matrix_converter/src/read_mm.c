@@ -945,7 +945,8 @@ read_matrix_market_real_sparse (const char* filename, struct coo_matrix_t* A)
 
       fscanf (f, "%d %d %lg\n", &II[i], &JJ[i], &x);
       /* This means val[i], but we have to go through contortions because val is a void*. */
-      *((double*) val + i*sizeof(double)) = x;
+      //*((double*) val + i*sizeof(double)) = x;
+      ((double*) val)[i] = x;
       II[i]--;  /* adjust from 1-based to 0-based */
       JJ[i]--;
     }

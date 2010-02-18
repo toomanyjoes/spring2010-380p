@@ -3,7 +3,6 @@
 #include <string.h>
 #include <bebop/smc/read_mm.h>
 #include "inout.h"
-#include "mmio.h"
 
 FILE *openFile(char *fname, char *mode)
 {

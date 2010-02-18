@@ -13,7 +13,7 @@
 #define MAX_THREAD 1000
 
 int num_threads;
-csr_matrix_t myMatrix;
+csr_matrix_t *myMatrix;
 
 int main(int argc, char* argv[])
 {
@@ -25,9 +25,12 @@ int main(int argc, char* argv[])
 	matrix invector;
 	//read_MMEF(argv[1], &inmatrix);
 	//print_matrix(&inmatrix);
-	coo_matrix_t inmatrix;
-	read_MMEF(argv[1], &inmatrix);
-	coo_to_csr (&myMatrix);
+	struct coo_matrix_t inMatrix;
+	read_MMEF(argv[1], &inMatrix);
+printf("completed read_mmef\n");
+	save_coo_matrix_in_matrix_market_format(argv[3],&inMatrix);
+	myMatrix = coo_to_csr(&inMatrix);
+printf("completed coo_to_csr\n");
 	read_vector(argv[2], &invector);
 	//print_matrix(&invector);
 	char *outfile = argv[3];
