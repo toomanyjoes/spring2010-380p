@@ -5,3 +5,4 @@
 void read_MMEF(char *filename, coo_matrix_t *out_matrix);
 void read_vector(char *filename, vector *out_vector);
 void write_vector(char *filename, vector *vec);
+

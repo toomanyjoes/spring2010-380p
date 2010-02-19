@@ -1,12 +1,12 @@
-SRCS = inout.c matrixmult.c
-OBJS = inout.o
+SRCS = inout.c matrixmult.c verify.c
+OBJS = inout.o verify.o
 INCLUDES = -I./sparse_matrix_converter/include -I./bebop_util/include
 LIBDIR = -L./sparse_matrix_converter -L./bebop_util
 
 SUBDIRS = bebop_util sparse_matrix_converter 
 
 CCFLAGS = -Wall -O0 -g -pthread -static
-CC=cc
+CC=gcc
 
 all: sparse_matrix_converter matrixmult
 

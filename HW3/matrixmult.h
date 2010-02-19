@@ -3,7 +3,14 @@ typedef struct csr_matrix_t csr_matrix_t;
 
 typedef struct {
 	int rows;		// number of vector rows
-	double *entry;		// array storing entries
+	double *values;		// array storing entries
 } vector;
 
+typedef struct {
+	int id;
+	csr_matrix_t *matrix;
+	vector *vec;
+	vector *result;
+	int num_threads;
+} thread_arg;
 
