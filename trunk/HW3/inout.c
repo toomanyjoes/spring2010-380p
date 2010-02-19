@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <bebop/smc/read_mm.h>
+#include <bebop/util/enumerations.h>
+#include <bebop/smc/csr_matrix.h>
 #include "inout.h"
 
 FILE *openFile(char *fname, char *mode)
@@ -28,10 +30,10 @@ void read_vector(char *filename, vector *out_vector)
 	int i;
 	FILE *file = openFile(filename,"r");
 	fscanf(file, "%d", &out_vector->rows);
-	out_vector->entry = (double *)malloc(sizeof(double)*out_vector->rows);
+	out_vector->values = (double *)malloc(sizeof(double)*out_vector->rows);
 	for(i=0; i < out_vector->rows; i++)
 	{
-		fscanf(file, "%lf", &out_vector->entry[i]);
+		fscanf(file, "%lf", &out_vector->values[i]);
 	}
 	fclose(file);
 }
@@ -40,10 +42,9 @@ void write_vector(char *filename, vector *vec)
 {
 	int i;
 	FILE *file = openFile(filename,"w");
-	fprintf(file, "%d\n", vec->rows);
+	//fprintf(file, "%d\n", vec->rows);
 	for(i=0; i < vec->rows; i++)
-		fprintf(file, "%lf ", vec->entry[i]);
+		fprintf(file, "%lf ", vec->values[i]);
 	fclose(file);
 }
-
 
