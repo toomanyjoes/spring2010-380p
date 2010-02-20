@@ -20,7 +20,7 @@ void read_MMEF(char *filename, coo_matrix_t *out_matrix)
 {
 	if(read_matrix_market_real_sparse(filename, out_matrix) != 0)
 	{
-		fprintf(stderr, "Error reading MMEF file\n");
+		fprintf(stderr, "Error reading MMEF file: %s\n",filename);
 		exit(1);
 	}
 }

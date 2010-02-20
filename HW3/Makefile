@@ -16,11 +16,14 @@ matrixmult: sparse_matrix_converter matrixmult.o ${OBJS}
 sparse_matrix_converter:
 	@for i in $(SUBDIRS); do $(MAKE) -C $$i; done
 
+genVector: genVector.c
+	${CC} ${CCFLAGS} genVector.c -o $@
+
 .c.o:
 	${CC} ${CCFLAGS} -c ${INCLUDES} $< -o $@
 
 clean:
 	@for i in $(SUBDIRS); do $(MAKE) -C $$i clean; done
-	rm -f *.o *~ matrixmult
+	rm -f *.o *~ matrixmult genVector
 
 .PHONY: clean sparse_matrix_converter

@@ -55,7 +55,9 @@ int main(int argc, char* argv[])
 
 	// Verify against a sequential multiplication calculation
 	if(verifyMult(csrMatrix, &invector, &result) == 0)
+	{
 		printf("\nFailed to verify result!\n\n");
+	}
 
 	return 0;
 }
