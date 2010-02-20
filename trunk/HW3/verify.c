@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include <bebop/smc/csr_matrix.h>
 #include "matrixmult.h"
 #include "inout.h"
@@ -20,6 +21,9 @@ int verifyMult(csr_matrix_t *matrix, vector *vec, vector *comparison)
 	vector result;
 	result.rows = matrix->m;
 	result.values = (double *)malloc(sizeof(double)*result.rows);
+
+	struct timeval begin, end;
+	gettimeofday(&begin, NULL);
 	for(i = 0; i < matrix->m; i++)
 	{
 		result.values[i] = 0.0;
@@ -29,6 +33,11 @@ int verifyMult(csr_matrix_t *matrix, vector *vec, vector *comparison)
 			result.values[i] += ((double *)matrix->values)[k] * vec->values[j];
 		}
 	}
+	gettimeofday(&end, NULL);
+	double beginsec = (double)begin.tv_sec + ((double)begin.tv_usec/1000000.0);
+	double endsec = (double)end.tv_sec + ((double)end.tv_usec/1000000.0);
+	printf("Sequential Time: %lf\n",endsec-beginsec);
+
 	int return_result = vectorsEqual(&result, comparison);
 	//write_vector("errVector.txt",&result);
 	free(result.values);
