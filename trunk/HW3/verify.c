@@ -2,6 +2,7 @@
 #include <math.h>
 #include <bebop/smc/csr_matrix.h>
 #include "matrixmult.h"
+#include "inout.h"
 
 int vectorsEqual(vector *A, vector *B)
 {
@@ -29,6 +30,7 @@ int verifyMult(csr_matrix_t *matrix, vector *vec, vector *comparison)
 		}
 	}
 	int return_result = vectorsEqual(&result, comparison);
+	//write_vector("errVector.txt",&result);
 	free(result.values);
 	return return_result;
 }
