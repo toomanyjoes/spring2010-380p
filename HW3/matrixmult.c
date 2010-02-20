@@ -19,7 +19,7 @@ int getRowPtrIndex(csr_matrix_t *matrix, int *lastrow);
 void *thread_main(void *arg);
 
 int *availableRows;
-int nextRow;
+int nextRow, rows_per_iter;
 pthread_mutex_t availableRowsLock = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char* argv[])
@@ -77,6 +77,8 @@ void multiply(int num_threads, csr_matrix_t *inMatrix, vector *inVector, vector 
 	out_result->rows = inMatrix->m;
 	out_result->values = (double *)malloc(sizeof(double)*out_result->rows);
 	memset(out_result->values,0,sizeof(double)*out_result->rows);
+	rows_per_iter = (inMatrix->rowptrsize / num_threads / 20)+1;   //   TODO: tune this parameter
+	printf("rows_per_iter: %d\n",rows_per_iter);
 	thread_arg args[num_threads];
 	for(i=0; i<num_threads; i++)
 	{
@@ -101,19 +103,32 @@ void *thread_main(void *arg)
 	int num_threads = myArg->num_threads;
 	int lastrow;
 	int rowIndex = getRowPtrIndex(matrix, &lastrow);
-	int k;
+	int j,k;
 
 	int *rowptr = matrix->rowptr;
 	int *colidx = matrix->colidx;
+	int rowptrsize = matrix->rowptrsize;
 	double *mvalues = (double *)matrix->values;
 	double *rvalues = result->values;
 	double *vvalues = vec->values;
+	int testval;
 	
 	while(rowIndex != -1)
 	{
-		for(k = rowptr[rowIndex]; k < rowptr[rowIndex+1]; k++)
+		for(j = 0; j < rows_per_iter && rowIndex < rowptrsize; j++,rowIndex++)
 		{
-			rvalues[rowIndex] += mvalues[k] * vvalues[ colidx[k] ];
+			if(rowIndex < rowptrsize-1)
+			{
+				if(rowptr[rowIndex] == rowptr[rowIndex+1])
+					continue;
+				testval = rowptr[rowIndex+1];
+			}
+			else
+				testval = matrix->nnz;
+			for(k = rowptr[rowIndex]; k < testval; k++)
+			{
+				rvalues[rowIndex] += mvalues[k] * vvalues[ colidx[k] ];
+			}
 		}
 		rowIndex = getRowPtrIndex(matrix, &lastrow);
 	}
@@ -124,19 +139,12 @@ void *thread_main(void *arg)
 int getRowPtrIndex(csr_matrix_t *matrix, int *lastrow)
 {
 	int myRow;
+	if(nextRow == -1)
+		return -1;
 	pthread_mutex_lock(&availableRowsLock);
 	{
 		myRow = nextRow;
-		if(nextRow != -1)
-		{
-			if(matrix->rowptr[nextRow+1] == matrix->nnz)  // Bebop fills unused rowptr entries with nnz
-			{
-				nextRow = -1;
-				*lastrow = 1;
-			}
-			else
-				nextRow++;
-		}
+		nextRow = (nextRow+rows_per_iter < matrix->rowptrsize ? nextRow + rows_per_iter : -1);
 	}
 	pthread_mutex_unlock(&availableRowsLock);
 	return myRow;	
