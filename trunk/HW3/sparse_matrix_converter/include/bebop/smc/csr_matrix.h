@@ -81,6 +81,10 @@ csr_matrix_t
   /** Array of indices into the colidx and values arrays, for each column */
   int* rowptr;
 
+
+  //Sam Palmer
+  int rowptrsize;
+
   /**
    * Symmetry type of the matrix.
    */

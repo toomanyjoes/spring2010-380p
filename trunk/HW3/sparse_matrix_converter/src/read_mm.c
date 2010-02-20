@@ -1265,6 +1265,9 @@ coo_to_csr (struct coo_matrix_t* A)
 	  colidx[i] = coord_array[i].c - index_base;
 	}
 
+      // Sam Palmer
+      B->rowptrsize = currow+1;
+
       /* Set the last entries in rowptr appropriately */
       for (j = currow+1; j <= m; j++)
 	rowptr[j] = nnz;
