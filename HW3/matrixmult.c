@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 //#include <sys/types.h>
+#include <time.h>
 #include <pthread.h>
 #include <bebop/smc/coo_matrix.h>
 #include <bebop/smc/csr_matrix.h>
@@ -31,13 +32,11 @@ int main(int argc, char* argv[])
 	vector invector,result;
 	csr_matrix_t *csrMatrix;
 	int num_threads;
+	struct timeval begin, end;
 	struct coo_matrix_t cooMatrix;
 	read_MMEF(argv[1], &cooMatrix);
-	//save_coo_matrix_in_matrix_market_format(argv[3],&inMatrix);
 	csrMatrix = coo_to_csr(&cooMatrix);
-	//print_csr_matrix_in_matrix_market_format(stdout,csrMatrix);
 	read_vector(argv[2], &invector);
-	//print_matrix(&invector);
 	char *outfile = argv[3];
 	if(argc == 5)
 		num_threads = atoi(argv[4]);
@@ -49,7 +48,12 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 
+	gettimeofday(&begin, NULL);
 	multiply(num_threads, csrMatrix, &invector, &result);
+	gettimeofday(&end, NULL);
+	double beginsec = (double)begin.tv_sec + ((double)begin.tv_usec/1000000.0);
+	double endsec = (double)end.tv_sec + ((double)end.tv_usec/1000000.0);
+	printf("Time: %lf\n",endsec-beginsec);
 	
 	write_vector(outfile, &result);
 
@@ -97,29 +101,23 @@ void *thread_main(void *arg)
 	int num_threads = myArg->num_threads;
 	int lastrow;
 	int rowIndex = getRowPtrIndex(matrix, &lastrow);
-	int i,j,k;
-//	for(i = 0; i < vec->rows; i++)
-//	{
+	int k;
 
-// 	if(lastrow)
-// 		for(k = matrix->rowptr[rowIndex]; k < vec->rows; k++)
-// 		{
-// 			j = matrix->colidx[k];
-// 			result[rowIndex] += matrix->values[k]*vec->values[j];
-// 		}
-// 	else
+	int *rowptr = matrix->rowptr;
+	int *colidx = matrix->colidx;
+	double *mvalues = (double *)matrix->values;
+	double *rvalues = result->values;
+	double *vvalues = vec->values;
 	
 	while(rowIndex != -1)
 	{
-		for(k = matrix->rowptr[rowIndex]; k < matrix->rowptr[rowIndex+1]; k++)
+		for(k = rowptr[rowIndex]; k < rowptr[rowIndex+1]; k++)
 		{
-			j = matrix->colidx[k];
-			result->values[rowIndex] += ((double *)matrix->values)[k] * ((double *)vec->values)[j];
+			rvalues[rowIndex] += mvalues[k] * vvalues[ colidx[k] ];
 		}
 		rowIndex = getRowPtrIndex(matrix, &lastrow);
 	}
 		
-//	}
 	return (void *)0;
 }
 

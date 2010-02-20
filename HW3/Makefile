@@ -5,7 +5,7 @@ LIBDIR = -L./sparse_matrix_converter -L./bebop_util
 
 SUBDIRS = bebop_util sparse_matrix_converter 
 
-CCFLAGS = -Wall -O0 -g -pthread -static
+CCFLAGS = -Wall -O2 -pthread -static
 CC=gcc
 
 all: sparse_matrix_converter matrixmult
