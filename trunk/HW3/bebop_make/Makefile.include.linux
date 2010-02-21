@@ -83,7 +83,7 @@ RM = rm -f
 ## -fpic doesn't seem to work on Darwin PowerPC; -fPIC is the more
 ## general option that also works on Linux x86.
 ##
-FPIC_FLAG =-fPIC
+FPIC_FLAG =
 CFLAGS_DEBUG=-g -Wall -O0
 CFLAGS_OPT=-O2
 CPPFLAGS=

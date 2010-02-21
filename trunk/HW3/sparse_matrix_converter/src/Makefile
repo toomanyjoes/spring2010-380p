@@ -87,7 +87,7 @@ HEADERDIR = ../include/bebop/smc
 
 all: $(EXEOUT) dynamic
 
-dynamic: $(LIBSMC_DYNAMIC)
+#dynamic: $(LIBSMC_DYNAMIC)
 
 static: $(LIBSMC_STATIC)
 
