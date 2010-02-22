@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
-#include <time.h>
+#include <sys/time.h>
 #include <bebop/smc/csr_matrix.h>
 #include "matrixmult.h"
 #include "inout.h"
@@ -43,50 +43,3 @@ int verifyMult(csr_matrix_t *matrix, vector *vec, vector *comparison)
 	free(result.values);
 	return return_result;
 }
-
-// csr_matrix_t *vector_to_csr(vector *v)
-// {
-// 	int i;
-// 	int *colidx = (int *)malloc(sizeof(int)*v->rows);
-// 	int *rowptr = (int *)malloc(sizeof(int)*v->rows);
-// 	for(i=0; i<v->rows;i++)
-// 	{
-// 		colidx[i] = 0;
-// 		rowptr[i] = i;
-// 	}
-// 	return create_csr_matrix(
-// 		v->rows,	// n
-// 		1,		// m
-// 		v->rows,	// nnz
-// 		v->values,	// values
-// 		colidx,
-// 		rowptr,
-// 		UNSYMMETRIC,	// symmetry_type
-// 		UPPER_TRIANGLE,	// symmetric_storage_location  ignore
-// 		REAL,		// value_type,
-// 		USER_DEALLOCATES, // ownership,
-// 		NULL,		// void(*)(void *) deallocator,
-// 		NO_COPY		// copy_mode	 
-// 	);
-// }
-// 
-// vector *csr_to_vector(csr_matrix_t *matrix)
-// {
-// 	int i;
-// 	if(matrix->n != 1)
-// 	{
-// 		printf("vector has more than one column\n");
-// 		return NULL;
-// 	}
-// 	vector *result = (vector *)malloc(sizeof(vector));
-// 	result->values = (double *)malloc(sizeof(double)*matrix->m);
-// 	result->rows = matrix->m;
-// 	for(i = 0; i < result->rows; i++)
-// 	{
-// 		if(matrix->rowptr[i] != i)
-// 			result->values[i] = 0.0;
-// 		else
-// 			result->values[i] = ((double *)matrix->values)[i];
-// 	}
-// 	return result;
-// }

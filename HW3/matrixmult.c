@@ -4,23 +4,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/types.h>
-#include <time.h>
+#include <sys/time.h>
 #include <pthread.h>
 #include <bebop/smc/coo_matrix.h>
 #include <bebop/smc/csr_matrix.h>
 #include <bebop/smc/read_mm.h>
 #include "inout.h"
 #include "verify.h"
+//#include "barrier.h"
 #define MAX_THREAD 1000
 
 void multiply(int num_threads, csr_matrix_t *inMatrix, vector *inVector, vector *out_result);
-int getRowPtrIndex(csr_matrix_t *matrix, int *lastrow);
+int getRowPtrIndex(csr_matrix_t *matrix);
 void *thread_main(void *arg);
 
 int *availableRows;
 int nextRow, rows_per_iter;
-pthread_mutex_t availableRowsLock = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t availableRowsLock;
 
 int main(int argc, char* argv[])
 {
@@ -29,7 +29,8 @@ int main(int argc, char* argv[])
 		printf("Usage:\n   %s [MMEF in file] [vector in file] [out file] <[num threads]>\n",argv[0]);
 		exit(1);
 	}
-	vector invector,result;
+	vector invector;
+	vector result;
 	csr_matrix_t *csrMatrix;
 	int num_threads;
 	struct timeval begin, end;
@@ -73,12 +74,12 @@ void multiply(int num_threads, csr_matrix_t *inMatrix, vector *inVector, vector 
 	pthread_t *threads = (pthread_t *)malloc(sizeof(pthread_t)*num_threads);
 	pthread_attr_init(&attr);
 	pthread_attr_setscope(&attr, PTHREAD_SCOPE_SYSTEM);
-	
+
 	out_result->rows = inMatrix->m;
 	out_result->values = (double *)malloc(sizeof(double)*out_result->rows);
 	memset(out_result->values,0,sizeof(double)*out_result->rows);
-	rows_per_iter = (inMatrix->rowptrsize / num_threads / 20)+1;   //   TODO: tune this parameter
-	printf("rows_per_iter: %d\n",rows_per_iter);
+	rows_per_iter = (inMatrix->rowptrsize / (4*num_threads))+1;
+	nextRow = num_threads * rows_per_iter;
 	thread_arg args[num_threads];
 	for(i=0; i<num_threads; i++)
 	{
@@ -86,9 +87,9 @@ void multiply(int num_threads, csr_matrix_t *inMatrix, vector *inVector, vector 
 		args[i].matrix = inMatrix;
 		args[i].vec = inVector;
 		args[i].result = out_result;
-		args[i].num_threads = num_threads;
 		pthread_create(&threads[i], &attr, thread_main, &args[i]);
 	}
+	pthread_attr_destroy(&attr);
 	for(i=0; i<num_threads; i++)
 		pthread_join(threads[i],NULL);
 }
@@ -96,21 +97,16 @@ void multiply(int num_threads, csr_matrix_t *inMatrix, vector *inVector, vector 
 void *thread_main(void *arg)
 {
 	thread_arg *myArg = (thread_arg *)arg;
-	int id = myArg->id;
 	csr_matrix_t *matrix = myArg->matrix;
-	vector *vec = myArg->vec;
-	vector *result = myArg->result;
-	int num_threads = myArg->num_threads;
-	int lastrow;
-	int rowIndex = getRowPtrIndex(matrix, &lastrow);
+	int rowIndex = myArg->id*rows_per_iter;
 	int j,k;
 
 	int *rowptr = matrix->rowptr;
 	int *colidx = matrix->colidx;
 	int rowptrsize = matrix->rowptrsize;
 	double *mvalues = (double *)matrix->values;
-	double *rvalues = result->values;
-	double *vvalues = vec->values;
+	double *rvalues = myArg->result->values;
+	double *vvalues = myArg->vec->values;
 	int testval;
 	
 	while(rowIndex != -1)
@@ -130,13 +126,13 @@ void *thread_main(void *arg)
 				rvalues[rowIndex] += mvalues[k] * vvalues[ colidx[k] ];
 			}
 		}
-		rowIndex = getRowPtrIndex(matrix, &lastrow);
+		rowIndex = getRowPtrIndex(matrix);
 	}
 		
 	return (void *)0;
 }
 
-int getRowPtrIndex(csr_matrix_t *matrix, int *lastrow)
+int getRowPtrIndex(csr_matrix_t *matrix)
 {
 	int myRow;
 	if(nextRow == -1)
@@ -144,7 +140,8 @@ int getRowPtrIndex(csr_matrix_t *matrix, int *lastrow)
 	pthread_mutex_lock(&availableRowsLock);
 	{
 		myRow = nextRow;
-		nextRow = (nextRow+rows_per_iter < matrix->rowptrsize ? nextRow + rows_per_iter : -1);
+		if(nextRow != -1)
+			nextRow = (nextRow+rows_per_iter < matrix->rowptrsize ? nextRow + rows_per_iter : -1);
 	}
 	pthread_mutex_unlock(&availableRowsLock);
 	return myRow;	
