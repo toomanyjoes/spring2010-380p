@@ -14,7 +14,6 @@ typedef struct {
 	csr_matrix_t *matrix;
 	vector *vec;
 	vector *result;
-	int num_threads;
 } thread_arg;
 
 #endif
