@@ -11,7 +11,6 @@
 #include <bebop/smc/read_mm.h>
 #include "inout.h"
 #include "verify.h"
-//#include "barrier.h"
 #define MAX_THREAD 1000
 
 void multiply(int num_threads, csr_matrix_t *inMatrix, vector *inVector, vector *out_result);
@@ -59,10 +58,11 @@ int main(int argc, char* argv[])
 	write_vector(outfile, &result);
 
 	// Verify against a sequential multiplication calculation
-	if(verifyMult(csrMatrix, &invector, &result) == 0)
+	// This works if you want to run a sequential version of this algoirthm
+	/*if(verifyMult(csrMatrix, &invector, &result) == 0)
 	{
 		printf("\nFailed to verify result!\n\n");
-	}
+	}*/
 
 	return 0;
 }
@@ -111,7 +111,7 @@ void *thread_main(void *arg)
 	
 	while(rowIndex != -1)
 	{
-		for(j = 0; j < rows_per_iter && rowIndex < rowptrsize; j++,rowIndex++)
+		for(j = 0; j < rows_per_iter && rowIndex < rowptrsize; j++,rowIndex++)	// for each row
 		{
 			if(rowIndex < rowptrsize-1)
 			{
@@ -121,12 +121,12 @@ void *thread_main(void *arg)
 			}
 			else
 				testval = matrix->nnz;
-			for(k = rowptr[rowIndex]; k < testval; k++)
+			for(k = rowptr[rowIndex]; k < testval; k++)	// for each value in the row
 			{
 				rvalues[rowIndex] += mvalues[k] * vvalues[ colidx[k] ];
 			}
 		}
-		rowIndex = getRowPtrIndex(matrix);
+		rowIndex = getRowPtrIndex(matrix);	// get some more rows
 	}
 		
 	return (void *)0;
@@ -136,7 +136,7 @@ int getRowPtrIndex(csr_matrix_t *matrix)
 {
 	int myRow;
 	if(nextRow == -1)
-		return -1;
+		return -1;	// no more rows to compute
 	pthread_mutex_lock(&availableRowsLock);
 	{
 		myRow = nextRow;
