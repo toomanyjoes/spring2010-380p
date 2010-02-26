@@ -44,7 +44,7 @@ void write_vector(char *filename, vector *vec)
 	FILE *file = openFile(filename,"w");
 	//fprintf(file, "%d\n", vec->rows);
 	for(i=0; i < vec->rows; i++)
-		fprintf(file, "%lf ", vec->values[i]);
+		fprintf(file, "%7.1f ", vec->values[i]);
 	fclose(file);
 }
 

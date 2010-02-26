@@ -60,6 +60,7 @@
 !*******************************************************************************
 */
 #include <stdio.h>
+#include <sys/time.h>
 #include "mkl_types.h"
 #include "mkl_spblas.h"
 
@@ -71,6 +72,7 @@ int main() {
 
 	int M;
 	int NNZ;
+	struct timeval begin, end;
 	char *filename = "sparse_matrix";
 	double		*values;   //[NNZ]
 	MKL_INT		*columns;  //[NNZ]
@@ -94,10 +96,8 @@ int main() {
 
 	for(i=0; i<M; ++i) {
 		input_vec[i] = 1.0;
-		output[i]    = 0.0;
+		output[i]    = 1.0;
 	}
-
-		printf("\n EXAMPLE PROGRAM FOR COMPRESSED SPARSE ROW FORMAT ROUTINES \n");
 
 //*******************************************************************************
 // Task 2.    Obtain matrix-vector multiply (U+I)' *sol --> rhs
@@ -110,21 +110,23 @@ int main() {
 		for (i = 0; i < m; i++) {
 			pointerB[i] = rowIndex[i];
 			pointerE[i] = rowIndex[i+1];
+			//printf("\nRow %d is going from %d to %d",i,pointerB[i],pointerE[i]);
 		};
 
 		transa = 'n';
-		matdescra[0] = 'g';
-		matdescra[3] = 'c';
+		matdescra[0] = 'G';
+		matdescra[3] = 'C';
 
+		gettimeofday(&begin, NULL);
 		mkl_dcsrmv(&transa, &m, &m, &alpha, matdescra, values, columns, pointerB, pointerE, input_vec, &beta, output);
+		gettimeofday(&end, NULL);
+		double beginsec = (double)begin.tv_sec + ((double)begin.tv_usec/1000000.0);
+		double endsec = (double)end.tv_sec + ((double)end.tv_usec/1000000.0);
+		printf("Time: %lf\n",endsec-beginsec);
 
-		printf("                             \n");
-		printf("   OUTPUT DATA FOR MKL_DCSRMV\n");
-		printf("   WITH TRIANGULAR MATRIX    \n");
 		for (i = 0; i < m; i++) {
 			printf("%7.1f\n", output[i]);
 		};
-		printf("-----------------------------------------------\n");
 	return 0;
 }
 
@@ -163,20 +165,22 @@ void read_matrices(char *filename, double **values, MKL_INT **columns, MKL_INT *
 	*M = m;
 	*NNZ = num_non_zero_elements;
 
-        /*printf("\nThe m=%d n=%d num=%d\n",m,n,num_non_zero_elements);*/
+        printf("\nThe m=%d n=%d num=%d\n",m,n,num_non_zero_elements);
 
         A = (double *)malloc(sizeof(double)*num_non_zero_elements);
         JA = (int *)malloc(sizeof(int)*num_non_zero_elements);
         IA = (int *)malloc(sizeof(int)*(m+1));
-	i=m+1;
-	while(i) {
+	i=0;
+	while(i!=(m+1)) {
 		fscanf(fp, "%d\n",&(IA[i]));
-		--i;
+		//printf("\n%d",IA[i]);
+		++i;
 	}
+	i=0;
         while(!feof(fp)) {
                 fscanf(fp, "%d %lf\n",&(JA[i]), &(A[i])); /*redundant writes happening*/
+                //printf("\n%d %lf", JA[i], A[i]);
 		++i;
-                /*printf("\n%d %d", row_index, col_index);*/
                 /*getchar();*/
         }
         fclose(fp);
