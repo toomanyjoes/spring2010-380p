@@ -8,7 +8,7 @@ SUBDIRS = bebop_util sparse_matrix_converter
 CCFLAGS = -Wall -O2 -pthread -static
 CC=gcc
 
-all: sparse_matrix_converter matrixmult
+all: sparse_matrix_converter matrixmult genVector
 
 matrixmult: sparse_matrix_converter matrixmult.o ${OBJS}
 	${CC} ${CCFLAGS} -o $@ matrixmult.o ${OBJS} ${LIBDIR} -lsparse_matrix_converter -lbebop_util
