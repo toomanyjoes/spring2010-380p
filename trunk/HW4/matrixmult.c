@@ -10,25 +10,16 @@
 #include <bebop/smc/read_mm.h>
 #include "inout.h"
 #include "verify.h"
-#define MAX_THREAD 1000
+#include "mpi.h"
 
-void multiply(int num_threads, int rank, csr_matrix_t *inMatrix, vector *inVector, vector *out_result);
-int getRowPtrIndex(csr_matrix_t *matrix, unsigned long *takenSets);
-
-const unsigned long masks[] = {0x80000000, 0x40000000, 0x20000000, 0x10000000,
-			       0x08000000, 0x04000000, 0x02000000, 0x01000000,
-			       0x00800000, 0x00400000, 0x00200000, 0x00100000,
-			       0x00080000, 0x00040000, 0x00020000, 0x00010000,
-			       0x00008000, 0x00004000, 0x00002000, 0x00001000,
-			       0x00000800, 0x00000400, 0x00000200, 0x00000100,
-			       0x00000080, 0x00000040, 0x00000020, 0x00000010
-			       0x00000008, 0x00000004, 0x00000002, 0x00000001};
+void multiply(int numtasks, int rank, csr_matrix_t *matrix, vector *vec, vector *out_result);
+void runController(csr_matrix_t *matrix, vector *result, int numtasks);
 
 int main(int argc, char* argv[])
 {
-	if(argc != 4 && argc != 5)
+	if(argc != 4)
 	{
-		printf("Usage:\n   %s [MMEF in file] [vector in file] [out file] <[num threads]>\n",argv[0]);
+		printf("Usage:\n   %s [MMEF in file] [vector in file] [out file]\n",argv[0]);
 		exit(1);
 	}
 	vector invector;
@@ -45,17 +36,9 @@ int main(int argc, char* argv[])
 	csrMatrix = coo_to_csr(&cooMatrix);
 	read_vector(argv[2], &invector);
 	char *outfile = argv[3];
-	if(argc == 5)
-		num_threads = atoi(argv[4]);
-	else
-		num_threads = 4; // default to 4 threads
-	if ((num_threads < 1) || (num_threads > MAX_THREAD))
-	{
-		printf ("The number of threads must be between 1 and %d.\n",MAX_THREAD);
-		exit(1);
-	}
 
 	MPI_Barrier(MPI_COMM_WORLD); // wait for all processes to finish I/O
+//printf("proc: %d calling multiply\n");
 	gettimeofday(&begin, NULL);
 	multiply(numtasks, rank, csrMatrix, &invector, &result);
 	gettimeofday(&end, NULL);
@@ -77,35 +60,26 @@ int main(int argc, char* argv[])
 
 void multiply(int numtasks, int rank, csr_matrix_t *matrix, vector *vec, vector *out_result)
 {
-	int i, j, k, totalSets;
-	int nextRow, rows_per_iter;
-	int takenSetsSize;
-	unsigned long *takenSets; // bit array indicating available sets of rows
-	unsigned long *recvBuf;
-	MPI_Op reduce_op;
-	MPI_Op_create((MPI_User_function *)reduce_op_func, 1, &reduce_op);
 	out_result->rows = matrix->m;
 	out_result->values = (double *)malloc(sizeof(double)*out_result->rows);
-	memset(out_result->values,0,sizeof(double)*out_result->rows);
-	rows_per_iter = (inMatrix->rowptrsize / (4*numtasks))+1;
-	totalSets = inMatrix->rowptrsize / rows_per_iter;
-	if(inMatrix->rowptrsize % rows_per_iter != 0)
-		totalSets++;
-	takenSetsSize = totalSets / 32;
-	if(totalSets % 32 != 0)
-		takenSetsSize++;
-	takenSets = malloc(sizeof(long)*takenSetsSize);
-	recvBuf = malloc(sizeof(long)*takenSetsSize);
-	memset(takenSets,0,sizeof(long)*takenSetsSize);
-	for(i = 0, j = -1, k = 0; i < numtasks; i++)
+	if(rank == 0)
 	{
-		if(i % 32 == 0)  { j++; k = 0; }
-		takenSets[j] |= masks[k++];
+		if(numtasks > 1)
+		{
+			runController(matrix, out_result, numtasks);
+			return;
+		}
+		rank = 1;
+		numtasks = 2;
 	}
+	memset(out_result->values,0,sizeof(double)*out_result->rows);
+	MPI_Status status;
+	int i, j, k, totalSets;
+	int rows_per_iter;
+	rows_per_iter = (matrix->rowptrsize / (4*(numtasks-1)))+1;
+//printf("proc: %d rows_per_iter: %d\n",rank, rows_per_iter);
 
-	int takenSetElem = 0;
-	int takenSetPos = rank;
-	int rowIndex = rank*rows_per_iter;
+	int rowIndex = (rank-1)*rows_per_iter;
 	int *rowptr = matrix->rowptr;
 	int *colidx = matrix->colidx;
 	int rowptrsize = matrix->rowptrsize;
@@ -113,11 +87,14 @@ void multiply(int numtasks, int rank, csr_matrix_t *matrix, vector *vec, vector 
 	double *rvalues = out_result->values;
 	double *vvalues = vec->values;
 	int testval;
+	int startRow = rowIndex;
+	int rowsCompleted = 0;
 	
 	while(rowIndex != -1)
 	{
 		for(j = 0; j < rows_per_iter && rowIndex < rowptrsize; j++,rowIndex++)	// for each row
 		{
+			rowsCompleted++;
 			if(rowIndex < rowptrsize-1)
 			{
 				if(rowptr[rowIndex] == rowptr[rowIndex+1])
@@ -131,35 +108,44 @@ void multiply(int numtasks, int rank, csr_matrix_t *matrix, vector *vec, vector 
 				rvalues[rowIndex] += mvalues[k] * vvalues[ colidx[k] ];
 			}
 		}
-		MPI_AllReduce(takenSets,recvBuf,takenSetsSize,MPI_LONG,reduce_op,MPI_COMM_WORLD);
-		for(i = takenSetElem; i < takenSetsSize; i++)
-		{
-			for(j = takenSetPos; j < 32; j++)
-				if(
-		}
+		MPI_Sendrecv(&rvalues[startRow], rowsCompleted, MPI_DOUBLE, 0, 0,
+			&startRow, 1, MPI_INT, 0, MPI_ANY_TAG,
+                 	MPI_COMM_WORLD, &status);
+//printf("proc: %d  startRow: %d  rowsCompleted: %d\n",rank,startRow,rowsCompleted);
+		rowsCompleted = 0;
+		rowIndex = startRow;
 	}
-		
-	return (void *)0;
+	
+	if(rank != 0)
+		exit(0);	// kill everyone except root
 }
 
-void reduce_op_func(unsigned long *in, unsigned long *inout, int *len, MPI_Datatype *type)
-{
-	int i;
-	for(i = 0; i < *len; i++)
-		inout[i] |= in[i];
-}
 
-int getRowPtrIndex(csr_matrix_t *matrix, unsigned long *takenSets)
+void runController(csr_matrix_t *matrix, vector *result, int numtasks)
 {
-	int myRow;
-	if(nextRow == -1)
-		return -1;	// no more rows to compute
-	pthread_mutex_lock(&availableRowsLock);
+	MPI_Request requests[numtasks-1];
+	MPI_Status status;
+	int rowptrsize = matrix->rowptrsize;
+	int rows_per_iter = (rowptrsize / (4*(numtasks-1)))+1;
+	int nextRow = (numtasks-1)*rows_per_iter;
+	int requestRank, index, i;
+	for(i = 1; i < numtasks; i++)	// receive initial data sets
 	{
-		myRow = nextRow;
-		if(nextRow != -1)
-			nextRow = (nextRow+rows_per_iter < matrix->rowptrsize ? nextRow + rows_per_iter : -1);
+		MPI_Irecv(&result->values[(i-1)*rows_per_iter], rows_per_iter, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, &requests[i-1]);
 	}
-	pthread_mutex_unlock(&availableRowsLock);
-	return myRow;	
+	while(nextRow != -1)
+	{
+		MPI_Waitany(numtasks-1, requests, &requestRank, &status);
+		requestRank++;
+//printf("recv from %d  sending nextRow: %d\n",requestRank,nextRow);
+		MPI_Send(&nextRow, 1, MPI_INT, requestRank, 0, MPI_COMM_WORLD);
+		if(rowptrsize - nextRow < rows_per_iter)
+			MPI_Irecv(&result->values[nextRow], rows_per_iter, MPI_DOUBLE, requestRank, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[requestRank-1]);
+		else
+			MPI_Irecv(&result->values[nextRow], rowptrsize - nextRow, MPI_DOUBLE, requestRank, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[requestRank-1]);
+		nextRow = (nextRow+rows_per_iter < rowptrsize ? nextRow + rows_per_iter : -1);
+	}
+	for(i = 1; i < numtasks; i++)	// send final -1 value
+		MPI_Send(&nextRow, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
+	MPI_Waitall(numtasks-1, requests, MPI_STATUSES_IGNORE);	// wait for all the processes to finish
 }
