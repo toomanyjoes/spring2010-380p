@@ -3,5 +3,6 @@
 
 int verifyMult(csr_matrix_t *matrix, vector *vec, vector *comparison);
 int vectorsEqual(vector *A, vector *B);
+void seqMult(csr_matrix_t *matrix, vector *vec, vector *result);
 
 #endif
