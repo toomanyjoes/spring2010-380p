@@ -5,13 +5,15 @@ LIBDIR = -L./sparse_matrix_converter -L./bebop_util
 
 SUBDIRS = bebop_util sparse_matrix_converter 
 
-CCFLAGS = -Wall -O2 -pthread -static
+CCFLAGS = -O2 -Wall
+MPICCFLAGS = -fast -tp barcelona-64
 CC=gcc
+MPICC=mpicc
 
 all: sparse_matrix_converter matrixmult genVector
 
 matrixmult: sparse_matrix_converter matrixmult.o ${OBJS}
-	${CC} ${CCFLAGS} -o $@ matrixmult.o ${OBJS} ${LIBDIR} -lsparse_matrix_converter -lbebop_util
+	${MPICC} ${MPICCFLAGS} -o $@ matrixmult.o ${OBJS} ${LIBDIR} -lsparse_matrix_converter -lbebop_util
 
 sparse_matrix_converter:
 	@for i in $(SUBDIRS); do $(MAKE) -C $$i; done
@@ -20,7 +22,7 @@ genVector: genVector.c
 	${CC} ${CCFLAGS} genVector.c -o $@
 
 .c.o:
-	${CC} ${CCFLAGS} -c ${INCLUDES} $< -o $@
+	${MPICC} ${MPICCFLAGS} -c ${INCLUDES} $< -o $@
 
 clean:
 	@for i in $(SUBDIRS); do $(MAKE) -C $$i clean; done
