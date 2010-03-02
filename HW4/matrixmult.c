@@ -38,7 +38,6 @@ int main(int argc, char* argv[])
 	char *outfile = argv[3];
 
 	MPI_Barrier(MPI_COMM_WORLD); // wait for all processes to finish I/O
-//printf("proc: %d calling multiply\n");
 	gettimeofday(&begin, NULL);
 	multiply(numtasks, rank, csrMatrix, &invector, &result);
 	gettimeofday(&end, NULL);
@@ -65,19 +64,16 @@ void multiply(int numtasks, int rank, csr_matrix_t *matrix, vector *vec, vector 
 	if(rank == 0)
 	{
 		if(numtasks > 1)
-		{
 			runController(matrix, out_result, numtasks);
-			return;
-		}
-		rank = 1;
-		numtasks = 2;
+		else
+			seqMult(matrix, vec, out_result);	// only one process so run the sequential version
+		return;
 	}
 	memset(out_result->values,0,sizeof(double)*out_result->rows);
 	MPI_Status status;
-	int i, j, k, totalSets;
+	int i, j, k;
 	int rows_per_iter;
 	rows_per_iter = (matrix->rowptrsize / (4*(numtasks-1)))+1;
-//printf("proc: %d rows_per_iter: %d\n",rank, rows_per_iter);
 
 	int rowIndex = (rank-1)*rows_per_iter;
 	int *rowptr = matrix->rowptr;
@@ -111,7 +107,6 @@ void multiply(int numtasks, int rank, csr_matrix_t *matrix, vector *vec, vector 
 		MPI_Sendrecv(&rvalues[startRow], rowsCompleted, MPI_DOUBLE, 0, 0,
 			&startRow, 1, MPI_INT, 0, MPI_ANY_TAG,
                  	MPI_COMM_WORLD, &status);
-//printf("proc: %d  startRow: %d  rowsCompleted: %d\n",rank,startRow,rowsCompleted);
 		rowsCompleted = 0;
 		rowIndex = startRow;
 	}
@@ -137,7 +132,6 @@ void runController(csr_matrix_t *matrix, vector *result, int numtasks)
 	{
 		MPI_Waitany(numtasks-1, requests, &requestRank, &status);
 		requestRank++;
-//printf("recv from %d  sending nextRow: %d\n",requestRank,nextRow);
 		MPI_Send(&nextRow, 1, MPI_INT, requestRank, 0, MPI_COMM_WORLD);
 		if(rowptrsize - nextRow < rows_per_iter)
 			MPI_Irecv(&result->values[nextRow], rows_per_iter, MPI_DOUBLE, requestRank, MPI_ANY_TAG, MPI_COMM_WORLD, &requests[requestRank-1]);

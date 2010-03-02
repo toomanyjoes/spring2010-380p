@@ -9,11 +9,4 @@ typedef struct {
 	double *values;		// array storing entries
 } vector;
 
-typedef struct {
-	int id;
-	csr_matrix_t *matrix;
-	vector *vec;
-	vector *result;
-} thread_arg;
-
 #endif
