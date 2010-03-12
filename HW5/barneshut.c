@@ -22,8 +22,8 @@ int main(int argc, char **argv)
 	tree.topLeft = tree.topRight = tree.bottomLeft = tree.bottomRight = 0;
 	read_input(argv[3], &tree);
 	char *outputfile = argv[4];
-
 	
 	
+	write_output(outputfile, &tree);
 	return 0;
 }
