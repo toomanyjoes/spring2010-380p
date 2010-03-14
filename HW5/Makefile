@@ -1,5 +1,5 @@
-SRCS = inout.c barneshut.c
-OBJS = inout.o
+SRCS = inout.c barneshut.c quadTree.c
+OBJS = inout.o quadTree.o
 
 CCFLAGS = -O0 -g -Wall
 MPICCFLAGS = -fast -tp barcelona-64
