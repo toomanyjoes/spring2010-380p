@@ -4,10 +4,14 @@
 */
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "inout.h"
 #include "barneshut.h"
 #include "quadTree.h"
 
+void updateVelocitiesAndPositions(quadTree *tree, quadTree *root, double timestep);
+void computeForce(quadTree *particle, quadTree *tree, forceVector *force);
+void forceFormula(quadTree *particle1, quadTree *particle2, forceVector *result);
 
 int main(int argc, char **argv)
 {
@@ -24,7 +28,7 @@ int main(int argc, char **argv)
 	int i;
 	for(i=0; i < iterations; i++)
 	{
-		updateVelocities(tree, timestep);
+		updateVelocitiesAndPositions(tree, tree, timestep);
 	}
 	
 	write_output(outputfile, tree);
@@ -32,19 +36,61 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-void updateVelocities(quadTree *tree, double timestep)
+void updateVelocitiesAndPositions(quadTree *tree, quadTree *root, double timestep)
 {
 	if(tree == 0)
 		return;
 	if(hasChildren(tree))
 	{
-		updateVelocities(tree->topLeft);
-		updateVelocities(tree->topRight);
-		updateVelocities(tree->bottomLeft);
-		updateVelocities(tree->bottomRight);
+		updateVelocitiesAndPositions(tree->topLeft, root, timestep);
+		updateVelocitiesAndPositions(tree->topRight, root, timestep);
+		updateVelocitiesAndPositions(tree->bottomLeft, root, timestep);
+		updateVelocitiesAndPositions(tree->bottomRight, root, timestep);
 	}
 	else
 	{
-		double force = 
+		forceVector force;
+		force.xMagnitude = force.yMagnitude = 0.0;
+		computeForce(tree, root, &force);
+		double oldX = tree->xVelocity;
+		double oldY = tree->yVelocity;
+		tree->xVelocity += force.xMagnitude / tree->mass;
+		tree->yVelocity += force.yMagnitude / tree->mass;
+		tree->xPosition += (oldX + tree->xVelocity) / 2.0 * timestep;
+		tree->yPosition += (oldY + tree->yVelocity) / 2.0 * timestep;
 	}
+}
+
+void computeForce(quadTree *particle, quadTree *tree, forceVector *force)
+{
+	if(!hasChildren(tree))
+	{
+		forceFormula(particle, tree, force);
+	}
+	else
+	{
+		double r = sqrt(  (tree->xPosition - particle->xPosition) * (tree->xPosition - particle->xPosition)
+				+ (tree->yPosition - particle->yPosition) * (tree->yPosition - particle->yPosition));
+		double D = tree->xTopRight - tree->xBottomLeft;
+		if(D/r < THETA)
+			forceFormula(particle, tree, force);
+		else
+		{
+			computeForce(particle, tree->topLeft, force);
+			computeForce(particle, tree->topRight, force);
+			computeForce(particle, tree->bottomLeft, force);
+			computeForce(particle, tree->bottomRight, force);
+		}
+	}
+}
+
+void forceFormula(quadTree *particle1, quadTree *particle2, forceVector *result)
+{
+	if(particle2 == 0) return;
+	double r_sqrd = (particle2->xPosition - particle1->xPosition) * (particle2->xPosition - particle1->xPosition)
+			+ (particle2->yPosition - particle1->yPosition) * (particle2->yPosition - particle1->yPosition);
+	double r = sqrt(r_sqrd);
+	double magnitude = (G * particle1->mass * particle2->mass) / r_sqrd;
+	result->xMagnitude += (particle2->xPosition - particle1->xPosition) / r * magnitude;
+	result->yMagnitude += (particle2->yPosition - particle1->yPosition) / r * magnitude;
 }

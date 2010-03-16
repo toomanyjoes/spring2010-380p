@@ -1,0 +1,58 @@
+//this is the structure I assumed for an nbody.
+//x,y gives the co-ordinates of the nbody in 2d space.
+//vel_ --> gives the velocity, 
+//accln_ --> gives the acceleration
+//weight --> gives the weigh.
+class nbody {
+        var x:real;
+        var y:real;
+        var weight:int;
+        var vel_x:real;
+        var vel_y:real;
+        var accln_x:real;
+        var accln_y:real;
+}
+
+//given 2 bodies, v and t, the force and the resultant accleration
+//enforced by body v ON body t is given by the below function.
+
+def compute_accln(v:nbody, t:nbody) {
+	double x = v.x;
+	double y = v.y;
+
+        x -= t.x;
+        y -= t.y;
+
+        double dist = x*x + y*y;
+        dist += soften; //softening factor helps in controlling the impact of one body over the other. assume a value of 18.
+
+        dist = dist**(3/2); //i.e dist to the power of 1.5
+        double mag = v.weight/dist;
+
+        t.accln_x += mag*x;
+        t.accln_y += mag*y;
+        return;
+}
+
+//the below function is used to move the body ONLY after the resultant acceleration 
+//experienced by a body t by virtue of all other bodies is computed.
+
+def move_body(t:nbody) {
+
+    // Notes : From NVIDIA CUDA SDL
+    // acceleration = force / mass;
+    // new velocity = old velocity + acceleration * deltaTime
+    // note: factor out the body's mass from the equation, here and in computeaccln
+    // (because they cancel out).  Thus here force == acceleration
+
+    t.vel_x += t.accln_x * deltaTime; //deltaTime -> is the duration of movement of each body during a single simulation of nbody system. assume 1 (Second).
+    t.vel_y += t.accln_y * deltaTime;
+
+    t.vel_x *= damping; //damping is used to control how much a body moves in free space. assume a value of 0.1
+    t.vel_y *= damping;
+
+    t.x += t.vel_x * deltaTime;
+    t.y += t.vel_y * deltaTime;
+
+    return;
+}
