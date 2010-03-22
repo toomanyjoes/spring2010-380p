@@ -29,6 +29,8 @@ int main(int argc, char **argv)
 	for(i=0; i < iterations; i++)
 	{
 		updateVelocitiesAndPositions(tree, tree, timestep);
+//		tree = buildTree(tree);
+//		freeQuadTree(tree);
 	}
 	
 	write_output(outputfile, tree);
@@ -54,8 +56,8 @@ void updateVelocitiesAndPositions(quadTree *tree, quadTree *root, double timeste
 		computeForce(tree, root, &force);
 		double oldX = tree->xVelocity;
 		double oldY = tree->yVelocity;
-		tree->xVelocity += force.xMagnitude / tree->mass;
-		tree->yVelocity += force.yMagnitude / tree->mass;
+		tree->xVelocity += (force.xMagnitude / tree->mass) * timestep;	// change in velocity = acceleration * change in time
+		tree->yVelocity += (force.yMagnitude / tree->mass) * timestep;
 		tree->xPosition += (oldX + tree->xVelocity) / 2.0 * timestep;
 		tree->yPosition += (oldY + tree->yVelocity) / 2.0 * timestep;
 	}
@@ -63,6 +65,7 @@ void updateVelocitiesAndPositions(quadTree *tree, quadTree *root, double timeste
 
 void computeForce(quadTree *particle, quadTree *tree, forceVector *force)
 {
+	if(tree == 0 || tree == particle) return;
 	if(!hasChildren(tree))
 	{
 		forceFormula(particle, tree, force);
@@ -71,7 +74,7 @@ void computeForce(quadTree *particle, quadTree *tree, forceVector *force)
 	{
 		double r = sqrt(  (tree->xPosition - particle->xPosition) * (tree->xPosition - particle->xPosition)
 				+ (tree->yPosition - particle->yPosition) * (tree->yPosition - particle->yPosition));
-		double D = tree->xTopRight - tree->xBottomLeft;
+		double D = tree->xTopRight - tree->xBottomLeft;		// size of bounding region
 		if(D/r < THETA)
 			forceFormula(particle, tree, force);
 		else

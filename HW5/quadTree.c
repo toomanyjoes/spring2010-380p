@@ -7,7 +7,7 @@ void addBody(quadTree *tree, double xPosition, double yPosition, double mass, do
 {
 	if(tree->mass > 0.0)	// region already has a particle
 	{
-		if(!hasChildren(tree))
+		if(!hasChildren(tree))	// leaf node, create new node to move it down the tree
 		{
 			if(tree->xPosition < ((tree->xTopRight + tree->xBottomLeft) / 2.0))	// left half
 			{
