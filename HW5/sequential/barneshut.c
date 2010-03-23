@@ -10,6 +10,8 @@
 #include "quadTree.h"
 
 void updateVelocities(quadTree *tree, quadTree *root, double timestep);
+//void computeForce(quadTree *particle, quadTree *tree, forceVector *force);
+//void forceFormula(quadTree *particle1, quadTree *particle2, forceVector *result);
 void updatePositions(quadTree *tree, double timestep);
 void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel);
 void acclnFormula(quadTree *particle1, quadTree *particle2, two_d_vector *accel);
@@ -56,7 +58,9 @@ void updateVelocities(quadTree *tree, quadTree *root, double timestep)
 	}
 	else
 	{
+// 		forceVector force;
 		two_d_vector accel;
+// 		force.xMagnitude = force.yMagnitude = 0.0;
 		accel.xMagnitude = accel.yMagnitude = 0.0;
 		compute_accln(tree, root, &accel);
 
@@ -82,12 +86,14 @@ void updatePositions(quadTree *tree, double timestep)
 	}
 }
 
+// void computeForce(quadTree *particle, quadTree *tree, forceVector *force)
 void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
 {
 	if(tree == 0 || tree == particle) return;
 	if(!hasChildren(tree))
 	{
 		acclnFormula(particle, tree, accel);
+// 		forceFormula(particle, tree, force);
 	}
 	else
 	{
@@ -97,6 +103,7 @@ void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
 		if(D/r < THETA)
 		{
 			acclnFormula(particle, tree, accel);
+// 			forceFormula(particle, tree, force);
 		}
 		else
 		{
@@ -104,6 +111,10 @@ void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
  			compute_accln(particle, tree->topRight, accel);
  			compute_accln(particle, tree->bottomLeft, accel);
  			compute_accln(particle, tree->bottomRight, accel);
+// 			computeForce(particle, tree->topLeft, force);
+// 			computeForce(particle, tree->topRight, force);
+// 			computeForce(particle, tree->bottomLeft, force);
+// 			computeForce(particle, tree->bottomRight, force);
 		}
 	}
 }
@@ -122,8 +133,19 @@ void acclnFormula(quadTree *particle1, quadTree *particle2, two_d_vector *accel)
         dist = pow(dist, 3.0/2.0); //i.e dist to the power of 1.5
         double mag = particle2->mass / dist;
 
+	// TODO: decide if we need the gravitational constant here
         accel->xMagnitude += mag*x;//G * mag*x;
         accel->yMagnitude += mag*y;//G * mag*y;
         return;
 }
 
+// void forceFormula(quadTree *particle1, quadTree *particle2, forceVector *result)
+// {
+// 	if(particle2 == 0) return;
+// 	double r_sqrd = (particle2->xPosition - particle1->xPosition) * (particle2->xPosition - particle1->xPosition)
+// 			+ (particle2->yPosition - particle1->yPosition) * (particle2->yPosition - particle1->yPosition);
+// 	double r = sqrt(r_sqrd);
+// 	double magnitude = (G * particle1->mass * particle2->mass) / r_sqrd;
+// 	result->xMagnitude += (particle2->xPosition - particle1->xPosition) / r * magnitude;
+// 	result->yMagnitude += (particle2->yPosition - particle1->yPosition) / r * magnitude;
+// }
