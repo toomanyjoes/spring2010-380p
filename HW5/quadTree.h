@@ -42,8 +42,8 @@ typedef struct body_list
 
 
 void addBody(quadTree *tree, double xPosition, double yPosition, double mass, double xVelocity, double yVelocity);
-quadTree *allocNewNode(int q, quadTree *tree);
-int hasChildren(quadTree *tree);
+quadTree *buildTree(quadTree *oldTree);
+inline int hasChildren(quadTree *tree);
 void freeQuadTree(quadTree *tree);
 
 #endif
