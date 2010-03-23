@@ -19,28 +19,22 @@ FILE *openFile(char *fname, char *mode)
 	return file;
 }
 
-quadTree *read_input(char *filename)
+quadTree *read_input(char *filename, int *num_particles)
 {
 	int i;
 	FILE *file = openFile(filename,"r");
-	int n;
-	fscanf(file,"%d", &n);	// n = number of bodies
-	quadTree *out_tree = (quadTree *)malloc(sizeof(quadTree));
+	fscanf(file,"%d", num_particles);	// number of bodies
+	quadTree *particles = (quadTree *)malloc(sizeof(quadTree) * *num_particles);
 
 	double xPosition, yPosition, mass, xVelocity, yVelocity;
 
-	out_tree->xBottomLeft = MIN_GRID;
-	out_tree->yBottomLeft = MIN_GRID;
-	out_tree->xTopRight = MAX_GRID;
-	out_tree->yTopRight = MAX_GRID;
 	for(i = 0; i < n; i++)
 	{
-		fscanf(file, "%lf %lf %lf %lf %lf", &xPosition, &yPosition, &mass, &xVelocity, &yVelocity);
-		addBody(out_tree, xPosition, yPosition, mass, xVelocity, yVelocity);
+		fscanf(file, "%lf %lf %lf %lf %lf", &particles[i].xPosition, &particles[i].yPosition, &particles[i].mass, &particles[i].xVelocity, &particles[i].yVelocity);
 	}
 
 	fclose(file);
-	return out_tree;
+	return particles;
 }
 
 void write_output(char *filename, quadTree *tree)

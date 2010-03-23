@@ -21,9 +21,20 @@ int main(int argc, char **argv)
 		printf("Usage:\n   %s [iterations (double)] [timestep (double)] [input file] [output file]\n",argv[0]);
 		exit(1);
 	}
+	int numtasks,rank;
+	MPI_Init(NULL,NULL);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+
+	struct timeval begin, end;
+
 	double iterations = atof(argv[1]);
 	double timestep = atof(argv[2]);
-	quadTree *tree = read_input(argv[3]);
+	quadTree *particles = read_input(argv[3]);
+
+	MPI_Barrier(); // wait for input to finish
+	gettimeofday(&begin, NULL);
+
 	quadTree *oldTree;
 	char *outputfile = argv[4];
 
@@ -33,10 +44,15 @@ int main(int argc, char **argv)
 		updateVelocities(tree, tree, timestep);
 		updatePositions(tree, timestep);
 		oldTree = tree;
-// printf("i: %d\n", i);
 		tree = buildTree(tree);
 		freeQuadTree(oldTree);
 	}
+	if(rank != 0)
+		exit(0);
+	gettimeofday(&end, NULL);
+	double beginsec = (double)begin.tv_sec + ((double)begin.tv_usec/1000000.0);
+	double endsec = (double)end.tv_sec + ((double)end.tv_usec/1000000.0);
+	printf("Time: %lf\n",endsec-beginsec);
 	
 	write_output(outputfile, tree);
 	freeQuadTree(tree);
