@@ -6,10 +6,10 @@
 #define SOFTEN 18
 #define THETA 0.5
 
-typedef struct forceVector
+typedef struct two_d_vector
 {
 	double xMagnitude;
 	double yMagnitude;
-} forceVector;
+} two_d_vector;
 
 #endif
