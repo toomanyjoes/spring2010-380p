@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <sys/time.h>
 #include "inout.h"
 #include "barneshut.h"
 #include "quadTree.h"
@@ -22,23 +23,33 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 	int numtasks,rank;
-	MPI_Init(NULL,NULL);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+ 	MPI_Init(NULL,NULL);
+ 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+ 	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
 
 	struct timeval begin, end;
 
+	int num_particles;
 	double iterations = atof(argv[1]);
 	double timestep = atof(argv[2]);
-	quadTree *particles = read_input(argv[3]);
-
-	MPI_Barrier(); // wait for input to finish
-	gettimeofday(&begin, NULL);
-
+	quadTree *particles = read_input(argv[3], &num_particles);
 	quadTree *oldTree;
 	char *outputfile = argv[4];
 
+ 	MPI_Barrier(); // wait for input to finish
+	gettimeofday(&begin, NULL);
+
+	int total_subdomains = (numtasks) * (numtasks);
+//	int total_subdomains = (num_particles % 4 == 0 ? num_particles / 4 : num_particles / 4 + 1);
+	int subdomains = total_subdomains / numtasks;	// subdomains per processor
+	quadTree **orderedParticles = mortonOrder(particles, num_particles);
+	quadTree trees[subdomains];
 	int i;
+	for(i = 0; i < subdomains; i++)
+	{
+		trees[i] = buildTree(orderedParticles, rank, numtasks, i+1, subdomains);
+	}
+
 	for(i=0; i < iterations; i++)
 	{
 		updateVelocities(tree, tree, timestep);
@@ -55,7 +66,10 @@ int main(int argc, char **argv)
 	printf("Time: %lf\n",endsec-beginsec);
 	
 	write_output(outputfile, tree);
-	freeQuadTree(tree);
+	for(i = 0; i < subdomains; i++)
+		freeQuadTree(trees[i]);
+	free(particles);
+	free(orderedParticles);
 	return 0;
 }
 

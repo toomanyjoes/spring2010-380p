@@ -26,9 +26,7 @@ quadTree *read_input(char *filename, int *num_particles)
 	fscanf(file,"%d", num_particles);	// number of bodies
 	quadTree *particles = (quadTree *)malloc(sizeof(quadTree) * *num_particles);
 
-	double xPosition, yPosition, mass, xVelocity, yVelocity;
-
-	for(i = 0; i < n; i++)
+	for(i = 0; i < *num_particles; i++)
 	{
 		fscanf(file, "%lf %lf %lf %lf %lf", &particles[i].xPosition, &particles[i].yPosition, &particles[i].mass, &particles[i].xVelocity, &particles[i].yVelocity);
 	}
