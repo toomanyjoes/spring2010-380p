@@ -6,14 +6,19 @@
 #include <stdio.h>
 #include <math.h>
 #include <sys/time.h>
+#include "mpi.h"
 #include "inout.h"
 #include "barneshut.h"
 #include "quadTree.h"
 
-void updateVelocities(quadTree *tree, quadTree *root, double timestep);
-void updatePositions(quadTree *tree, double timestep);
-void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel);
-void acclnFormula(quadTree *particle1, quadTree *particle2, two_d_vector *accel);
+MPI_Datatype bodyType;
+
+void updateVelocities(quadTree *root, body **particles, int num_particles, double timestep);
+void updatePositions(quadTree *root, body **particles, int num_particles, double timestep);
+void compute_accln(body *particle, quadTree *tree, two_d_vector *accel);
+void acclnFormula(body *particle1, quadTree *particle2, two_d_vector *accel);
+void shareData(body **particles, int num_particles, body **myParticles, int myParticleCt, int myRank, int numtasks);
+void createBodyType(MPI_Datatype *outtype);
 
 int main(int argc, char **argv)
 {
@@ -26,38 +31,45 @@ int main(int argc, char **argv)
  	MPI_Init(NULL,NULL);
  	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
  	MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
+	createBodyType(&bodyType);
 
 	struct timeval begin, end;
 
 	int num_particles;
 	double iterations = atof(argv[1]);
 	double timestep = atof(argv[2]);
-	quadTree *particles = read_input(argv[3], &num_particles);
+	body *particles = read_input(argv[3], &num_particles);
 	quadTree *oldTree;
 	char *outputfile = argv[4];
 
- 	MPI_Barrier(); // wait for input to finish
+ 	MPI_Barrier(MPI_COMM_WORLD); // wait for input to finish
 	gettimeofday(&begin, NULL);
-
-	int total_subdomains = (numtasks) * (numtasks);
-//	int total_subdomains = (num_particles % 4 == 0 ? num_particles / 4 : num_particles / 4 + 1);
-	int subdomains = total_subdomains / numtasks;	// subdomains per processor
-	quadTree **orderedParticles = mortonOrder(particles, num_particles);
-	quadTree trees[subdomains];
+printf("num_particles: %d\n",num_particles);
+	body **orderedParticles = mortonOrder(particles, num_particles);
+	int particles_per_proc = num_particles / numtasks;
+	quadTree *tree;
 	int i;
-	for(i = 0; i < subdomains; i++)
-	{
-		trees[i] = buildTree(orderedParticles, rank, numtasks, i+1, subdomains);
-	}
+	tree = buildTree(orderedParticles, num_particles, rank, numtasks);
 
 	for(i=0; i < iterations; i++)
 	{
-		updateVelocities(tree, tree, timestep);
-		updatePositions(tree, timestep);
+		int sizeMyParticles;
+		if(rank != numtasks-1)
+			sizeMyParticles = particles_per_proc;
+		else
+			sizeMyParticles = particles_per_proc + (num_particles%numtasks);
+		
+		updateVelocities(tree, orderedParticles + (rank*particles_per_proc), sizeMyParticles, timestep);
+		updatePositions(tree, orderedParticles + (rank*particles_per_proc), sizeMyParticles, timestep);
+		shareData(orderedParticles, num_particles, orderedParticles + (rank*particles_per_proc), sizeMyParticles, rank, numtasks);
+		free(orderedParticles);
+		orderedParticles = mortonOrder(particles, num_particles);
 		oldTree = tree;
-		tree = buildTree(tree);
+		tree = buildTree(orderedParticles, num_particles, rank, numtasks);
 		freeQuadTree(oldTree);
 	}
+	MPI_Type_free(&bodyType);
+	MPI_Finalize();
 	if(rank != 0)
 		exit(0);
 	gettimeofday(&end, NULL);
@@ -66,55 +78,62 @@ int main(int argc, char **argv)
 	printf("Time: %lf\n",endsec-beginsec);
 	
 	write_output(outputfile, tree);
-	for(i = 0; i < subdomains; i++)
-		freeQuadTree(trees[i]);
+	freeQuadTree(tree);
 	free(particles);
 	free(orderedParticles);
 	return 0;
 }
 
-void updateVelocities(quadTree *tree, quadTree *root, double timestep)
+void updateVelocities(quadTree *root, body **particles, int num_particles, double timestep)
 {
-	if(tree == 0)
-		return;
-	if(hasChildren(tree))
+// 	if(root == 0)
+// 		return;
+// 	if(hasChildren(tree))
+// 	{
+// 		updateVelocities(tree->topLeft, root, timestep);
+// 		updateVelocities(tree->topRight, root, timestep);
+// 		updateVelocities(tree->bottomLeft, root, timestep);
+// 		updateVelocities(tree->bottomRight, root, timestep);
+// 	}
+// 	else
+// 	{
+	int i;
+	two_d_vector accel;
+	for(i = 0; i < num_particles; i++)
 	{
-		updateVelocities(tree->topLeft, root, timestep);
-		updateVelocities(tree->topRight, root, timestep);
-		updateVelocities(tree->bottomLeft, root, timestep);
-		updateVelocities(tree->bottomRight, root, timestep);
-	}
-	else
-	{
-		two_d_vector accel;
 		accel.xMagnitude = accel.yMagnitude = 0.0;
-		compute_accln(tree, root, &accel);
+		compute_accln(particles[i], root, &accel);
 
-		tree->xVelocity += accel.xMagnitude * timestep * DAMPING;
-		tree->yVelocity += accel.yMagnitude * timestep * DAMPING;
+		particles[i]->xVelocity += accel.xMagnitude * timestep * DAMPING;
+		particles[i]->yVelocity += accel.yMagnitude * timestep * DAMPING;
 	}
+// 	}
 }
 
-void updatePositions(quadTree *tree, double timestep)
+void updatePositions(quadTree *root, body **particles, int num_particles, double timestep)
+{
+// 	if(tree == 0) return;
+// 	if(hasChildren(tree))
+// 	{
+// 		updatePositions(tree->topLeft, timestep);
+// 		updatePositions(tree->topRight, timestep);
+// 		updatePositions(tree->bottomLeft, timestep);
+// 		updatePositions(tree->bottomRight, timestep);
+// 	}
+// 	else
+// 	{
+	int i;
+	for(i = 0; i < num_particles; i++)
+	{
+		particles[i]->xPosition += particles[i]->xVelocity * timestep;
+		particles[i]->yPosition += particles[i]->yVelocity * timestep;
+	}
+// 	}
+}
+
+void compute_accln(body *particle, quadTree *tree, two_d_vector *accel)
 {
 	if(tree == 0) return;
-	if(hasChildren(tree))
-	{
-		updatePositions(tree->topLeft, timestep);
-		updatePositions(tree->topRight, timestep);
-		updatePositions(tree->bottomLeft, timestep);
-		updatePositions(tree->bottomRight, timestep);
-	}
-	else
-	{
-		tree->xPosition += tree->xVelocity * timestep;
-		tree->yPosition += tree->yVelocity * timestep;
-	}
-}
-
-void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
-{
-	if(tree == 0 || tree == particle) return;
 	if(!hasChildren(tree))
 	{
 		acclnFormula(particle, tree, accel);
@@ -123,7 +142,7 @@ void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
 	{
 		double r = sqrt(  (tree->xPosition - particle->xPosition) * (tree->xPosition - particle->xPosition)
 				+ (tree->yPosition - particle->yPosition) * (tree->yPosition - particle->yPosition));
-		double D = tree->xTopRight - tree->xBottomLeft;		// size of bounding region
+		double D = tree->size;		// size of bounding region
 		if(D/r < THETA)
 		{
 			acclnFormula(particle, tree, accel);
@@ -138,7 +157,7 @@ void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
 	}
 }
 
-void acclnFormula(quadTree *particle1, quadTree *particle2, two_d_vector *accel)
+void acclnFormula(body *particle1, quadTree *particle2, two_d_vector *accel)
 {
 	double x = particle2->xPosition;
 	double y = particle2->yPosition;
@@ -155,5 +174,51 @@ void acclnFormula(quadTree *particle1, quadTree *particle2, two_d_vector *accel)
         accel->xMagnitude += mag*x;//G * mag*x;
         accel->yMagnitude += mag*y;//G * mag*y;
         return;
+}
+
+void shareData(body **particles, int num_particles, body **myParticles, int myParticleCt, int myRank, int numtasks)
+{
+	int i, j;
+	for(i = 0; i < numtasks-1; i++)
+	{
+		for(j = 0; j < num_particles/numtasks; j++)
+		{
+printf("proc %d i: %d j: %d   xPos: %lf  yPos: %lf\n",myRank,i,j,particles[i*(num_particles/numtasks)+j]->xPosition, particles[i*(num_particles/numtasks)+j]->yPosition);
+// 			printf("proc %d before recv particle %d from %d\n", myRank, j, i);
+			MPI_Bcast(particles[i*(num_particles/numtasks)+j],1,bodyType,i,MPI_COMM_WORLD);
+// 			printf("proc %d after recv particle %d from %d\n", myRank, j, i);
+printf("proc %d i: %d j: %d   xPos: %lf  yPos: %lf\n",myRank,i,j,particles[i*(num_particles/numtasks)+j]->xPosition, particles[i*(num_particles/numtasks)+j]->yPosition);
+		}
+	}
+	for(j = 0; j < num_particles/numtasks + (num_particles%numtasks); j++)
+	{
+// 		printf("proc %d before recv particle %d from %d\n", myRank, j, numtasks-1);
+		MPI_Bcast(particles[(numtasks-1)*(num_particles/numtasks)+j],1,bodyType,numtasks-1,MPI_COMM_WORLD);
+// 		printf("proc %d after recv particle %d from %d\n", myRank, j, numtasks-1);
+	}
+}
+
+void createBodyType(MPI_Datatype *outtype)
+{
+	body b;
+	int count[] = { 1,1,1,1,1,1 };
+	MPI_Datatype type[] = { MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE, MPI_DOUBLE };
+	int bAddr, xAddr, yAddr, massAddr, xvAddr, yvAddr;//, mnAddr;
+	int disp[6];
+	MPI_Get_address(&b, &bAddr);
+	MPI_Get_address(&b.xPosition, &xAddr);
+	MPI_Get_address(&b.yPosition, &yAddr);
+	MPI_Get_address(&b.mass, &massAddr);
+	MPI_Get_address(&b.xVelocity, &xvAddr);
+	MPI_Get_address(&b.yVelocity, &yvAddr);
+// 	MPI_Get_address(&b.mortonNumber, &mnAddr);
+	disp[0] = xAddr - bAddr;
+	disp[1] = yAddr - bAddr;
+	disp[2] = massAddr - bAddr;
+	disp[3] = xvAddr - bAddr;
+	disp[4] = yvAddr - bAddr;
+// 	disp[5] = mnAddr - bAddr;
+	MPI_Type_struct(5,count,disp,type,outtype);
+	MPI_Type_commit(outtype);
 }
 

@@ -6,7 +6,7 @@
 #include "inout.h"
 
 void write_bodies(FILE *file, quadTree *tree);
-int count_bodies(FILE *file, quadTree *tree);
+int count_bodies(quadTree *tree);
 
 
 FILE *openFile(char *fname, char *mode)
@@ -19,12 +19,12 @@ FILE *openFile(char *fname, char *mode)
 	return file;
 }
 
-quadTree *read_input(char *filename, int *num_particles)
+body *read_input(char *filename, int *num_particles)
 {
 	int i;
 	FILE *file = openFile(filename,"r");
 	fscanf(file,"%d", num_particles);	// number of bodies
-	quadTree *particles = (quadTree *)malloc(sizeof(quadTree) * *num_particles);
+	body *particles = (body *)malloc(sizeof(body) * *num_particles);
 
 	for(i = 0; i < *num_particles; i++)
 	{
@@ -38,19 +38,19 @@ quadTree *read_input(char *filename, int *num_particles)
 void write_output(char *filename, quadTree *tree)
 {
 	FILE *file = openFile(filename,"w");
-	int n = count_bodies(file, tree);
+	int n = count_bodies(tree);
 	fprintf(file, "%d\n", n);
 	write_bodies(file, tree);
 	fclose(file);
 }
 
-int count_bodies(FILE *file, quadTree *tree)
+int count_bodies(quadTree *tree)
 {
 	if(!tree)
 		return 0;
 	if(!hasChildren(tree))
 		return 1;
-	return count_bodies(file, tree->bottomRight) + count_bodies(file, tree->bottomLeft) + count_bodies(file, tree->topRight) + count_bodies(file, tree->topLeft);
+	return count_bodies(tree->bottomRight) + count_bodies(tree->bottomLeft) + count_bodies(tree->topRight) + count_bodies(tree->topLeft);
 }
 
 void write_bodies(FILE *file, quadTree *tree)
@@ -59,7 +59,7 @@ void write_bodies(FILE *file, quadTree *tree)
 		return;
 	if(!hasChildren(tree))
 	{
-		fprintf(file, "%lf %lf %lf %lf %lf\n", tree->xPosition, tree->yPosition, tree->mass, tree->xVelocity, tree->yVelocity);
+		fprintf(file, "%lf %lf %lf %lf %lf\n", tree->particle->xPosition, tree->particle->yPosition, tree->particle->mass, tree->particle->xVelocity, tree->particle->yVelocity);
 		return;
 	}
 	write_bodies(file, tree->bottomRight);
