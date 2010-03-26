@@ -44,13 +44,13 @@ int main(int argc, char **argv)
 
  	MPI_Barrier(MPI_COMM_WORLD); // wait for input to finish
 	gettimeofday(&begin, NULL);
-printf("num_particles: %d\n",num_particles);
+// printf("num_particles: %d\n",num_particles);
 // 	body **orderedParticles = mortonOrder(particles, num_particles);
 	int particles_per_proc = num_particles / numtasks;
 	quadTree *tree;
 	int i;
 	tree = buildTree(particles, num_particles, rank, numtasks);
-	write_output("stdout",tree);
+// 	write_output("stdout",tree);
 
 	for(i=0; i < iterations; i++)
 	{
@@ -62,13 +62,31 @@ printf("num_particles: %d\n",num_particles);
 
 // 		printf("proc %d  startIndex: %d  num_particles: %d\n", rank, (rank*particles_per_proc), sizeMyParticles);
 		updateVelocities(tree, particles + (rank*particles_per_proc), sizeMyParticles, timestep);
+// 		printf("iteration %d complete vel\n",i);
 		updatePositions(tree, particles + (rank*particles_per_proc), sizeMyParticles, timestep);
+// 		printf("iteration %d complete pos\n",i);
 		shareData(particles, num_particles, particles + (rank*particles_per_proc), sizeMyParticles, rank, numtasks);
+// 		printf("iteration %d complete share\n",i);
 // 		free(orderedParticles);
 // 		orderedParticles = mortonOrder(particles, num_particles);
 		oldTree = tree;
+
+// 		if(i == 14)
+// 		{
+// 			write_output("stdout",tree);
+// 			#include <sys/types.h>
+// #include <unistd.h>
+// printf("pid: %d\n",getpid());
+// 			int m = 0;
+// 			int n;
+// 			while(m == 0)
+// 				n = 0;
+// 		}
+		
 		tree = buildTree(particles, num_particles, rank, numtasks);
+// 		printf("iteration %d complete build\n",i);
 		freeQuadTree(oldTree);
+// 		printf("completed iteration %d\n\n",i);
 	}
 	MPI_Type_free(&bodyType);
 	MPI_Finalize();
