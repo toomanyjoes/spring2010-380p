@@ -50,7 +50,7 @@ typedef struct body_list
 }body_list;
 
 void addBody(quadTree *tree, body *particle);
-quadTree *buildTree(body **particles, int num_particles, int rank, int numtasks);
+quadTree *buildTree(body *particles, int num_particles, int rank, int numtasks);
 int hasChildren(quadTree *tree);
 body **mortonOrder(body *particles, int num_particles);
 void freeQuadTree(quadTree *tree);

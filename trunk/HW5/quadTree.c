@@ -32,6 +32,34 @@ void sort(body *arr[], int beg, int end)
 	}
 }
 
+// // returns true if p < q in the Morton ordering
+// int compare(body *p, body *q)
+// {
+// 	int x = 0;
+// 	int dim = 0;
+// 	int i;
+// 	for(i = 0; i < 2; i++)
+// 		int y = XORmsb(p->xPosition, q->xPosition);
+// 	if(x < y)
+// 		x = y;
+// 		dim = i;
+// }
+// 
+// int XORmsb(double a, double b)
+// {
+// 	int x = extractExponent(a);
+// 	int y = extractExponent(b);
+// 	if(x == y)
+// 	{
+// 		int z = msdb(extractMantissa(a), extractMantissa(b));
+// 		x = x - extract exponent(z);
+// 		return x;
+// 	}
+// 	if(y < x)
+// 		return x;
+// 	return y;
+// }
+
 body **mortonOrder(body *particles, int num_particles)
 {
 	// source: http://www.cs.utk.edu/~vose/c-stuff/bithacks.html#InterleaveTableObvious
@@ -51,7 +79,7 @@ body **mortonOrder(body *particles, int num_particles)
 		{
 			z[j] |= (x & 1 << i) << i | (y & 1 << i) << (i + 1);
 		}
-		printf("x: %d y:%d z: %x\n",x,y,(unsigned int)z[j]);
+// 		printf("x: %d y:%d z: %x\n",x,y,(unsigned int)z[j]);
 		particles[j].mortonNumber = z[j];
 		orderedParticles[j] = &particles[j];
 	}
@@ -92,6 +120,7 @@ void addBody(quadTree *tree, body *particle)
 		tree->xPosition = (particle->xPosition * particle->mass + tree->xPosition * tree->mass) / (tree->mass + particle->mass);
 		tree->yPosition = (particle->yPosition * particle->mass + tree->yPosition * tree->mass) / (tree->mass + particle->mass);
 		tree->mass += particle->mass;
+// 		printf("new tree mass: %lf\n",tree->mass);
 
 		double xMid = (tree->xBottomLeft + tree->size) / 2.0;
 		double yMid = (tree->yBottomLeft + tree->size) / 2.0;
@@ -134,124 +163,4 @@ void addBody(quadTree *tree, body *particle)
 					tree->topRight = allocNewNode(TOP_RIGHT, tree, particle);
 				}
 				else
-					addBody(tree->topRight, particle);
-			}
-		}
-	}
-	else	// the region only has this particle
-	{
-		tree->xBottomLeft = MIN_GRID;
-		tree->yBottomLeft = MIN_GRID;
-		tree->size = MAX_GRID - MIN_GRID;
-		tree->xPosition = particle->xPosition;
-		tree->yPosition = particle->yPosition;
-		tree->mass = particle->mass;
-		tree->particle = particle;
-	}
-}
-
-int hasChildren(quadTree *tree)
-{
-	if(tree->topLeft || tree->topRight || tree->bottomLeft || tree->bottomRight)
-		return 1;
-	return 0;
-}
-
-quadTree *allocNewNode(int q, quadTree *tree, body *particle)
-{
-	quadTree *newNode = (quadTree *)malloc(sizeof(quadTree));
-	memset(newNode,0,sizeof(quadTree));
-	double xMid = (tree->xBottomLeft + tree->size) / 2.0;
-	double yMid = (tree->yBottomLeft + tree->size) / 2.0;
-	switch(q)
-	{
-		case TOP_RIGHT:
-			newNode->xBottomLeft = xMid;
-	 		newNode->yBottomLeft = yMid;
-		break;
-		case TOP_LEFT:
-			newNode->xBottomLeft = tree->xBottomLeft;
-	 		newNode->yBottomLeft = yMid;
-		break;
-		case BOTTOM_RIGHT:
-			newNode->xBottomLeft = xMid;
-	 		newNode->yBottomLeft = tree->yBottomLeft;
-		break;
-		case BOTTOM_LEFT:
-			newNode->xBottomLeft = tree->xBottomLeft;
-	 		newNode->yBottomLeft = tree->yBottomLeft;
-	}
-	newNode->size = tree->size / 2.0;
-	newNode->xPosition = particle->xPosition;
-	newNode->yPosition = particle->yPosition;
-	newNode->mass = particle->mass;
-	newNode->xVelocity = particle->xVelocity;
-	newNode->yVelocity = particle->yVelocity;
-	newNode->particle = particle;
-	return newNode;
-}
-
-quadTree *buildTree(body **particles, int num_particles, int rank, int numtasks)
-{
-	int first, last;
-	first = rank * (num_particles/numtasks);
-	if(rank != numtasks - 1)
-		last = ((rank + 1) * (num_particles/numtasks)) - 1;
-	else
-		last = num_particles - 1;
-
-	quadTree *newTree = (quadTree *)malloc(sizeof(quadTree));
-	newTree->xBottomLeft = MIN_GRID;
-	newTree->yBottomLeft = MIN_GRID;
-	newTree->size = MAX_GRID - MIN_GRID;
-	newTree->mass = 0.0;
-	newTree->topLeft = newTree->topRight = newTree->bottomLeft = newTree->bottomRight = 0;
-	
-	int i;
-	for(i = first; i < last; i++)
-	{
-		addBody(newTree, particles[i]);
-	}
-	return newTree;
-}
-
-
-// quadTree *buildTree(quadTree *oldTree)
-// {
-// 	quadTree *newTree = (quadTree *)malloc(sizeof(quadTree));
-// 
-// 	newTree->xBottomLeft = oldTree->xBottomLeft;
-// 	newTree->yBottomLeft = oldTree->yBottomLeft;
-// 	newTree->xTopRight = oldTree->xTopRight;
-// 	newTree->yTopRight = oldTree->yTopRight;
-// 	newTree->mass = 0.0;
-// 	newTree->topLeft = newTree->topRight = newTree->bottomLeft = newTree->bottomRight = 0;
-// 	buildTreeHelper(oldTree, newTree);
-// 	return newTree;
-// }
-// 
-// void buildTreeHelper(quadTree *oldTree, quadTree *newTree)
-// {
-// 	if(oldTree == 0)
-// 		return;
-// 	if(hasChildren(oldTree))
-// 	{
-// 		buildTreeHelper(oldTree->topLeft, newTree);
-// 		buildTreeHelper(oldTree->topRight, newTree);
-// 		buildTreeHelper(oldTree->bottomLeft, newTree);
-// 		buildTreeHelper(oldTree->bottomRight, newTree);
-// 	}
-// 	else
-// 		addBody(newTree, oldTree->xPosition, oldTree->yPosition, oldTree->mass, oldTree->xVelocity, oldTree->yVelocity);
-// }
-
-void freeQuadTree(quadTree *tree)
-{
-	if(tree == 0)
-		return;
-	freeQuadTree(tree->topLeft);
-	freeQuadTree(tree->topRight);
-	freeQuadTree(tree->bottomLeft);
-	freeQuadTree(tree->bottomRight);
-	free(tree);
-}
+					addBody(tre
