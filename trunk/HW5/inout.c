@@ -50,7 +50,7 @@ int count_bodies(quadTree *tree)
 		return 0;
 	if(!hasChildren(tree))
 	{
-		printf("count   xPos: %lf yPos: %lf mass: %lf\n",tree->particle->xPosition, tree->particle->yPosition, tree->particle->mass);
+// 		printf("count   xPos: %lf yPos: %lf mass: %lf\n",tree->particle->xPosition, tree->particle->yPosition, tree->particle->mass);
 		return 1;
 	}
 	return count_bodies(tree->bottomRight) + count_bodies(tree->bottomLeft) + count_bodies(tree->topRight) + count_bodies(tree->topLeft);
