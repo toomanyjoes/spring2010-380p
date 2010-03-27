@@ -26,6 +26,8 @@ void addBody(quadTree *tree, double xPosition, double yPosition, double mass, do
 					tree->bottomLeft->mass = tree->mass;
 					tree->bottomLeft->xVelocity = tree->xVelocity;
 					tree->bottomLeft->yVelocity = tree->yVelocity;
+					tree->bottomLeft->xAccel = tree->xAccel;
+					tree->bottomLeft->xAccel = tree->yAccel;
 				}
 				else	// top half
 				{
@@ -35,6 +37,8 @@ void addBody(quadTree *tree, double xPosition, double yPosition, double mass, do
 					tree->topLeft->mass = tree->mass;
 					tree->topLeft->xVelocity = tree->xVelocity;
 					tree->topLeft->yVelocity = tree->yVelocity;
+					tree->topLeft->xAccel = tree->xAccel;
+					tree->topLeft->xAccel = tree->yAccel;
 				}
 			}
 			else	// right half
@@ -47,6 +51,8 @@ void addBody(quadTree *tree, double xPosition, double yPosition, double mass, do
 					tree->bottomRight->mass = tree->mass;
 					tree->bottomRight->xVelocity = tree->xVelocity;
 					tree->bottomRight->yVelocity = tree->yVelocity;
+					tree->bottomRight->xAccel = tree->xAccel;
+					tree->bottomRight->xAccel = tree->yAccel;
 				}
 				else	// top half
 				{
@@ -56,6 +62,8 @@ void addBody(quadTree *tree, double xPosition, double yPosition, double mass, do
 					tree->topRight->mass = tree->mass;
 					tree->topRight->xVelocity = tree->xVelocity;
 					tree->topRight->yVelocity = tree->yVelocity;
+					tree->topRight->xAccel = tree->xAccel;
+					tree->topRight->xAccel = tree->yAccel;
 				}
 			}
 		}
