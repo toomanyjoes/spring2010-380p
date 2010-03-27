@@ -35,34 +35,22 @@ body *read_input(char *filename, int *num_particles)
 	return particles;
 }
 
-void write_output(char *filename, quadTree *tree)
+void write_output(char *filename, body *particles, int num_particles)
 {
 	FILE *file = openFile(filename,"w");
-	int n = count_bodies(tree);
-	fprintf(file, "%d\n", n);
-	write_bodies(file, tree);
+	fprintf(file, "%d\n", num_particles);
+	int i;
+	for(i = 0; i < num_particles; i++)
+		fprintf(file, "%lf %lf %lf %lf %lf\n", particles[i].xPosition, particles[i].yPosition, particles[i].mass, particles[i].xVelocity, particles[i].yVelocity);
 	fclose(file);
 }
 
-int count_bodies(quadTree *tree)
-{
-	if(!tree)
-		return 0;
-	if(!hasChildren(tree))
-	{
-// 		printf("count   xPos: %lf yPos: %lf mass: %lf\n",tree->particle->xPosition, tree->particle->yPosition, tree->particle->mass);
-		return 1;
-	}
-	return count_bodies(tree->bottomRight) + count_bodies(tree->bottomLeft) + count_bodies(tree->topRight) + count_bodies(tree->topLeft);
-}
 
-void write_bodies(FILE *file, quadTree *tree)
+void write_bodies(FILE *file, body *particles, int num_particles)
 {
-	if(!tree)
-		return;
-	if(!hasChildren(tree))
-	{
-		fprintf(file, "%lf %lf %lf %lf %lf\n", tree->particle->xPosition, tree->particle->yPosition, tree->particle->mass, tree->particle->xVelocity, tree->particle->yVelocity);
+	int i;
+
+		
 		return;
 	}
 	write_bodies(file, tree->bottomRight);

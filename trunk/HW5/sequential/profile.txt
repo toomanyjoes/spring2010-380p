@@ -2,20 +2,24 @@ Flat profile:
 
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
- time   seconds   seconds    calls  us/call  us/call  name    
- 49.18      4.79     4.79  8000000     0.60     0.68  compute_accln
- 15.30      6.28     1.49  8000004     0.19     0.19  addBody
- 10.47      7.30     1.02 213804271     0.00     0.00  hasChildren
-  7.19      8.00     0.70  2000000     0.35     0.44  updatePositions
-  7.08      8.69     0.69  2000000     0.34     3.16  updateVelocities
-  6.16      9.29     0.60  2000000     0.30     1.04  buildTreeHelper
-  3.70      9.65     0.36  2000001     0.18     0.18  freeQuadTree
-  0.92      9.74     0.09                             main
-  0.00      9.74     0.00  2000000     0.00     1.04  buildTree
-  0.00      9.74     0.00        1     0.00     0.09  count_bodies
-  0.00      9.74     0.00        1     0.00     0.74  read_input
-  0.00      9.74     0.00        1     0.00     0.09  write_bodies
-  0.00      9.74     0.00        1     0.00     0.17  write_output
+ time   seconds   seconds    calls  ns/call  ns/call  name    
+ 36.96      3.60     3.60 358422346    10.04    12.39  compute_accln
+ 19.20      5.47     1.87                             updateVelocities
+ 13.86      6.82     1.35  8000004   168.75   168.75  addBody
+ 10.47      7.84     1.02 213804272     4.77     4.77  allocNewNode
+  7.29      8.55     0.71  2000000   355.00   493.89  main
+  3.18      8.86     0.31                             __libc_csu_init
+  2.26      9.08     0.22 90337748     2.44     2.44  buildTree
+  1.85      9.26     0.18 52109612     3.45     3.45  freeQuadTree
+  1.85      9.44     0.18                             findxmin
+  1.03      9.54     0.10                             buildTreeHelper
+  0.92      9.63     0.09                             __do_global_ctors_aux
+  0.92      9.72     0.09                             count_bodies
+  0.21      9.74     0.02                             __libc_csu_fini
+  0.00      9.74     0.00  2000000     0.00     2.44  _fini
+  0.00      9.74     0.00       29     0.00     0.00  openFile
+  0.00      9.74     0.00        1     0.00   219.45  read_input
+  0.00      9.74     0.00        1     0.00     0.00  write_bodies
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -51,79 +55,101 @@ granularity: each sample hit covers 4 byte(s) for 0.10% of 9.74 seconds
 
 index % time    self  children    called     name
                                                  <spontaneous>
-[1]    100.0    0.09    9.65                 main [1]
-                0.69    5.63 2000000/2000000     updateVelocities [2]
-                0.00    2.09 2000000/2000000     buildTree [4]
-                0.70    0.18 2000000/2000000     updatePositions [8]
-                0.36    0.00 2000001/2000001     freeQuadTree [9]
-                0.00    0.00       1/1           read_input [10]
-                0.00    0.00       1/1           write_output [11]
+[1]     63.5    1.87    4.32                 updateVelocities [1]
+                3.50    0.82 348422346/358422346     compute_accln [2]
 -----------------------------------------------
-                             117783664             updateVelocities [2]
-                0.69    5.63 2000000/2000000     main [1]
-[2]     64.9    0.69    5.63 2000000+117783664 updateVelocities [2]
-                4.79    0.66 8000000/8000000     compute_accln [3]
-                0.18    0.00 37445916/213804271     hasChildren [7]
-                             117783664             updateVelocities [2]
+                             88337748             compute_accln [2]
+                0.02    0.00 2000000/358422346     count_bodies [5]
+                0.08    0.02 8000000/358422346     main [8]
+                3.50    0.82 348422346/358422346     updateVelocities [1]
+[2]     45.6    3.60    0.84 358422346+88337748 compute_accln [2]
+                0.84    0.00 176358319/213804282     allocNewNode <cycle 1> [7]
+                             88337748             compute_accln [2]
 -----------------------------------------------
-                             348422346             compute_accln [3]
-                4.79    0.66 8000000/8000000     updateVelocities [2]
-[3]     56.0    4.79    0.66 8000000+348422346 compute_accln [3]
-                0.66    0.00 138912403/213804271     hasChildren [7]
-                             348422346             compute_accln [3]
+                                                 <spontaneous>
+[3]     14.8    0.09    1.35                 __do_global_ctors_aux [3]
+                1.35    0.00 8000000/8000004     addBody [4]
 -----------------------------------------------
-                0.00    2.09 2000000/2000000     main [1]
-[4]     21.5    0.00    2.09 2000000         buildTree [4]
-                0.60    1.49 2000000/2000000     buildTreeHelper [5]
+                0.00    0.00       4/8000004     write_output [16]
+                1.35    0.00 8000000/8000004     __do_global_ctors_aux [3]
+[4]     13.9    1.35    0.00 8000004         addBody [4]
 -----------------------------------------------
-                             88337748             buildTreeHelper [5]
-                0.60    1.49 2000000/2000000     buildTree [4]
-[5]     21.5    0.60    1.49 2000000+88337748 buildTreeHelper [5]
-                1.49    0.00 8000000/8000004     addBody [6]
-                             88337748             buildTreeHelper [5]
+                                                 <spontaneous>
+[5]     11.4    0.09    1.02                 count_bodies [5]
+                0.71    0.28 2000000/2000000     main [8]
+                0.02    0.00 2000000/358422346     compute_accln [2]
+                0.01    0.00 2000001/52109612     freeQuadTree [12]
+                0.00    0.00 2000000/2000000     _fini [15]
+                0.00    0.00       1/213804282     allocNewNode <cycle 1> [7]
 -----------------------------------------------
-                0.00    0.00       4/8000004     read_input [10]
-                1.49    0.00 8000000/8000004     buildTreeHelper [5]
-[6]     15.3    1.49    0.00 8000004         addBody [6]
+[6]     10.5    1.02    0.00 213804282+19      <cycle 1 as a whole> [6]
+                1.02    0.00 213804272             allocNewNode <cycle 1> [7]
 -----------------------------------------------
-                0.00    0.00      18/213804271     count_bodies [12]
-                0.00    0.00      18/213804271     write_bodies [13]
-                0.18    0.00 37445916/213804271     updatePositions [8]
-                0.18    0.00 37445916/213804271     updateVelocities [2]
-                0.66    0.00 138912403/213804271     compute_accln [3]
-[7]     10.5    1.02    0.00 213804271         hasChildren [7]
+                                  18             openFile <cycle 1> [18]
+                0.00    0.00       1/213804282     count_bodies [5]
+                0.00    0.00      18/213804282     read_input [17]
+                0.18    0.00 37445916/213804282     main [8]
+                0.84    0.00 176358319/213804282     compute_accln [2]
+[7]     10.5    1.02    0.00 213804272         allocNewNode <cycle 1> [7]
+                0.00    0.00       1/1           write_bodies [19]
+                                   1             openFile <cycle 1> [18]
 -----------------------------------------------
-                             88337748             updatePositions [8]
-                0.70    0.18 2000000/2000000     main [1]
-[8]      9.0    0.70    0.18 2000000+88337748 updatePositions [8]
-                0.18    0.00 37445916/213804271     hasChildren [7]
-                             88337748             updatePositions [8]
+                             117783664             main [8]
+                0.71    0.28 2000000/2000000     count_bodies [5]
+[8]     10.1    0.71    0.28 2000000+117783664 main [8]
+                0.18    0.00 37445916/213804282     allocNewNode <cycle 1> [7]
+                0.08    0.02 8000000/358422346     compute_accln [2]
+                0.00    0.00       1/1           read_input [17]
+                             117783664             main [8]
 -----------------------------------------------
-                             69429350             freeQuadTree [9]
-                0.36    0.00 2000001/2000001     main [1]
-[9]      3.7    0.36    0.00 2000001+69429350 freeQuadTree [9]
-                             69429350             freeQuadTree [9]
+                                                 <spontaneous>
+[9]      5.4    0.31    0.22                 __libc_csu_init [9]
+                0.22    0.00 88337748/90337748     buildTree [11]
 -----------------------------------------------
-                0.00    0.00       1/1           main [1]
-[10]     0.0    0.00    0.00       1         read_input [10]
-                0.00    0.00       4/8000004     addBody [6]
+                                                 <spontaneous>
+[10]     3.6    0.18    0.17                 findxmin [10]
+                0.17    0.00 50109611/52109612     freeQuadTree [12]
 -----------------------------------------------
-                0.00    0.00       1/1           main [1]
-[11]     0.0    0.00    0.00       1         write_output [11]
-                0.00    0.00       1/1           count_bodies [12]
-                0.00    0.00       1/1           write_bodies [13]
+                0.00    0.00 2000000/90337748     _fini [15]
+                0.22    0.00 88337748/90337748     __libc_csu_init [9]
+[11]     2.3    0.22    0.00 90337748         buildTree [11]
 -----------------------------------------------
-                                  42             count_bodies [12]
-                0.00    0.00       1/1           write_output [11]
-[12]     0.0    0.00    0.00       1+42      count_bodies [12]
-                0.00    0.00      18/213804271     hasChildren [7]
-                                  42             count_bodies [12]
+                             19319739             freeQuadTree [12]
+                0.01    0.00 2000001/52109612     count_bodies [5]
+                0.17    0.00 50109611/52109612     findxmin [10]
+[12]     1.8    0.18    0.00 52109612+19319739 freeQuadTree [12]
+                             19319739             freeQuadTree [12]
 -----------------------------------------------
-                                  42             write_bodies [13]
-                0.00    0.00       1/1           write_output [11]
-[13]     0.0    0.00    0.00       1+42      write_bodies [13]
-                0.00    0.00      18/213804271     hasChildren [7]
-                                  42             write_bodies [13]
+                                                 <spontaneous>
+[13]     1.0    0.10    0.00                 buildTreeHelper [13]
+-----------------------------------------------
+                                                 <spontaneous>
+[14]     0.2    0.02    0.00                 __libc_csu_fini [14]
+-----------------------------------------------
+                0.00    0.00 2000000/2000000     count_bodies [5]
+[15]     0.1    0.00    0.00 2000000         _fini [15]
+                0.00    0.00 2000000/90337748     buildTree [11]
+-----------------------------------------------
+                                                 <spontaneous>
+[16]     0.0    0.00    0.00                 write_output [16]
+                0.00    0.00       4/8000004     addBody [4]
+-----------------------------------------------
+                0.00    0.00       1/1           main [8]
+[17]     0.0    0.00    0.00       1         read_input [17]
+                0.00    0.00      28/213804282     openFile <cycle 1> [18]
+                0.00    0.00      18/213804282     allocNewNode <cycle 1> [7]
+-----------------------------------------------
+                                  14             openFile <cycle 1> [18]
+                                   1             allocNewNode <cycle 1> [7]
+                0.00    0.00      28/213804282     read_input [17]
+[18]     0.0    0.00    0.00      29+14      openFile <cycle 1> [18]
+                                  18             allocNewNode <cycle 1> [7]
+                                  14             openFile <cycle 1> [18]
+-----------------------------------------------
+                                  42             write_bodies [19]
+                0.00    0.00       1/1           allocNewNode <cycle 1> [7]
+[19]     0.0    0.00    0.00       1+42      write_bodies [19]
+                                  42             write_bodies [19]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -211,8 +237,9 @@ index % time    self  children    called     name
 
 Index by function name
 
-   [6] addBody                 [9] freeQuadTree            [2] updateVelocities
-   [4] buildTree               [7] hasChildren            [13] write_bodies
-   [5] buildTreeHelper         [1] main                   [11] write_output
-   [3] compute_accln          [10] read_input
-  [12] count_bodies            [8] updatePositions
+   [3] __do_global_ctors_aux  [11] buildTree               [8] main
+  [14] __libc_csu_fini        [13] buildTreeHelper        [18] openFile
+   [9] __libc_csu_init         [2] compute_accln          [17] read_input
+  [15] _fini                   [5] count_bodies            [1] updateVelocities
+   [4] addBody                [10] findxmin               [19] write_bodies
+   [7] allocNewNode           [12] freeQuadTree            [6] <cycle 1>

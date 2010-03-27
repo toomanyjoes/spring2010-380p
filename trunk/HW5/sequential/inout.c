@@ -70,9 +70,9 @@ void write_bodies(FILE *file, quadTree *tree)
 		fprintf(file, "%lf %lf %lf %lf %lf\n", tree->xPosition, tree->yPosition, tree->mass, tree->xVelocity, tree->yVelocity);
 		return;
 	}
-	write_bodies(file, tree->bottomRight);
-	write_bodies(file, tree->bottomLeft);
-	write_bodies(file, tree->topRight);
 	write_bodies(file, tree->topLeft);
+	write_bodies(file, tree->topRight);
+	write_bodies(file, tree->bottomLeft);
+	write_bodies(file, tree->bottomRight);
 }
 

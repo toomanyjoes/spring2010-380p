@@ -14,6 +14,9 @@ typedef struct qTree
 	double xVelocity;
 	double yVelocity;
 
+	double xAccel;
+	double yAccel;
+
 	double mass;
 
 	// tracks the area that this node is responsible for

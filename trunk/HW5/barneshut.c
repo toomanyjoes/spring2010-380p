@@ -126,8 +126,11 @@ void updateVelocities(quadTree *root, body *particles, int num_particles, double
 		//if((int)particles[i]->mass == 100000)
 // 			printf("accel x: %lf y: %lf\n", accel.xMagnitude, accel.yMagnitude);
 
-		particles[i].xVelocity += accel.xMagnitude * timestep * DAMPING;
-		particles[i].yVelocity += accel.yMagnitude * timestep * DAMPING;
+		particles[i].xVelocity += accel.xMagnitude * timestep;
+		particles[i].yVelocity += accel.yMagnitude * timestep;
+
+		particles[i].xVelocity *= DAMPING;
+		particles[i].yVelocity *= DAMPING;
 	}
 // 	}
 }
@@ -192,7 +195,7 @@ void acclnFormula(body *particle1, quadTree *particle2, two_d_vector *accel)
 
         dist += SOFTEN; //softening factor helps in controlling the impact of one body over the other. assume a value of 18.
 
-        dist = pow(dist, 3.0/2.0); //i.e dist to the power of 1.5
+        dist = pow(dist, 1.5); //i.e dist to the power of 1.5
         double mag = particle2->mass / dist;
 
         accel->xMagnitude += mag*x;//G * mag*x;

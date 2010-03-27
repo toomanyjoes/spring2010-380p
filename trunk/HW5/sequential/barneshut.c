@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <sys/time.h>
 #include "inout.h"
 #include "barneshut.h"
 #include "quadTree.h"
@@ -23,12 +24,17 @@ int main(int argc, char **argv)
 		printf("Usage:\n   %s [iterations (double)] [timestep (double)] [input file] [output file]\n",argv[0]);
 		exit(1);
 	}
+
+
+	struct timeval begin, end;
+
 	double iterations = atof(argv[1]);
 	double timestep = atof(argv[2]);
 	quadTree *tree = read_input(argv[3]);
 	quadTree *oldTree;
 	char *outputfile = argv[4];
 
+	gettimeofday(&begin, NULL);
 	int i;
 	for(i=0; i < iterations; i++)
 	{
@@ -39,6 +45,11 @@ int main(int argc, char **argv)
 		tree = buildTree(tree);
 		freeQuadTree(oldTree);
 	}
+
+	gettimeofday(&end, NULL);
+	double beginsec = (double)begin.tv_sec + ((double)begin.tv_usec/1000000.0);
+	double endsec = (double)end.tv_sec + ((double)end.tv_usec/1000000.0);
+	printf("Time: %lf\n",endsec-beginsec);
 	
 	write_output(outputfile, tree);
 	freeQuadTree(tree);
@@ -64,8 +75,11 @@ void updateVelocities(quadTree *tree, quadTree *root, double timestep)
 		accel.xMagnitude = accel.yMagnitude = 0.0;
 		compute_accln(tree, root, &accel);
 
-		tree->xVelocity += accel.xMagnitude * timestep * DAMPING;
-		tree->yVelocity += accel.yMagnitude * timestep * DAMPING;
+// 		tree->xVelocity += tree->xAccel * timestep;
+// 		tree->yVelocity += tree->yAccel * timestep;
+// 
+// 		tree->xVelocity *= DAMPING;
+// 		tree->yVelocity *= DAMPING;
 	}
 }
 
@@ -81,19 +95,24 @@ void updatePositions(quadTree *tree, double timestep)
 	}
 	else
 	{
+
+		tree->xVelocity += tree->xAccel * timestep;
+		tree->yVelocity += tree->yAccel * timestep;
+
+		tree->xVelocity *= DAMPING;
+		tree->yVelocity *= DAMPING;
+
 		tree->xPosition += tree->xVelocity * timestep;
 		tree->yPosition += tree->yVelocity * timestep;
 	}
 }
 
-// void computeForce(quadTree *particle, quadTree *tree, forceVector *force)
 void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
 {
 	if(tree == 0 || tree == particle) return;
 	if(!hasChildren(tree))
 	{
 		acclnFormula(particle, tree, accel);
-// 		forceFormula(particle, tree, force);
 	}
 	else
 	{
@@ -103,7 +122,6 @@ void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
 		if(D/r < THETA)
 		{
 			acclnFormula(particle, tree, accel);
-// 			forceFormula(particle, tree, force);
 		}
 		else
 		{
@@ -111,10 +129,6 @@ void compute_accln(quadTree *particle, quadTree *tree, two_d_vector *accel)
  			compute_accln(particle, tree->topRight, accel);
  			compute_accln(particle, tree->bottomLeft, accel);
  			compute_accln(particle, tree->bottomRight, accel);
-// 			computeForce(particle, tree->topLeft, force);
-// 			computeForce(particle, tree->topRight, force);
-// 			computeForce(particle, tree->bottomLeft, force);
-// 			computeForce(particle, tree->bottomRight, force);
 		}
 	}
 }
@@ -130,12 +144,14 @@ void acclnFormula(quadTree *particle1, quadTree *particle2, two_d_vector *accel)
 
         dist += SOFTEN; //softening factor helps in controlling the impact of one body over the other. assume a value of 18.
 
-        dist = pow(dist, 3.0/2.0); //i.e dist to the power of 1.5
+        dist = pow(dist, 1.5); //i.e dist to the power of 1.5
         double mag = particle2->mass / dist;
 
 	// TODO: decide if we need the gravitational constant here
-        accel->xMagnitude += mag*x;//G * mag*x;
-        accel->yMagnitude += mag*y;//G * mag*y;
+//         accel->xMagnitude += mag*x;//G * mag*x;
+//         accel->yMagnitude += mag*y;//G * mag*y;
+	particle1->xAccel += mag*x;
+	particle1->yAccel += mag*y;
         return;
 }
 
