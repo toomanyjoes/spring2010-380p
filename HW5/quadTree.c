@@ -8,29 +8,29 @@
 void buildTreeHelper(quadTree *oldTree, quadTree *newTree);
 quadTree *allocNewNode(int q, quadTree *tree, body *particle);
 
-void swap(body *a, body *b)
-{
-	body *t = a;
-	a = b;
-	b = t;
-}
-void sort(body *arr[], int beg, int end)
-{
-	if (end > beg + 1)
-	{
-		uint64_t piv = arr[beg]->mortonNumber, l = beg + 1, r = end;
-		while (l < r)
-		{
-			if (arr[l]->mortonNumber <= piv)
-				l++;
-			else
-				swap(arr[l], arr[--r]);
-		}
-		swap(arr[--l], arr[beg]);
-		sort(arr, beg, l);
-		sort(arr, r, end);
-	}
-}
+// void swap(body *a, body *b)
+// {
+// 	body *t = a;
+// 	a = b;
+// 	b = t;
+// }
+// void sort(body *arr[], int beg, int end)
+// {
+// 	if (end > beg + 1)
+// 	{
+// 		uint64_t piv = arr[beg]->mortonNumber, l = beg + 1, r = end;
+// 		while (l < r)
+// 		{
+// 			if (arr[l]->mortonNumber <= piv)
+// 				l++;
+// 			else
+// 				swap(arr[l], arr[--r]);
+// 		}
+// 		swap(arr[--l], arr[beg]);
+// 		sort(arr, beg, l);
+// 		sort(arr, r, end);
+// 	}
+// }
 
 // // returns true if p < q in the Morton ordering
 // int compare(body *p, body *q)
@@ -60,33 +60,33 @@ void sort(body *arr[], int beg, int end)
 // 	return y;
 // }
 
-body **mortonOrder(body *particles, int num_particles)
-{
-	// source: http://www.cs.utk.edu/~vose/c-stuff/bithacks.html#InterleaveTableObvious
-	int32_t x;
-	int32_t y;
-	uint64_t z[num_particles]; // z gets the resulting 32-bit Morton Number.
-	body **orderedParticles = (body **)malloc(sizeof(body *) * num_particles);
-
-	int32_t i;
-	int j;
-	for(j = 0; j < num_particles; j++)
-	{
-		x = (int32_t)particles[j].xPosition;
-		y = (int32_t)particles[j].yPosition;
-		z[j] = 0;
-		for(i = 0; i < sizeof(x) * 8; i++)
-		{
-			z[j] |= (x & 1 << i) << i | (y & 1 << i) << (i + 1);
-		}
-// 		printf("x: %d y:%d z: %x\n",x,y,(unsigned int)z[j]);
-		particles[j].mortonNumber = z[j];
-		orderedParticles[j] = &particles[j];
-	}
-	sort(orderedParticles, 0, num_particles-1);
-printf("\n");
-	return orderedParticles;
-}
+// body **mortonOrder(body *particles, int num_particles)
+// {
+// 	// source: http://www.cs.utk.edu/~vose/c-stuff/bithacks.html#InterleaveTableObvious
+// 	int32_t x;
+// 	int32_t y;
+// 	uint64_t z[num_particles]; // z gets the resulting 32-bit Morton Number.
+// 	body **orderedParticles = (body **)malloc(sizeof(body *) * num_particles);
+// 
+// 	int32_t i;
+// 	int j;
+// 	for(j = 0; j < num_particles; j++)
+// 	{
+// 		x = (int32_t)particles[j].xPosition;
+// 		y = (int32_t)particles[j].yPosition;
+// 		z[j] = 0;
+// 		for(i = 0; i < sizeof(x) * 8; i++)
+// 		{
+// 			z[j] |= (x & 1 << i) << i | (y & 1 << i) << (i + 1);
+// 		}
+// // 		printf("x: %d y:%d z: %x\n",x,y,(unsigned int)z[j]);
+// 		particles[j].mortonNumber = z[j];
+// 		orderedParticles[j] = &particles[j];
+// 	}
+// 	sort(orderedParticles, 0, num_particles-1);
+// printf("\n");
+// 	return orderedParticles;
+// }
 
 void addBody(quadTree *tree, body *particle)
 {
@@ -174,7 +174,6 @@ void addBody(quadTree *tree, body *particle)
 		tree->size = MAX_GRID - MIN_GRID;
 		tree->xPosition = particle->xPosition;
 		tree->yPosition = particle->yPosition;
-// 		printf("tree mass: %lf\n", particle->mass);
 		tree->mass = particle->mass;
 		tree->particle = particle;
 	}

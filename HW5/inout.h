@@ -5,6 +5,6 @@
 #include "quadTree.h"
 
 body *read_input(char *filename, int *num_particles);
-void write_output(char *filename, quadTree *tree);
+void write_output(char *filename, body *particles, int num_particles);
 
 #endif
