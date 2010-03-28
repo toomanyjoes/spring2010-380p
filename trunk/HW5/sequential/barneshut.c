@@ -73,6 +73,8 @@ void updateVelocities(quadTree *tree, quadTree *root, double timestep)
 		two_d_vector accel;
 // 		force.xMagnitude = force.yMagnitude = 0.0;
 		accel.xMagnitude = accel.yMagnitude = 0.0;
+if(tree->xPosition == 1000.0 && tree->yPosition == 1000.0)
+printf("part 1\n");
 		compute_accln(tree, root, &accel);
 
 // 		tree->xVelocity += tree->xAccel * timestep;

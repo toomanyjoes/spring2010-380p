@@ -5,8 +5,8 @@
 #include "quadTree.h"
 #include "inout.h"
 
-void write_bodies(FILE *file, quadTree *tree);
-int count_bodies(quadTree *tree);
+// void write_bodies(FILE *file, quadTree *tree);
+// int count_bodies(quadTree *tree);
 
 
 FILE *openFile(char *fname, char *mode)
@@ -46,16 +46,16 @@ void write_output(char *filename, body *particles, int num_particles)
 }
 
 
-void write_bodies(FILE *file, body *particles, int num_particles)
-{
-	int i;
-
-		
-		return;
-	}
-	write_bodies(file, tree->bottomRight);
-	write_bodies(file, tree->bottomLeft);
-	write_bodies(file, tree->topRight);
-	write_bodies(file, tree->topLeft);
-}
+// void write_bodies(FILE *file, body *particles, int num_particles)
+// {
+// 	int i;
+// 
+// 		
+// 		return;
+// 	}
+// 	write_bodies(file, tree->bottomRight);
+// 	write_bodies(file, tree->bottomLeft);
+// 	write_bodies(file, tree->topRight);
+// 	write_bodies(file, tree->topLeft);
+// }
 

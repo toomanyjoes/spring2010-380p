@@ -16,7 +16,9 @@ typedef struct body
 	double mass;
 	double xVelocity;
 	double yVelocity;
-	uint64_t mortonNumber;
+// 	double xAccel;
+// 	double yAccel;
+// 	uint64_t mortonNumber;
 }body;
 
 typedef struct qTree
@@ -42,12 +44,6 @@ typedef struct qTree
 	struct qTree *bottomLeft;
 	struct qTree *bottomRight;
 } quadTree;
-
-typedef struct body_list
-{
-	body b;
-	struct body_list *next;
-}body_list;
 
 void addBody(quadTree *tree, body *particle);
 quadTree *buildTree(body *particles, int num_particles, int rank, int numtasks);
