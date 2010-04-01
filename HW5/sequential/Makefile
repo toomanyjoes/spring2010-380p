@@ -1,7 +1,7 @@
-SRCS = inout.c barneshut.c quadTree.c
-OBJS = inout.o quadTree.o
+SRCS = inout.c barneshut.c quadTree.c barrier.c
+OBJS = inout.o quadTree.o barrier.o
 
-CCFLAGS = -O0 -Wall -g
+CCFLAGS = -O3 -Wall
 LDFLAGS = -lm
 MPICCFLAGS = -fast -tp barcelona-64
 CC=gcc

@@ -77,11 +77,11 @@ if(tree->xPosition == 1000.0 && tree->yPosition == 1000.0)
 printf("part 1\n");
 		compute_accln(tree, root, &accel);
 
-// 		tree->xVelocity += tree->xAccel * timestep;
-// 		tree->yVelocity += tree->yAccel * timestep;
-// 
-// 		tree->xVelocity *= DAMPING;
-// 		tree->yVelocity *= DAMPING;
+		tree->xVelocity += accel.xMagnitude * timestep;
+		tree->yVelocity += accel.yMagnitude * timestep;
+
+		tree->xVelocity *= DAMPING;
+		tree->yVelocity *= DAMPING;
 	}
 }
 
@@ -98,11 +98,11 @@ void updatePositions(quadTree *tree, double timestep)
 	else
 	{
 
-		tree->xVelocity += tree->xAccel * timestep;
-		tree->yVelocity += tree->yAccel * timestep;
+// 		tree->xVelocity += tree->xAccel * timestep;
+// 		tree->yVelocity += tree->yAccel * timestep;
 
-		tree->xVelocity *= DAMPING;
-		tree->yVelocity *= DAMPING;
+// 		tree->xVelocity *= DAMPING;
+// 		tree->yVelocity *= DAMPING;
 
 		tree->xPosition += tree->xVelocity * timestep;
 		tree->yPosition += tree->yVelocity * timestep;
@@ -146,14 +146,14 @@ void acclnFormula(quadTree *particle1, quadTree *particle2, two_d_vector *accel)
 
         dist += SOFTEN; //softening factor helps in controlling the impact of one body over the other. assume a value of 18.
 
-        dist = pow(dist, 1.5); //i.e dist to the power of 1.5
+        dist = pow(dist, 1.0); //i.e dist to the power of 1.5
         double mag = particle2->mass / dist;
 
 	// TODO: decide if we need the gravitational constant here
-//         accel->xMagnitude += mag*x;//G * mag*x;
-//         accel->yMagnitude += mag*y;//G * mag*y;
-	particle1->xAccel += mag*x;
-	particle1->yAccel += mag*y;
+        accel->xMagnitude += mag*x;//G * mag*x;
+        accel->yMagnitude += mag*y;//G * mag*y;
+// 	particle1->xAccel += mag*x;
+// 	particle1->yAccel += mag*y;
         return;
 }
 

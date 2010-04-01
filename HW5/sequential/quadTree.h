@@ -14,8 +14,8 @@ typedef struct qTree
 	double xVelocity;
 	double yVelocity;
 
-	double xAccel;
-	double yAccel;
+// 	double xAccel;
+// 	double yAccel;
 
 	double mass;
 
