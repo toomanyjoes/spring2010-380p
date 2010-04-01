@@ -16,9 +16,6 @@ typedef struct body
 	double mass;
 	double xVelocity;
 	double yVelocity;
-// 	double xAccel;
-// 	double yAccel;
-// 	uint64_t mortonNumber;
 }body;
 
 typedef struct qTree
