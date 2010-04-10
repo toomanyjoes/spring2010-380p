@@ -32,7 +32,7 @@
 
 //#include "FLAME.h"
 
-use constants;
+use constants, FLA_Check;
 
 def FLA_Scal_check( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
 {

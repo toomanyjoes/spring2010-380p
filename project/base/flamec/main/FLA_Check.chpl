@@ -34,13 +34,13 @@
 
 use constants;
 
-var fla_error_checking_level: uint;	// static unsigned int fla_error_checking_level = FLA_INTERNAL_ERROR_CHECKING_LEVEL;
+var fla_error_checking_level: uint = FLA_INTERNAL_ERROR_CHECKING_LEVEL;	// static unsigned int fla_error_checking_level = FLA_INTERNAL_ERROR_CHECKING_LEVEL;
 
 
 
 def FLA_Check_error_level(): int
 {
-  return fla_error_checking_level;
+  return fla_error_checking_level:int;
 }
 
 
@@ -245,20 +245,20 @@ FLA_Error FLA_Check_complex_datatype( FLA_Datatype datatype )
 
   return e_val;
 }
-
-FLA_Error FLA_Check_floating_object( FLA_Obj A )
+*/
+def FLA_Check_floating_object( A: FLA_Obj ): FLA_Error
 {
-  FLA_Error    e_val = FLA_SUCCESS;
-  FLA_Datatype datatype;
+  var e_val: FLA_Error = FLA_SUCCESS;
+  var datatype: FLA_Datatype;
 
   datatype = FLA_Obj_datatype( A );
 
-  if ( FLA_Check_floating_datatype( datatype ) != FLA_SUCCESS )
+  if FLA_Check_floating_datatype( datatype ) != FLA_SUCCESS then
     e_val = FLA_OBJECT_NOT_FLOATING_POINT;
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_int_object( FLA_Obj A )
 {
   FLA_Error    e_val = FLA_SUCCESS;

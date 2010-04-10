@@ -34,7 +34,7 @@
 
 module FLA_Error_wrapper
 {
-use constants;
+use constants, FLA_Scal_check, FLA_Check;
 
 def FLA_Scal_external( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
 {
