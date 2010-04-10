@@ -28,6 +28,10 @@ type dim_t = uint;	// typedef unsigned int dim_t;
 type size_t = int;
 
 
+/* Encodes the default level of internal error checking chosen at
+   configure-time. */
+param FLA_INTERNAL_ERROR_CHECKING_LEVEL: int = 2;	//#define FLA_INTERNAL_ERROR_CHECKING_LEVEL 2
+
 
 
 // FLAME internal error checking level
@@ -87,6 +91,97 @@ param FLA_TRANS_MASK: int = 0x3;	//#define FLA_TRANS_MASK        0x3
 param FLA_NO_CONJUGATE: int = 450;	//#define FLA_NO_CONJUGATE      450
 param FLA_CONJUGATE: int = 451;	//#define FLA_CONJUGATE         451
 
+
+// --- Error-related macro definitions -----------------------------------------
+
+// Useful when determining the relative index base of the error codes.
+//#define FLA_ERROR_CODE_MIN                    (-10)
+
+// FLA_Error values.
+/*#define FLA_INVALID_SIDE                      (-10)
+#define FLA_INVALID_UPLO                      (-11)
+#define FLA_INVALID_TRANS                     (-12)
+#define FLA_INVALID_TRANS_GIVEN_DATATYPE      (-13)
+#define FLA_INVALID_CONJ                      (-14)
+#define FLA_INVALID_DIRECT                    (-15)
+#define FLA_INVALID_STOREV                    (-16)
+#define FLA_INVALID_DATATYPE                  (-17)
+#define FLA_INVALID_INTEGER_DATATYPE          (-18)
+#define FLA_INVALID_REAL_DATATYPE             (-19)
+#define FLA_INVALID_COMPLEX_DATATYPE          (-20)
+#define FLA_OBJECT_NOT_INTEGER                (-21)
+#define FLA_OBJECT_NOT_REAL                   (-22)
+#define FLA_OBJECT_NOT_COMPLEX                (-23)
+#define FLA_OBJECT_NOT_SQUARE                 (-24)
+#define FLA_OBJECT_NOT_SCALAR                 (-25)
+#define FLA_OBJECT_NOT_VECTOR                 (-26)
+#define FLA_INCONSISTENT_DATATYPES            (-27)
+#define FLA_NONCONFORMAL_DIMENSIONS           (-28)
+#define FLA_UNEQUAL_VECTOR_LENGTHS            (-29)
+#define FLA_INVALID_HESSENBERG_INDICES        (-30)
+#define FLA_INVALID_VECTOR_LENGTH             (-31)
+#define FLA_NULL_POINTER                      (-32)
+#define FLA_SPECIFIED_OBJ_DIM_MISMATCH        (-33)
+#define FLA_INVALID_PIVOT_TYPE                (-35)
+#define FLA_MALLOC_RETURNED_NULL_POINTER      (-37)
+#define FLA_OBJECT_BASE_BUFFER_MISMATCH       (-38)
+#define FLA_OBJECTS_NOT_VERTICALLY_ADJ        (-39)
+#define FLA_OBJECTS_NOT_HORIZONTALLY_ADJ      (-40)
+#define FLA_ADJACENT_OBJECT_DIM_MISMATCH      (-41)
+#define FLA_OBJECTS_NOT_VERTICALLY_ALIGNED    (-42)
+#define FLA_OBJECTS_NOT_HORIZONTALLY_ALIGNED  (-43)
+#define FLA_INVALID_FLOATING_DATATYPE         (-44)*/
+param FLA_OBJECT_NOT_FLOATING_POINT: int = -45;	//#define FLA_OBJECT_NOT_FLOATING_POINT         (-45)
+/*#define FLA_INVALID_BLOCKSIZE_VALUE           (-46)
+#define FLA_OPEN_RETURNED_ERROR               (-47)
+#define FLA_LSEEK_RETURNED_ERROR              (-48)
+#define FLA_CLOSE_RETURNED_ERROR              (-49)
+#define FLA_UNLINK_RETURNED_ERROR             (-50)
+#define FLA_READ_RETURNED_ERROR               (-51)
+#define FLA_WRITE_RETURNED_ERROR              (-52)
+#define FLA_INVALID_QUADRANT                  (-53)
+#define FLA_NOT_YET_IMPLEMENTED               (-54)
+#define FLA_EXPECTED_NONNEGATIVE_VALUE        (-55)
+#define FLA_SUPERMATRIX_NOT_ENABLED           (-56)
+#define FLA_UNDEFINED_ERROR_CODE              (-57)
+#define FLA_INVALID_DIAG                      (-58)
+#define FLA_INCONSISTENT_OBJECT_PRECISION     (-59)
+#define FLA_INVALID_BLOCKSIZE_OBJ             (-60)
+#define FLA_VECTOR_LENGTH_BELOW_MIN           (-61)
+#define FLA_PTHREAD_CREATE_RETURNED_ERROR     (-63)
+#define FLA_PTHREAD_JOIN_RETURNED_ERROR       (-64)
+#define FLA_INVALID_ISGN_VALUE                (-65)
+#define FLA_CHOL_FAILED_MATRIX_NOT_SPD        (-67)
+#define FLA_INVALID_ELEMTYPE                  (-68)
+#define FLA_POSIX_MEMALIGN_FAILED             (-69)
+#define FLA_INVALID_SUBMATRIX_DIMS            (-70)
+#define FLA_INVALID_SUBMATRIX_OFFSET          (-71)
+#define FLA_OBJECT_NOT_SCALAR_ELEMTYPE        (-72)
+#define FLA_OBJECT_NOT_MATRIX_ELEMTYPE        (-73)
+#define FLA_ENCOUNTERED_NON_POSITIVE_NTHREADS (-74)
+#define FLA_INVALID_CONJ_GIVEN_DATATYPE       (-75)
+#define FLA_INVALID_COMPLEX_TRANS             (-76)
+#define FLA_INVALID_REAL_TRANS                (-77)
+#define FLA_INVALID_BLAS_TRANS                (-78)
+#define FLA_INVALID_NONCONSTANT_DATATYPE      (-79)
+#define FLA_OBJECT_NOT_NONCONSTANT            (-80)
+#define FLA_OBJECT_DATATYPES_NOT_EQUAL        (-82)
+#define FLA_DIVIDE_BY_ZERO                    (-83)
+#define FLA_OBJECT_ELEMTYPES_NOT_EQUAL        (-84)
+#define FLA_INVALID_PIVOT_INDEX_RANGE         (-85)
+#define FLA_HOUSEH_PANEL_MATRIX_TOO_SMALL     (-86)
+#define FLA_INVALID_OBJECT_LENGTH             (-87)
+#define FLA_INVALID_OBJECT_WIDTH              (-88)
+#define FLA_INVALID_ERROR_CHECKING_LEVEL      (-89)
+#define FLA_ATTEMPTED_OVER_REPART_2X2         (-90)
+#define FLA_ATTEMPTED_OVER_REPART_2X1         (-91)
+#define FLA_ATTEMPTED_OVER_REPART_1X2         (-92)
+#define FLA_EXTERNAL_LAPACK_NOT_IMPLEMENTED   (-93)
+#define FLA_INVALID_ROW_STRIDE                (-94)
+#define FLA_INVALID_COL_STRIDE                (-95)
+#define FLA_INVALID_STRIDE_COMBINATION        (-96)
+#define FLA_INVALID_VECTOR_DIM                (-97)
+*/
 
 
 // constant FLA_Obj objects
