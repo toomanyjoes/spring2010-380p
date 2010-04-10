@@ -93,17 +93,17 @@ def FLA_Gemm_internal( transa: FLA_Trans, transb: FLA_Trans, alpha: FLA_Obj, A: 
 				r_val = FLA_Gemm_nn( alpha, A, B, beta, C, cntl );
 			}
 			else if ( transb == FLA_TRANSPOSE ) {
-				writeln("Matrix B is transposed, Chapel/FLAME only supports to non-transposed real matrices");
+				writeln("Matrix B is transposed, Chapel/FLAME only supports non-transposed real matrices");
 				//r_val = FLA_Gemm_nt( alpha, A, B, beta, C, cntl );
 			}
 			else if ( transb == FLA_CONJ_TRANSPOSE ) {
-				writeln("Matrix B is complex and transposed, Chapel/FLAME only supports to non-transposed real matrices");
+				writeln("Matrix B is complex and transposed, Chapel/FLAME only supports non-transposed real matrices");
 				//r_val = FLA_Gemm_nh( alpha, A, B, beta, C, cntl );
 			}
 		}
 		else if ( transa == FLA_TRANSPOSE )
 		{
-			writeln("Matrix A is transposed, Chapel/FLAME only supports to non-transposed real matrices");
+			writeln("Matrix A is transposed, Chapel/FLAME only supports non-transposed real matrices");
 		/*
 			if      ( transb == FLA_NO_TRANSPOSE )
 				r_val = FLA_Gemm_tn( alpha, A, B, beta, C, cntl );
@@ -115,7 +115,7 @@ def FLA_Gemm_internal( transa: FLA_Trans, transb: FLA_Trans, alpha: FLA_Obj, A: 
 		}
 		else if ( transa == FLA_CONJ_TRANSPOSE )
 		{
-			writeln("Matrix B is complex and transposed, Chapel/FLAME only supports to non-transposed real matrices");
+			writeln("Matrix B is complex and transposed, Chapel/FLAME only supports non-transposed real matrices");
 		/*	if      ( transb == FLA_NO_TRANSPOSE )
 				r_val = FLA_Gemm_hn( alpha, A, B, beta, C, cntl );
 			else if ( transb == FLA_TRANSPOSE )
