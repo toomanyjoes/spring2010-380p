@@ -1,5 +1,7 @@
 module constants
 {
+use FLA_Obj;
+
 param FLA_SUCCESS: int = -1;	// #define FLA_SUCCESS           (-1)
 param FLA_FAILURE: int = -2;	// #define FLA_FAILURE           (-2)
 
@@ -66,5 +68,21 @@ param FLA_COMPLEX: int = 102;	//#define FLA_COMPLEX           102
 param FLA_DOUBLE_COMPLEX: int = 103;	//#define FLA_DOUBLE_COMPLEX    103
 param FLA_INT: int = 104;	//#define FLA_INT               104
 param FLA_CONSTANT: int = 105;	//#define FLA_CONSTANT          105
+
+
+// FLA_Conj
+param FLA_NO_CONJUGATE: int = 450;	//#define FLA_NO_CONJUGATE      450
+param FLA_CONJUGATE: int = 451;	//#define FLA_CONJUGATE         451
+
+
+
+// constant FLA_Obj objects
+const FLA_TWO: FLA_Obj = new FLA_Obj();
+const FLA_ONE: FLA_Obj = new FLA_Obj();
+const FLA_ONE_HALF: FLA_Obj = new FLA_Obj();
+const FLA_ZERO: FLA_Obj = new FLA_Obj();
+const FLA_MINUS_ONE_HALF: FLA_Obj = new FLA_Obj();
+const FLA_MINUS_ONE: FLA_Obj = new FLA_Obj();
+const FLA_MINUS_TWO: FLA_Obj = new FLA_Obj();
 
 }
