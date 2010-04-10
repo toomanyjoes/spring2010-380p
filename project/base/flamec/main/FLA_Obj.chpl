@@ -39,6 +39,7 @@ class FLA_Base_obj
 {
   // from FLA_Base_obj
   /* Basic object description fields */
+  //type t;
   var datatype: FLA_Datatype;	// FLA_Datatype  datatype;
   var elemtype: FLA_Elemtype;	// FLA_Elemtype  elemtype;
   var m: dim_t;	// dim_t         m;
@@ -50,7 +51,7 @@ class FLA_Base_obj
   var id: dim_t;	// unsigned long id;
   var m_index: dim_t;	// dim_t         m_index;
   var n_index: dim_t;	// dim_t         n_index;
-  var buffer: [1, 1] datatype;	//  this array is later resized       void*         buffer;
+  var buffer: [1..1, 1..1] real;	//  this array is later resized       void*         buffer;
 }
 
 class FLA_Obj: FLA_Base_obj
@@ -59,9 +60,46 @@ class FLA_Obj: FLA_Base_obj
   /* Basic object view description fields */
   var offm: dim_t;	// dim_t         offm;
   var offn: dim_t;	// dim_t         offn;
-  var m: dim_t;		// dim_t         m;
-  var n: dim_t;		// dim_t         n;
+  //var m: dim_t;		// dim_t         m;
+  //var n: dim_t;		// dim_t         n;
   //FLA_Base_obj* base;
+
+  // constructor
+/*  def FLA_Obj(type typ, datatype: int = 0, elemtype: int = 0, m: uint = 0, n: uint, rs: uint = 0, cs: uint = 0, m_inner: uint = 0, n_inner: uint = 0, id: uint = 0, m_index: uint = 0, n_index: uint = 0, buffer: [1,1] real = 0, offm: uint = 0, offn: uint = 0)
+  {
+    t = typ;
+/*    offm = 0;
+    offn = 0;
+    n_index = 0;
+    m_index = 0;
+    id = 0;
+    n_inner = 0;
+    m_inner = 0;
+    cs = 0;
+    rs = 0;
+    n = 0;
+    m = 0;
+    elemtype = 0;
+    datatype = 0;
+  }*/
+  def FLA_Obj()
+  {
+    //t = real;
+    offm = 0;
+    offn = 0;
+    n_index = 0;
+    m_index = 0;
+    id = 0;
+    n_inner = 0;
+    m_inner = 0;
+    cs = 0;
+    rs = 0;
+    n = 0;
+    m = 0;
+    elemtype = 0;
+    datatype = 0;
+    buffer = 0.0;
+  }
 }
 
 
@@ -325,40 +363,41 @@ FLA_Error FLA_Obj_create_without_buffer( FLA_Datatype datatype, dim_t m, dim_t n
   return FLA_SUCCESS;
 }
 
+*/
 
-
-FLA_Error FLA_Obj_create_constant( double const_real, FLA_Obj *obj )
+def FLA_Obj_create_constant( const_real: real, obj: FLA_Obj ): FLA_Error
 {
-  int*      temp_i;
-  float*    temp_s;
-  double*   temp_d;
-  scomplex* temp_c;
-  dcomplex* temp_z;
+  //int*      temp_i;
+  //float*    temp_s;
+  //double*   temp_d;
+  //scomplex* temp_c;
+  //dcomplex* temp_z;
 
-  if ( FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING )
+  if FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING then
     FLA_Obj_create_constant_check( const_real, obj );
 
   FLA_Obj_create( FLA_CONSTANT, 1, 1, 0, 0, obj );
 
-  temp_i       = FLA_INT_PTR( *obj );
-  temp_s       = FLA_FLOAT_PTR( *obj );
-  temp_d       = FLA_DOUBLE_PTR( *obj );
-  temp_c       = FLA_COMPLEX_PTR( *obj );
-  temp_z       = FLA_DOUBLE_COMPLEX_PTR( *obj );
+  //temp_i       = FLA_INT_PTR( *obj );
+  //temp_s       = FLA_FLOAT_PTR( *obj );
+  //temp_d       = FLA_DOUBLE_PTR( *obj );
+  //temp_c       = FLA_COMPLEX_PTR( *obj );
+  //temp_z       = FLA_DOUBLE_COMPLEX_PTR( *obj );
 
-  *temp_i      = ( int   ) const_real;
-  *temp_s      = ( float ) const_real;
-  *temp_d      =           const_real;
-  temp_c->real = ( float ) const_real;
-  temp_c->imag = ( float ) 0.0;
-  temp_z->real =           const_real;
-  temp_z->imag =           0.0;
+  //*temp_i      = ( int   ) const_real;
+  //*temp_s      = ( float ) const_real;
+  //*temp_d      =           const_real;
+  //temp_c->real = ( float ) const_real;
+  //temp_c->imag = ( float ) 0.0;
+  //temp_z->real =           const_real;
+  //temp_z->imag =           0.0;
 
+  obj.buffer[1,1] = const_real;
   return FLA_SUCCESS;
 }
 
 
-
+/*
 FLA_Error FLA_Obj_create_complex_constant( double const_real, double const_imag, FLA_Obj *obj )
 {
   int*      temp_i;

@@ -70,6 +70,14 @@ param FLA_INT: int = 104;	//#define FLA_INT               104
 param FLA_CONSTANT: int = 105;	//#define FLA_CONSTANT          105
 
 
+// FLA_Trans
+param FLA_NO_TRANSPOSE: int = 400;	//#define FLA_NO_TRANSPOSE      400
+param FLA_TRANSPOSE: int = 401;		//#define FLA_TRANSPOSE         401
+param FLA_CONJ_TRANSPOSE: int = 402;	//#define FLA_CONJ_TRANSPOSE    402
+param FLA_CONJ_NO_TRANSPOSE: int = 403;	//#define FLA_CONJ_NO_TRANSPOSE 403
+param FLA_TRANS_MASK: int = 0x3;	//#define FLA_TRANS_MASK        0x3
+
+
 // FLA_Conj
 param FLA_NO_CONJUGATE: int = 450;	//#define FLA_NO_CONJUGATE      450
 param FLA_CONJUGATE: int = 451;	//#define FLA_CONJUGATE         451
