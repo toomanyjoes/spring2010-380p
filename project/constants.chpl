@@ -8,7 +8,7 @@ param FLA_FAILURE: int = -2;	// #define FLA_FAILURE           (-2)
 
 //typedef int FLA_Bool;
 type FLA_Error = int;	// typedef int FLA_Error;
-//typedef int FLA_Quadrant;
+type FLA_Quadrant = int; // typedef int FLA_Quadrant;
 type FLA_Datatype = int;	// typedef int FLA_Datatype;
 type FLA_Elemtype = int;	// typedef int FLA_Elemtype;
 type FLA_Side = int;		//typedef int FLA_Side;
@@ -60,6 +60,11 @@ param FLA_INVALID_STRIDE_COMBINATION: int = -96;	//#define FLA_INVALID_STRIDE_CO
 // Necessary when computing whether an error code is defined.
 param FLA_ERROR_CODE_MAX: int = -97;	//#define FLA_ERROR_CODE_MAX                    (-97)
 
+//FLA_Quadrant
+param FLA_TL: int = 11; //#define FLA_TL                 11
+param FLA_TR: int = 12; //#define FLA_TR                 12
+param FLA_BL: int = 21; //#define FLA_BL                 21
+param FLA_BR: int = 22; //#define FLA_BR                 22
 
 // FLA_Datatype
 param FLA_FLOAT: int = 100;	//#define FLA_FLOAT             100
