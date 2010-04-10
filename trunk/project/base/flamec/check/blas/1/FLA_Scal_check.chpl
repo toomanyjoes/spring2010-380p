@@ -34,20 +34,28 @@
 
 use constants;
 
-def FLA_Obj_create_ext_check( datatype: FLA_Datatype, elemtype: FLA_Elemtype, m: dim_t, n: dim_t, m_inner: dim_t, n_inner: dim_t, rs: dim_t, cs: dim_t, obj: FLA_Obj ): FLA_Error
+def FLA_Scal_check( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
 {
-  var e_val: FLA_Error;	//FLA_Error e_val;
+  var e_val: FLA_Error;
 
-  e_val = FLA_Check_valid_elemtype( elemtype );
+  e_val = FLA_Check_floating_object( A );
   FLA_Check_error_code( e_val );
 
-  e_val = FLA_Check_valid_datatype( datatype );
+  e_val = FLA_Check_nonconstant_object( A );
   FLA_Check_error_code( e_val );
 
-  e_val = FLA_Check_matrix_strides( m, n, rs, cs );
-  FLA_Check_error_code( e_val );
+  if FLA_Obj_is_real( A )
+  {
+    e_val = FLA_Check_consistent_object_datatype( A, alpha );
+    FLA_Check_error_code( e_val );
+  }
+  else
+  {
+    e_val = FLA_Check_identical_object_precision( A, alpha );
+    FLA_Check_error_code( e_val );
+  }
 
-  e_val = FLA_Check_null_pointer( obj );
+  e_val = FLA_Check_if_scalar( alpha );
   FLA_Check_error_code( e_val );
 
   return FLA_SUCCESS;

@@ -22,6 +22,7 @@ function getdir()
 getdir
 #echo $src_files
 
-echo "chpl --baseline --no-optimize $src_files"
-chpl --baseline --no-optimize $src_files 
+echo "chpl --baseline --no-optimize --nil-checks --local-checks --bounds-checks $src_files"
+echo
+chpl --baseline --no-optimize --nil-checks --local-checks --bounds-checks $src_files 
 
