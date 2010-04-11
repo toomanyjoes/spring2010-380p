@@ -31,17 +31,19 @@
 */
 
 //#include "FLAME.h"
-/*
-FLA_Datatype FLA_Obj_datatype( FLA_Obj obj )
+
+use constants, FLA_Check, FLA_Obj_datatype_check, FLA_Obj_equals_check;
+
+def FLA_Obj_datatype( obj: FLA_Obj ): FLA_Datatype
 {
-  if ( FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING )
+  if FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING then
     FLA_Obj_datatype_check( obj );
 
-  return obj.base->datatype;
+  return obj.datatype;
 }
 
 
-
+/*
 FLA_Datatype FLA_Obj_datatype_proj_to_real( FLA_Obj A )
 {
 	FLA_Datatype datatype;
@@ -64,12 +66,12 @@ FLA_Elemtype FLA_Obj_elemtype( FLA_Obj obj )
   return obj.base->elemtype;
 }
 
+*/
 
-
-dim_t FLA_Obj_datatype_size( FLA_Datatype datatype )
+def FLA_Obj_datatype_size( datatype: FLA_Datatype ): dim_t
 {
-  dim_t datatype_size = 0;
-
+  var datatype_size: dim_t = 0;
+/*
   if ( FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING )
     FLA_Obj_datatype_size_check( datatype );
 
@@ -93,12 +95,13 @@ dim_t FLA_Obj_datatype_size( FLA_Datatype datatype )
     case FLA_CONSTANT: 
       datatype_size = FLA_CONSTANT_SIZE;
       break;
-  }
+  }*/
 
+  datatype_size = 64;	// Samuel Palmer default size of real
   return datatype_size;
 }
 
-
+/*
 
 def FLA_Obj_elem_size( obj: FLA_Obj ): dim_t
 {
@@ -119,21 +122,21 @@ def FLA_Obj_elem_size( obj: FLA_Obj ): dim_t
   return elem_size;
 }
 
+*/
 
-
-dim_t FLA_Obj_length( FLA_Obj obj )
+def FLA_Obj_length( obj: FLA_Obj ): dim_t
 {
   return obj.m;
 }
 
 
 
-dim_t FLA_Obj_width( FLA_Obj obj )
+def FLA_Obj_width( obj: FLA_Obj ): dim_t
 {
   return obj.n;
 }
 
-
+/*
 
 dim_t FLA_Obj_vector_dim( FLA_Obj obj )
 {
@@ -163,21 +166,23 @@ dim_t FLA_Obj_max_dim( FLA_Obj obj )
   return max( obj.m, obj.n );
 }
 
+*/
 
-
-dim_t FLA_Obj_row_stride( FLA_Obj obj )
+def FLA_Obj_row_stride( obj: FLA_Obj ): dim_t
 {
-  return (obj.base)->rs;
+  //return (obj.base)->rs;
+  return obj.rs;
 }
 
 
 
-dim_t FLA_Obj_col_stride( FLA_Obj obj )
+def FLA_Obj_col_stride( obj: FLA_Obj ): dim_t
 {
-  return (obj.base)->cs;
+  //return (obj.base)->cs;
+  return obj.cs;
 }
 
-
+/*
 
 void* FLA_Obj_buffer( FLA_Obj obj )
 {
@@ -236,16 +241,16 @@ FLA_Bool FLA_Obj_is_floating_point( FLA_Obj A )
   return r_val;
 }
 
+*/
 
-
-FLA_Bool FLA_Obj_is_constant( FLA_Obj A )
+def FLA_Obj_is_constant( A: FLA_Obj ): FLA_Bool
 {
-  FLA_Datatype datatype;
-  FLA_Bool     r_val;
+  var datatype: FLA_Datatype;
+  var r_val: FLA_Bool;
 
   datatype = FLA_Obj_datatype( A );
 
-  if ( datatype == FLA_CONSTANT )
+  if datatype == FLA_CONSTANT then
     r_val = TRUE;
   else
     r_val = FALSE;
@@ -255,14 +260,14 @@ FLA_Bool FLA_Obj_is_constant( FLA_Obj A )
 
 
 
-FLA_Bool FLA_Obj_is_real( FLA_Obj A )
+def FLA_Obj_is_real( A: FLA_Obj ): FLA_Bool
 {
-  FLA_Datatype datatype;
-  FLA_Bool     r_val;
+  var datatype: FLA_Datatype;
+  var r_val: FLA_Bool;
 
   datatype = FLA_Obj_datatype( A );
 
-  if ( datatype == FLA_CONSTANT || datatype == FLA_FLOAT || datatype == FLA_DOUBLE )
+  if datatype == FLA_CONSTANT || datatype == FLA_FLOAT || datatype == FLA_DOUBLE then
     r_val = TRUE;
   else
     r_val = FALSE;
@@ -272,14 +277,14 @@ FLA_Bool FLA_Obj_is_real( FLA_Obj A )
 
 
 
-FLA_Bool FLA_Obj_is_complex( FLA_Obj A )
+def FLA_Obj_is_complex( A: FLA_Obj ): FLA_Bool
 {
-  FLA_Datatype datatype;
-  FLA_Bool     r_val;
+  var datatype: FLA_Datatype;
+  var r_val: FLA_Bool;
 
   datatype = FLA_Obj_datatype( A );
 
-  if ( datatype == FLA_CONSTANT || datatype == FLA_COMPLEX || datatype == FLA_DOUBLE_COMPLEX )
+  if datatype == FLA_CONSTANT || datatype == FLA_COMPLEX || datatype == FLA_DOUBLE_COMPLEX then
     r_val = TRUE;
   else
     r_val = FALSE;
@@ -287,7 +292,7 @@ FLA_Bool FLA_Obj_is_complex( FLA_Obj A )
   return r_val;
 }
 
-
+/*
 
 FLA_Bool FLA_Obj_is_single_precision( FLA_Obj A )
 {
@@ -346,19 +351,19 @@ FLA_Bool FLA_Obj_is_vector( FLA_Obj A )
   return r_val;
 }
 
+*/
 
-
-FLA_Bool FLA_Obj_has_zero_dim( FLA_Obj A )
+def FLA_Obj_has_zero_dim( A: FLA_Obj ): FLA_Bool
 {
-  FLA_Bool r_val = FALSE;
+  var r_val: FLA_Bool = FALSE;
 
-  if ( FLA_Obj_length( A ) == 0 || FLA_Obj_width( A ) == 0 )
+  if FLA_Obj_length( A ) == 0 || FLA_Obj_width( A ) == 0 then
     r_val = TRUE;
 
   return r_val;
 }
 
-
+/*
 
 FLA_Bool FLA_Obj_is_col_major( FLA_Obj A )
 {
@@ -418,19 +423,19 @@ FLA_Bool FLA_Obj_is( FLA_Obj A, FLA_Obj B )
   return r_val;
 }
 
+*/
 
-
-FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
+def FLA_Obj_equals( A: FLA_Obj, B: FLA_Obj ): FLA_Bool
 {
-  FLA_Datatype datatype_A;
-  FLA_Datatype datatype_B;
-  FLA_Datatype datatype;
-  dim_t        m, n;
-  dim_t        rs_A, cs_A;
-  dim_t        rs_B, cs_B;
-  dim_t        i, j;
+  var datatype_A: FLA_Datatype;
+  var datatype_B: FLA_Datatype;
+  var datatype: FLA_Datatype;
+  var        m, n: dim_t;
+  var        rs_A, cs_A: dim_t;
+  var        rs_B, cs_B: dim_t;
+  var        i, j: dim_t;
 
-  if ( FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING )
+  if FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING then
     FLA_Obj_equals_check( A, B );
 
   m      = FLA_Obj_length( A );
@@ -443,6 +448,18 @@ FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
   datatype_A = FLA_Obj_datatype( A );
   datatype_B = FLA_Obj_datatype( B );
 
+  if A.n !=  B.n || A.m != B.m then
+    return FALSE;
+
+  var returnval: FLA_Bool = TRUE;
+  forall (i,j) in A.buffer.domain
+  {
+    if A.buffer(i,j) != B.buffer(i,j) then
+      returnval = FALSE;
+  }
+  return returnval;
+
+/*
   // If A is a non-FLA_CONSTANT object, then we should proceed based on the
   // value of datatype_A. In such a situation, either datatype_B is an exact
   // match and we're fine, or datatype_B is FLA_CONSTANT, in which case we're
@@ -453,14 +470,14 @@ FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
   // in which case both types are FLA_CONSTANT and therefore we have to handle
   // that case. Only if both are FLA_CONSTANTs does the FLA_CONSTANT case
   // statement below execute.
-  if ( datatype_A != FLA_CONSTANT )
+  if datatype_A != FLA_CONSTANT then
     datatype = datatype_A;
   else
     datatype = datatype_B;
 
-  switch ( datatype )
+  select datatype
   {
-    case FLA_CONSTANT:
+    when FLA_CONSTANT	//case FLA_CONSTANT:
     {
       // If both objects are FLA_CONSTANTs, then it doesn't matter which datatype
       // macro we use, as long as we use the same one for both A and B.
@@ -473,10 +490,10 @@ FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
                buff_B[ j * cs_B + i * rs_B ] )
             return FALSE;
 
-      break;
+      //break;
     }
 
-    case FLA_INT:
+    when FLA_INT	//case FLA_INT:
     {
       int *buff_A = ( int * ) FLA_INT_PTR( A );
       int *buff_B = ( int * ) FLA_INT_PTR( B );
@@ -489,10 +506,10 @@ FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
             return FALSE;
           }
 
-      break;
+      //break;
     }
 
-    case FLA_FLOAT:
+    when FLA_FLOAT	//case FLA_FLOAT:
     {
       float *buff_A = ( float * ) FLA_FLOAT_PTR( A );
       float *buff_B = ( float * ) FLA_FLOAT_PTR( B );
@@ -505,10 +522,10 @@ FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
             return FALSE;
           }
 
-      break;
+      //break;
     }
 
-    case FLA_DOUBLE:
+    when FLA_DOUBLE	//case FLA_DOUBLE:
     {
       double *buff_A = ( double * ) FLA_DOUBLE_PTR( A );
       double *buff_B = ( double * ) FLA_DOUBLE_PTR( B );
@@ -521,10 +538,10 @@ FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
             return FALSE;
           }
 
-      break;
+      //break;
     }
 
-    case FLA_COMPLEX:
+    when FLA_COMPLEX	//case FLA_COMPLEX:
     {
       scomplex *buff_A = ( scomplex * ) FLA_COMPLEX_PTR( A );
       scomplex *buff_B = ( scomplex * ) FLA_COMPLEX_PTR( B );
@@ -537,10 +554,10 @@ FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
             return FALSE;
           }
 
-      break;
+      //break;
     }
 
-    case FLA_DOUBLE_COMPLEX:
+    when FLA_DOUBLE_COMPLEX	//case FLA_DOUBLE_COMPLEX:
     {
       dcomplex *buff_A = ( dcomplex * ) FLA_DOUBLE_COMPLEX_PTR( A );
       dcomplex *buff_B = ( dcomplex * ) FLA_DOUBLE_COMPLEX_PTR( B );
@@ -553,10 +570,10 @@ FLA_Bool FLA_Obj_equals( FLA_Obj A, FLA_Obj B )
             return FALSE;
           }
 
-      break;
+      //break;
     }
   }
-
+*/
   return TRUE;
 }
-*/
+

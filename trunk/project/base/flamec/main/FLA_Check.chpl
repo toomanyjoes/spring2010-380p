@@ -32,7 +32,7 @@
 
 //#include "FLAME.h"
 
-use constants;
+use constants, FLA_Query, FLA_Error_module;
 
 var fla_error_checking_level: uint = FLA_INTERNAL_ERROR_CHECKING_LEVEL;	// static unsigned int fla_error_checking_level = FLA_INTERNAL_ERROR_CHECKING_LEVEL;
 
@@ -184,11 +184,11 @@ def FLA_Check_valid_datatype( datatype:FLA_Datatype ): FLA_Error
 
   return e_val;
 }
-/*
-FLA_Error FLA_Check_valid_object_datatype( FLA_Obj A )
+
+def FLA_Check_valid_object_datatype( A: FLA_Obj ): FLA_Error
 {
-  FLA_Error    e_val;
-  FLA_Datatype datatype;
+  var    e_val: FLA_Error;
+  var datatype: FLA_Datatype;
 
   datatype = FLA_Obj_datatype( A );
 
@@ -197,20 +197,21 @@ FLA_Error FLA_Check_valid_object_datatype( FLA_Obj A )
   return e_val;
 }
 
-FLA_Error FLA_Check_floating_datatype( FLA_Datatype datatype )
+def FLA_Check_floating_datatype( datatype: FLA_Datatype ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
-  if ( datatype != FLA_CONSTANT &&
-       datatype != FLA_FLOAT && 
-       datatype != FLA_DOUBLE && 
-       datatype != FLA_COMPLEX && 
-       datatype != FLA_DOUBLE_COMPLEX )
+  if datatype != FLA_CONSTANT &&
+     datatype != FLA_FLOAT && 
+     datatype != FLA_DOUBLE && 
+     datatype != FLA_COMPLEX && 
+     datatype != FLA_DOUBLE_COMPLEX
+ then
     e_val = FLA_INVALID_FLOATING_DATATYPE;
   
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_int_datatype( FLA_Datatype datatype )
 {
   FLA_Error e_val = FLA_SUCCESS;
@@ -297,26 +298,26 @@ FLA_Error FLA_Check_complex_object( FLA_Obj A )
 
   return e_val;
 }
-
-FLA_Error FLA_Check_identical_object_precision( FLA_Obj A, FLA_Obj B )
+*/
+def FLA_Check_identical_object_precision( A: FLA_Obj, B: FLA_Obj ): FLA_Error
 {
-  FLA_Error    e_val = FLA_SUCCESS;
-  FLA_Datatype datatype_A;
-  FLA_Datatype datatype_B;
-  dim_t        precision_A;
-  dim_t        precision_B;
+  var e_val: FLA_Error = FLA_SUCCESS;
+  var datatype_A: FLA_Datatype;
+  var datatype_B: FLA_Datatype;
+  var precision_A: dim_t;
+  var precision_B: dim_t;
 
   datatype_A = FLA_Obj_datatype( A );
   datatype_B = FLA_Obj_datatype( B );
 
-  if ( datatype_A == FLA_CONSTANT ||
-       datatype_B == FLA_CONSTANT )
+  if datatype_A == FLA_CONSTANT ||
+     datatype_B == FLA_CONSTANT
   {
     return FLA_SUCCESS;
   }
 
-  if ( FLA_Check_floating_object( A ) != FLA_SUCCESS ||
-       FLA_Check_floating_object( B ) != FLA_SUCCESS )
+  if FLA_Check_floating_object( A ) != FLA_SUCCESS ||
+       FLA_Check_floating_object( B ) != FLA_SUCCESS
   {
     return FLA_OBJECT_NOT_FLOATING_POINT;
   }
@@ -327,30 +328,32 @@ FLA_Error FLA_Check_identical_object_precision( FLA_Obj A, FLA_Obj B )
   precision_A = FLA_Obj_datatype_size( datatype_A );
   precision_B = FLA_Obj_datatype_size( datatype_B );
 
-  if ( FLA_Obj_is_complex( A ) )
+  if FLA_Obj_is_complex( A ) then
     precision_A = precision_A / 2;
 
-  if ( FLA_Obj_is_complex( B ) )
+  if FLA_Obj_is_complex( B ) then
     precision_B = precision_B / 2;
 
-  if ( precision_A != precision_B )
+  if precision_A != precision_B then
     e_val = FLA_INCONSISTENT_OBJECT_PRECISION;
 
   return e_val;
 }
 
-FLA_Error FLA_Check_consistent_object_datatype( FLA_Obj A, FLA_Obj B )
+def FLA_Check_consistent_object_datatype( A: FLA_Obj, B: FLA_Obj ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
-  if ( FLA_Obj_datatype( A ) != FLA_CONSTANT &&
-       FLA_Obj_datatype( B ) != FLA_CONSTANT )
-    if ( FLA_Obj_datatype( A ) != FLA_Obj_datatype( B ) )
+  if FLA_Obj_datatype( A ) != FLA_CONSTANT &&
+     FLA_Obj_datatype( B ) != FLA_CONSTANT
+  {
+    if FLA_Obj_datatype( A ) != FLA_Obj_datatype( B ) then
       e_val = FLA_INCONSISTENT_DATATYPES;
+  }
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_consistent_datatype( FLA_Datatype datatype, FLA_Obj A )
 {
   FLA_Error e_val = FLA_SUCCESS;
@@ -372,17 +375,17 @@ FLA_Error FLA_Check_square( FLA_Obj A )
 
   return e_val;
 }
-
-FLA_Error FLA_Check_if_scalar( FLA_Obj A )
+*/
+def FLA_Check_if_scalar( A: FLA_Obj ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
-  if ( FLA_Obj_length( A ) != 1 || FLA_Obj_width( A ) != 1 )
+  if FLA_Obj_length( A ) != 1 || FLA_Obj_width( A ) != 1 then
     e_val = FLA_OBJECT_NOT_SCALAR;
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_if_vector( FLA_Obj A )
 {
   FLA_Error e_val = FLA_SUCCESS;
@@ -392,31 +395,31 @@ FLA_Error FLA_Check_if_vector( FLA_Obj A )
 
   return e_val;
 }
-
-FLA_Error FLA_Check_conformal_dims( FLA_Trans trans, FLA_Obj A, FLA_Obj B )
+*/
+def FLA_Check_conformal_dims( trans: FLA_Trans, A: FLA_Obj, B: FLA_Obj ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
-  if ( trans == FLA_NO_TRANSPOSE || trans == FLA_CONJ_NO_TRANSPOSE )
+  if trans == FLA_NO_TRANSPOSE || trans == FLA_CONJ_NO_TRANSPOSE
   {
-    if ( FLA_Obj_length( A ) != FLA_Obj_length( B ) )
+    if FLA_Obj_length( A ) != FLA_Obj_length( B ) then
       e_val = FLA_NONCONFORMAL_DIMENSIONS;
 
-    if ( FLA_Obj_width( A ) != FLA_Obj_width( B ) )
+    if FLA_Obj_width( A ) != FLA_Obj_width( B ) then
       e_val = FLA_NONCONFORMAL_DIMENSIONS;
   }
   else
   {
-    if ( FLA_Obj_width( A ) != FLA_Obj_length( B ) )
+    if FLA_Obj_width( A ) != FLA_Obj_length( B ) then
       e_val = FLA_NONCONFORMAL_DIMENSIONS;
 
-    if ( FLA_Obj_length( A ) != FLA_Obj_width( B ) )
+    if FLA_Obj_length( A ) != FLA_Obj_width( B ) then
       e_val = FLA_NONCONFORMAL_DIMENSIONS;
   }
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_matrix_matrix_dims( FLA_Trans transa, FLA_Trans transb, FLA_Obj A, FLA_Obj B, FLA_Obj C )
 {
   FLA_Error e_val = FLA_SUCCESS;
@@ -942,34 +945,34 @@ FLA_Error FLA_Check_valid_blas_trans( FLA_Trans trans )
 
   return e_val;
 }
-
-FLA_Error FLA_Check_nonconstant_datatype( FLA_Datatype datatype )
+*/
+def FLA_Check_nonconstant_datatype( datatype: FLA_Datatype ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
-  if ( datatype != FLA_INT &&
-       datatype != FLA_FLOAT && 
-       datatype != FLA_DOUBLE && 
-       datatype != FLA_COMPLEX && 
-       datatype != FLA_DOUBLE_COMPLEX )
+  if datatype != FLA_INT &&
+     datatype != FLA_FLOAT && 
+     datatype != FLA_DOUBLE && 
+     datatype != FLA_COMPLEX && 
+     datatype != FLA_DOUBLE_COMPLEX then
     e_val = FLA_INVALID_NONCONSTANT_DATATYPE;
   
   return e_val;
 }
 
-FLA_Error FLA_Check_nonconstant_object( FLA_Obj A )
+def FLA_Check_nonconstant_object( A: FLA_Obj ): FLA_Error
 {
-  FLA_Error    e_val = FLA_SUCCESS;
-  FLA_Datatype datatype;
+  var e_val: FLA_Error = FLA_SUCCESS;
+  var datatype: FLA_Datatype;
 
   datatype = FLA_Obj_datatype( A );
 
-  if ( FLA_Check_nonconstant_datatype( datatype ) != FLA_SUCCESS )
+  if FLA_Check_nonconstant_datatype( datatype ) != FLA_SUCCESS then
     e_val = FLA_OBJECT_NOT_NONCONSTANT;
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_identical_object_datatype( FLA_Obj A, FLA_Obj B )
 {
   FLA_Error e_val = FLA_SUCCESS;

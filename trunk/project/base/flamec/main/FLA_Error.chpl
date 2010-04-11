@@ -32,6 +32,7 @@
 
 //#include "FLAME.h"
 
+
 // Internal array to hold error strings.
 //char fla_error_string[FLA_MAX_NUM_ERROR_MSGS][FLA_MAX_ERROR_MSG_LENGTH];
 
@@ -227,6 +228,8 @@ void FLA_Error_messages_init( void )
 
  *************************************************************************** */
 
+module FLA_Error_module
+{
 def FLA_Print_message( str: string, file: string, line: int )
 {
 	writeln();	//fprintf( stderr, "\n" );
@@ -245,6 +248,7 @@ def FLA_Abort()
 {
 	writeln("libflame: Aborting");	//fprintf( stderr, "libflame: Aborting.\n");
 	//raise( SIGABRT );
-	abort();
+	exit(-1);	//abort();
 }
 
+}  // end module
