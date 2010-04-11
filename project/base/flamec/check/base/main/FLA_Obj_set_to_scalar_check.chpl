@@ -31,12 +31,12 @@
 */
 
 //#include "FLAME.h"
-module FLA_Scal_check_module
+module FLA_Obj_set_to_scalar_check_module
 {
 
 use constants, FLA_Check;
 
-def FLA_Scal_check( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
+def FLA_Obj_set_to_scalar_check( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
 {
   var e_val: FLA_Error;
 
@@ -46,16 +46,8 @@ def FLA_Scal_check( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
   e_val = FLA_Check_nonconstant_object( A );
   FLA_Check_error_code( e_val );
 
-  if FLA_Obj_is_real( A )
-  {
-    e_val = FLA_Check_consistent_object_datatype( A, alpha );
-    FLA_Check_error_code( e_val );
-  }
-  else
-  {
-    e_val = FLA_Check_identical_object_precision( A, alpha );
-    FLA_Check_error_code( e_val );
-  }
+  e_val = FLA_Check_consistent_object_datatype( A, alpha );
+  FLA_Check_error_code( e_val );
 
   e_val = FLA_Check_if_scalar( alpha );
   FLA_Check_error_code( e_val );
@@ -64,4 +56,3 @@ def FLA_Scal_check( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
 }
 
 } // end module
-

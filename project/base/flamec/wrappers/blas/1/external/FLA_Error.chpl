@@ -34,13 +34,13 @@
 
 module FLA_Error_wrapper
 {
-use constants, FLA_Scal_check, FLA_Check;
+use constants, FLA_Misc, FLA_Check, FLA_Scal_check_module, FLA_Param;
 
 def FLA_Scal_external( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
 {
   var datatype, dt_alpha: FLA_Datatype;
-  var          m_A, n_A: int;
-  var          rs_A, cs_A: int;
+  var          m_A, n_A: uint;
+  var          rs_A, cs_A: uint;
   var blis_conj: string;	//char         blis_conj;
 
   if FLA_Check_error_level() == FLA_FULL_ERROR_CHECKING

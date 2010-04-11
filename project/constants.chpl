@@ -2,20 +2,23 @@ module constants
 {
 use FLA_Obj;
 
+param TRUE: int = 1;	//#define TRUE  1
+param FALSE: int = 0;	//#define FALSE 0
+
 param FLA_SUCCESS: int = -1;	// #define FLA_SUCCESS           (-1)
 param FLA_FAILURE: int = -2;	// #define FLA_FAILURE           (-2)
 
 
-//typedef int FLA_Bool;
+type FLA_Bool = int;	//typedef int FLA_Bool;
 type FLA_Error = int;	// typedef int FLA_Error;
 type FLA_Quadrant = int; // typedef int FLA_Quadrant;
 type FLA_Datatype = int;	// typedef int FLA_Datatype;
 type FLA_Elemtype = int;	// typedef int FLA_Elemtype;
 type FLA_Side = int;		//typedef int FLA_Side;
-/*typedef int FLA_Uplo;
-typedef int FLA_Trans;
-typedef int FLA_Conj;
-typedef int FLA_Diag;
+/*typedef int FLA_Uplo;*/
+type FLA_Trans = int;	//typedef int FLA_Trans;
+type FLA_Conj = int;	//typedef int FLA_Conj;
+/*typedef int FLA_Diag;
 typedef int FLA_Dimension;
 typedef int FLA_Pivot_type;
 typedef int FLA_Direct;
@@ -101,9 +104,9 @@ param FLA_CONJUGATE: int = 451;	//#define FLA_CONJUGATE         451
 /*#define FLA_INVALID_SIDE                      (-10)
 #define FLA_INVALID_UPLO                      (-11)
 #define FLA_INVALID_TRANS                     (-12)
-#define FLA_INVALID_TRANS_GIVEN_DATATYPE      (-13)
-#define FLA_INVALID_CONJ                      (-14)
-#define FLA_INVALID_DIRECT                    (-15)
+#define FLA_INVALID_TRANS_GIVEN_DATATYPE      (-13)*/
+param FLA_INVALID_CONJ: int = -14;	//#define FLA_INVALID_CONJ                      (-14)
+/*#define FLA_INVALID_DIRECT                    (-15)
 #define FLA_INVALID_STOREV                    (-16)
 #define FLA_INVALID_DATATYPE                  (-17)
 #define FLA_INVALID_INTEGER_DATATYPE          (-18)
@@ -112,12 +115,12 @@ param FLA_CONJUGATE: int = 451;	//#define FLA_CONJUGATE         451
 #define FLA_OBJECT_NOT_INTEGER                (-21)
 #define FLA_OBJECT_NOT_REAL                   (-22)
 #define FLA_OBJECT_NOT_COMPLEX                (-23)
-#define FLA_OBJECT_NOT_SQUARE                 (-24)
-#define FLA_OBJECT_NOT_SCALAR                 (-25)
-#define FLA_OBJECT_NOT_VECTOR                 (-26)
-#define FLA_INCONSISTENT_DATATYPES            (-27)
-#define FLA_NONCONFORMAL_DIMENSIONS           (-28)
-#define FLA_UNEQUAL_VECTOR_LENGTHS            (-29)
+#define FLA_OBJECT_NOT_SQUARE                 (-24)*/
+param FLA_OBJECT_NOT_SCALAR: int = -25;	//#define FLA_OBJECT_NOT_SCALAR                 (-25)
+param FLA_OBJECT_NOT_VECTOR: int = -26;	//#define FLA_OBJECT_NOT_VECTOR                 (-26)*/
+param FLA_INCONSISTENT_DATATYPES: int = -27;	//#define FLA_INCONSISTENT_DATATYPES            (-27)
+param FLA_NONCONFORMAL_DIMENSIONS: int = -28;	//#define FLA_NONCONFORMAL_DIMENSIONS           (-28)
+/*#define FLA_UNEQUAL_VECTOR_LENGTHS            (-29)
 #define FLA_INVALID_HESSENBERG_INDICES        (-30)
 #define FLA_INVALID_VECTOR_LENGTH             (-31)
 #define FLA_NULL_POINTER                      (-32)
@@ -129,8 +132,8 @@ param FLA_CONJUGATE: int = 451;	//#define FLA_CONJUGATE         451
 #define FLA_OBJECTS_NOT_HORIZONTALLY_ADJ      (-40)
 #define FLA_ADJACENT_OBJECT_DIM_MISMATCH      (-41)
 #define FLA_OBJECTS_NOT_VERTICALLY_ALIGNED    (-42)
-#define FLA_OBJECTS_NOT_HORIZONTALLY_ALIGNED  (-43)
-#define FLA_INVALID_FLOATING_DATATYPE         (-44)*/
+#define FLA_OBJECTS_NOT_HORIZONTALLY_ALIGNED  (-43)*/
+param FLA_INVALID_FLOATING_DATATYPE: int = -44;	//#define FLA_INVALID_FLOATING_DATATYPE         (-44)
 param FLA_OBJECT_NOT_FLOATING_POINT: int = -45;	//#define FLA_OBJECT_NOT_FLOATING_POINT         (-45)
 /*#define FLA_INVALID_BLOCKSIZE_VALUE           (-46)
 #define FLA_OPEN_RETURNED_ERROR               (-47)
@@ -144,9 +147,9 @@ param FLA_OBJECT_NOT_FLOATING_POINT: int = -45;	//#define FLA_OBJECT_NOT_FLOATIN
 #define FLA_EXPECTED_NONNEGATIVE_VALUE        (-55)
 #define FLA_SUPERMATRIX_NOT_ENABLED           (-56)
 #define FLA_UNDEFINED_ERROR_CODE              (-57)
-#define FLA_INVALID_DIAG                      (-58)
-#define FLA_INCONSISTENT_OBJECT_PRECISION     (-59)
-#define FLA_INVALID_BLOCKSIZE_OBJ             (-60)
+#define FLA_INVALID_DIAG                      (-58)*/
+param FLA_INCONSISTENT_OBJECT_PRECISION: int = -59;	// #define FLA_INCONSISTENT_OBJECT_PRECISION     (-59)
+/*#define FLA_INVALID_BLOCKSIZE_OBJ             (-60)
 #define FLA_VECTOR_LENGTH_BELOW_MIN           (-61)
 #define FLA_PTHREAD_CREATE_RETURNED_ERROR     (-63)
 #define FLA_PTHREAD_JOIN_RETURNED_ERROR       (-64)
@@ -162,10 +165,10 @@ param FLA_OBJECT_NOT_FLOATING_POINT: int = -45;	//#define FLA_OBJECT_NOT_FLOATIN
 #define FLA_INVALID_CONJ_GIVEN_DATATYPE       (-75)
 #define FLA_INVALID_COMPLEX_TRANS             (-76)
 #define FLA_INVALID_REAL_TRANS                (-77)
-#define FLA_INVALID_BLAS_TRANS                (-78)
-#define FLA_INVALID_NONCONSTANT_DATATYPE      (-79)
-#define FLA_OBJECT_NOT_NONCONSTANT            (-80)
-#define FLA_OBJECT_DATATYPES_NOT_EQUAL        (-82)
+#define FLA_INVALID_BLAS_TRANS                (-78)*/
+param FLA_INVALID_NONCONSTANT_DATATYPE: int = -79;	//#define FLA_INVALID_NONCONSTANT_DATATYPE      (-79)
+param FLA_OBJECT_NOT_NONCONSTANT: int = -80;	//#define FLA_OBJECT_NOT_NONCONSTANT            (-80)
+/*#define FLA_OBJECT_DATATYPES_NOT_EQUAL        (-82)
 #define FLA_DIVIDE_BY_ZERO                    (-83)
 #define FLA_OBJECT_ELEMTYPES_NOT_EQUAL        (-84)
 #define FLA_INVALID_PIVOT_INDEX_RANGE         (-85)
@@ -182,6 +185,11 @@ param FLA_OBJECT_NOT_FLOATING_POINT: int = -45;	//#define FLA_OBJECT_NOT_FLOATIN
 #define FLA_INVALID_STRIDE_COMBINATION        (-96)
 #define FLA_INVALID_VECTOR_DIM                (-97)
 */
+
+// --- conj ---
+
+const BLIS_NO_CONJUGATE: string = "n";	//#define BLIS_NO_CONJUGATE      'n'
+const BLIS_CONJUGATE: string = "c";	//#define BLIS_CONJUGATE         'c'
 
 
 // constant FLA_Obj objects
