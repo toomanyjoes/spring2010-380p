@@ -31,7 +31,7 @@
 */
 
 //#include "FLAME.h"
-use constants, FLA_Error_wrapper;
+use constants, FLA_Error_wrapper, FLA_View;
 
 //#ifdef FLA_ENABLE_NON_CRITICAL_CODE
 

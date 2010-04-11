@@ -1102,17 +1102,17 @@ FLA_Error FLA_Check_attempted_repart_2x2( FLA_Obj A_quad, dim_t b_m, dim_t b_n )
 
   return e_val;
 }
-
-FLA_Error FLA_Check_attempted_repart_2x1( FLA_Obj A_side, dim_t b_m )
+*/
+def FLA_Check_attempted_repart_2x1( A_side: FLA_Obj, b_m: dim_t ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
-  if ( b_m > FLA_Obj_length( A_side ) )
+  if ( b_m > FLA_Obj_length( A_side ) ) then
     e_val = FLA_ATTEMPTED_OVER_REPART_2X1;
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_attempted_repart_1x2( FLA_Obj A_side, dim_t b_n )
 {
   FLA_Error e_val = FLA_SUCCESS;
@@ -1133,18 +1133,18 @@ FLA_Error FLA_Check_valid_leftright_side( FLA_Side side )
 
   return e_val;
 }
-
-FLA_Error FLA_Check_valid_topbottom_side( FLA_Side side )
+*/
+def FLA_Check_valid_topbottom_side( side: FLA_Side ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
   if ( side != FLA_TOP && 
-       side != FLA_BOTTOM )
+       side != FLA_BOTTOM ) then
     e_val = FLA_INVALID_SIDE;
 
   return e_val;
 }
-*/
+
 def FLA_Check_matrix_strides( m: dim_t, n: dim_t, rs: dim_t, cs: dim_t ): FLA_Error
 {
   var e_val: FLA_Error = FLA_SUCCESS;	//FLA_Error e_val = FLA_SUCCESS;
