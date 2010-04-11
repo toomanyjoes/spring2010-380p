@@ -39,7 +39,7 @@ def FLA_Obj_datatype( obj: FLA_Obj ): FLA_Datatype
   if FLA_Check_error_level() >= FLA_MIN_ERROR_CHECKING then
     FLA_Obj_datatype_check( obj );
 
-  return obj.datatype;
+  return obj.base.datatype;
 }
 
 
@@ -171,7 +171,7 @@ dim_t FLA_Obj_max_dim( FLA_Obj obj )
 def FLA_Obj_row_stride( obj: FLA_Obj ): dim_t
 {
   //return (obj.base)->rs;
-  return obj.rs;
+  return obj.base.rs;
 }
 
 
@@ -179,7 +179,7 @@ def FLA_Obj_row_stride( obj: FLA_Obj ): dim_t
 def FLA_Obj_col_stride( obj: FLA_Obj ): dim_t
 {
   //return (obj.base)->cs;
-  return obj.cs;
+  return obj.base.cs;
 }
 
 /*
@@ -452,9 +452,9 @@ def FLA_Obj_equals( A: FLA_Obj, B: FLA_Obj ): FLA_Bool
     return FALSE;
 
   var returnval: FLA_Bool = TRUE;
-  forall (i,j) in A.buffer.domain
+  forall (i,j) in A.base.buffer.domain
   {
-    if A.buffer(i,j) != B.buffer(i,j) then
+    if A.base.buffer(i,j) != B.base.buffer(i,j) then
       returnval = FALSE;
   }
   return returnval;

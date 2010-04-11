@@ -29,7 +29,7 @@
    1 University Station C0500
    Austin TX 78712
 */
-use FLA_Obj;
+use FLA_Obj, FLA_Check, FLA_Part_2x1_check_module, FLA_Repart_2x1_to_3x1_check_module;
 /****************************************************************************
 
    FLA_Part_2x2( )
@@ -108,19 +108,20 @@ def FLA_Part_2x1( A: FLA_Obj, A1: FLA_Obj,
     FLA_Part_2x1_check( A,    A1,
                               A2,     mb, side );
 
+  var mb2: dim_t = mb;
   // Safeguard: if mb > m, reduce mb to m.
-  if ( mb > A.m ) then mb = A.m;
+  if ( mb > A.m ) then mb2 = A.m;
 
   // Set mb to be the dimension of A1.
-  if ( side == FLA_BOTTOM ) then mb = A.m - mb;
+  if ( side == FLA_BOTTOM ) then mb2 = A.m - mb;
 
-  A1.m    = mb;
+  A1.m    = mb2;
   A1.n    = A.n;
   A1.offm = A.offm;
   A1.offn = A.offn;
   A1.base = A.base;
 
-  A2.m    = A.m - mb;
+  A2.m    = A.m - mb2;
   A2.n    = A.n;
   A2.offm = A.offm + mb;
   A2.offn = A.offn;

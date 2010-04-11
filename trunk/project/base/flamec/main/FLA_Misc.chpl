@@ -49,8 +49,8 @@ def FLA_Obj_set_to_scalar( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
   rs       = FLA_Obj_row_stride( A );
   cs       = FLA_Obj_col_stride( A );
 */
-  forall (i,j) in A.buffer.domain do
-    A.buffer(i,j) = alpha.buffer(1,1);
+  forall (i,j) in A.base.buffer.domain do
+    A.base.buffer(i,j) = alpha.base.buffer(1,1);
 /*
   switch ( datatype ){
 

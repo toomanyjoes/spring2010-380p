@@ -52,17 +52,33 @@ class FLA_Base_obj
   var m_index: dim_t;	// dim_t         m_index;
   var n_index: dim_t;	// dim_t         n_index;
   var buffer: [1..1, 1..1] real;	//  this array is later resized       void*         buffer;
+
+  // constructor
+  def FLA_Base_obj()
+  {
+    n_index = 0;
+    m_index = 0;
+    id = 0;
+    n_inner = 0;
+    m_inner = 0;
+    cs = 0;
+    rs = 0;
+    elemtype = 0;
+    datatype = 0;
+    buffer = 0.0;
+  }
 }
 
-class FLA_Obj: FLA_Base_obj
+//class FLA_Obj: FLA_Base_obj
+class FLA_Obj
 {
   // from FLA_Obj
   /* Basic object view description fields */
   var offm: dim_t;	// dim_t         offm;
   var offn: dim_t;	// dim_t         offn;
-  //var m: dim_t;		// dim_t         m;
-  //var n: dim_t;		// dim_t         n;
-  //FLA_Base_obj* base;
+  var m: dim_t;		// dim_t         m;
+  var n: dim_t;		// dim_t         n;
+  var base: FLA_Base_obj;	//FLA_Base_obj* base;
 
   // constructor
 /*  def FLA_Obj(type typ, datatype: int = 0, elemtype: int = 0, m: uint = 0, n: uint, rs: uint = 0, cs: uint = 0, m_inner: uint = 0, n_inner: uint = 0, id: uint = 0, m_index: uint = 0, n_index: uint = 0, buffer: [1,1] real = 0, offm: uint = 0, offn: uint = 0)
@@ -84,21 +100,11 @@ class FLA_Obj: FLA_Base_obj
   }*/
   def FLA_Obj()
   {
-    //t = real;
     offm = 0;
     offn = 0;
-    n_index = 0;
-    m_index = 0;
-    id = 0;
-    n_inner = 0;
-    m_inner = 0;
-    cs = 0;
-    rs = 0;
+    base = new FLA_Base_obj();
     n = 0;
     m = 0;
-    elemtype = 0;
-    datatype = 0;
-    buffer = 0.0;
   }
 }
 
@@ -173,15 +179,15 @@ def FLA_Obj_create_ext( datatype: FLA_Datatype, elemtype: FLA_Elemtype, m: dim_t
   //obj->base             = ( FLA_Base_obj * ) FLA_malloc( sizeof( FLA_Base_obj ) );
 
   // Populate the fields in the base object.
-  obj.datatype = datatype;	//obj->base->datatype   = datatype;
-  obj.elemtype = elemtype;	//obj->base->elemtype   = elemtype;
-  //obj->base->m          = m;
-  //obj->base->n          = n;
-  obj.m_inner = m_inner;	//obj->base->m_inner    = m_inner;
-  obj.n_inner = n_inner;	//obj->base->n_inner    = n_inner;
-  obj.id = 1;			//obj->base->id         = ( unsigned long ) obj->base;
-  obj.m_index = 0;	//obj->base->m_index    = 0;
-  obj.n_index = 0;	//obj->base->n_index    = 0;
+  obj.base.datatype = datatype;	//obj->base->datatype   = datatype;
+  obj.base.elemtype = elemtype;	//obj->base->elemtype   = elemtype;
+  obj.base.m = m; //obj->base->m          = m;
+  obj.base.n = n; //obj->base->n          = n;
+  obj.base.m_inner = m_inner;	//obj->base->m_inner    = m_inner;
+  obj.base.n_inner = n_inner;	//obj->base->n_inner    = n_inner;
+  obj.base.id = 1;			//obj->base->id         = ( unsigned long ) obj->base;
+  obj.base.m_index = 0;	//obj->base->m_index    = 0;
+  obj.base.n_index = 0;	//obj->base->n_index    = 0;
 
   // Determine the amount of space we need to allocate based on the values of
   // the row and column strides.
@@ -216,11 +222,11 @@ def FLA_Obj_create_ext( datatype: FLA_Datatype, elemtype: FLA_Elemtype, m: dim_t
 
   // Allocate the base object's element buffer.
   //obj->base->buffer = FLA_malloc( buffer_size );
-  obj.buffer = [1..m, 1,..n];
+  obj.base.buffer = [1..m, 1,..n];
 
   // Save the row and column strides used in the memory allocation.
-  obj.rs = rs;	//obj->base->rs     = rs;
-  obj.cs = cs;	//obj->base->cs     = cs;
+  obj.base.rs = rs;	//obj->base->rs     = rs;
+  obj.base.cs = cs;	//obj->base->cs     = cs;
 
 //#ifdef FLA_ENABLE_SUPERMATRIX
 //  // Initialize SuperMatrix fields.
