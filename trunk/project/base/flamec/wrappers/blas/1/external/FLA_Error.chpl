@@ -38,10 +38,11 @@ use constants, FLA_Misc, FLA_Check, FLA_Scal_check_module, FLA_Param;
 
 def FLA_Scal_external( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
 {
-  var datatype, dt_alpha: FLA_Datatype;
-  var          m_A, n_A: uint;
-  var          rs_A, cs_A: uint;
-  var blis_conj: string;	//char         blis_conj;
+
+  //var datatype, dt_alpha: FLA_Datatype;
+  //var          m_A, n_A: uint;
+  //var          rs_A, cs_A: uint;
+  //var blis_conj: string;	//char         blis_conj;
 
   if FLA_Check_error_level() == FLA_FULL_ERROR_CHECKING
   {
@@ -66,7 +67,11 @@ def FLA_Scal_external( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
     }
   }
 
-  datatype = FLA_Obj_datatype( A );
+  // scale by alpha (only considering real numbers)      // Samuel Palmer need to check to make sure this is correct
+  forall (i,j) in A.base.buffer.domain do
+    A.base.buffer(i,j) *= alpha.base.buffer(1,1);
+
+/*  datatype = FLA_Obj_datatype( A );
 
   m_A      = FLA_Obj_length( A );
   n_A      = FLA_Obj_width( A );
@@ -78,14 +83,14 @@ def FLA_Scal_external( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
   else
     dt_alpha = FLA_Obj_datatype( alpha );
 
-  FLA_Param_map_flame_to_blis_conj( FLA_NO_CONJUGATE, blis_conj );
-}/*
+  blis_conj = FLA_Param_map_flame_to_blis_conj( FLA_NO_CONJUGATE, blis_conj );
+
   select datatype {	//switch ( datatype ){
 
   when FLA_FLOAT	//case FLA_FLOAT:
   {
-    float *buff_A     = ( float * ) FLA_FLOAT_PTR( A );
-    float *buff_alpha = ( float * ) FLA_FLOAT_PTR( alpha );
+    //float *buff_A     = ( float * ) FLA_FLOAT_PTR( A );
+    //float *buff_alpha = ( float * ) FLA_FLOAT_PTR( alpha );
 
     bli_sscalm( blis_conj,
                 m_A,
@@ -93,9 +98,9 @@ def FLA_Scal_external( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
                 buff_alpha,
                 buff_A, rs_A, cs_A );
 
-    break;
+    //break;
   }
-
+}}/*
   when FLA_DOUBLE	//case FLA_DOUBLE:
   {
     double *buff_A     = ( double * ) FLA_DOUBLE_PTR( A );
@@ -167,8 +172,8 @@ def FLA_Scal_external( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
   }
 
   }
-
+*/
   return FLA_SUCCESS;
 }
-*/
+
 } // end module

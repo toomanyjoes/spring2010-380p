@@ -102,9 +102,9 @@ param FLA_CONJUGATE: int = 451;	//#define FLA_CONJUGATE         451
 
 // FLA_Error values.
 /*#define FLA_INVALID_SIDE                      (-10)
-#define FLA_INVALID_UPLO                      (-11)
-#define FLA_INVALID_TRANS                     (-12)
-#define FLA_INVALID_TRANS_GIVEN_DATATYPE      (-13)*/
+#define FLA_INVALID_UPLO                      (-11)*/
+param FLA_INVALID_TRANS: int = -12;	//#define FLA_INVALID_TRANS                     (-12)
+/*#define FLA_INVALID_TRANS_GIVEN_DATATYPE      (-13)*/
 param FLA_INVALID_CONJ: int = -14;	//#define FLA_INVALID_CONJ                      (-14)
 /*#define FLA_INVALID_DIRECT                    (-15)
 #define FLA_INVALID_STOREV                    (-16)
@@ -168,8 +168,8 @@ param FLA_INCONSISTENT_OBJECT_PRECISION: int = -59;	// #define FLA_INCONSISTENT_
 #define FLA_INVALID_BLAS_TRANS                (-78)*/
 param FLA_INVALID_NONCONSTANT_DATATYPE: int = -79;	//#define FLA_INVALID_NONCONSTANT_DATATYPE      (-79)
 param FLA_OBJECT_NOT_NONCONSTANT: int = -80;	//#define FLA_OBJECT_NOT_NONCONSTANT            (-80)
-/*#define FLA_OBJECT_DATATYPES_NOT_EQUAL        (-82)
-#define FLA_DIVIDE_BY_ZERO                    (-83)
+param FLA_OBJECT_DATATYPES_NOT_EQUAL: int = -82;	//#define FLA_OBJECT_DATATYPES_NOT_EQUAL        (-82)
+/*#define FLA_DIVIDE_BY_ZERO                    (-83)
 #define FLA_OBJECT_ELEMTYPES_NOT_EQUAL        (-84)
 #define FLA_INVALID_PIVOT_INDEX_RANGE         (-85)
 #define FLA_HOUSEH_PANEL_MATRIX_TOO_SMALL     (-86)
@@ -185,6 +185,13 @@ param FLA_ATTEMPTED_OVER_REPART_2X1: int = -91;	//#define FLA_ATTEMPTED_OVER_REP
 #define FLA_INVALID_STRIDE_COMBINATION        (-96)
 #define FLA_INVALID_VECTOR_DIM                (-97)
 */
+
+// --- trans ---
+
+const BLIS_NO_TRANSPOSE: string = "n";	//#define BLIS_NO_TRANSPOSE      'n'
+const BLIS_TRANSPOSE: string = "n";	//#define BLIS_TRANSPOSE         't'
+const BLIS_CONJ_NO_TRANSPOSE: string = "n";	//#define BLIS_CONJ_NO_TRANSPOSE 'c'
+const BLIS_CONJ_TRANSPOSE: string = "n";	//#define BLIS_CONJ_TRANSPOSE    'h'
 
 // --- conj ---
 

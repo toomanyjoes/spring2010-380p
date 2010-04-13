@@ -109,20 +109,20 @@ FLA_Error FLA_Check_valid_uplo( FLA_Uplo uplo )
 
   return e_val;
 }
-
-FLA_Error FLA_Check_valid_trans( FLA_Trans trans )
+*/
+def FLA_Check_valid_trans( trans: FLA_Trans ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
   if ( trans != FLA_NO_TRANSPOSE &&
        trans != FLA_TRANSPOSE &&
        trans != FLA_CONJ_TRANSPOSE &&
-       trans != FLA_CONJ_NO_TRANSPOSE )
+       trans != FLA_CONJ_NO_TRANSPOSE ) then
     e_val = FLA_INVALID_TRANS;
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_valid_diag( FLA_Diag diag )
 {
   FLA_Error e_val = FLA_SUCCESS;
@@ -385,17 +385,17 @@ def FLA_Check_if_scalar( A: FLA_Obj ): FLA_Error
 
   return e_val;
 }
-/*
-FLA_Error FLA_Check_if_vector( FLA_Obj A )
-{
-  FLA_Error e_val = FLA_SUCCESS;
 
-  if ( FLA_Obj_length( A ) != 1 && FLA_Obj_width( A ) != 1 )
+def FLA_Check_if_vector( A: FLA_Obj ): FLA_Error
+{
+  var e_val: FLA_Error = FLA_SUCCESS;
+
+  if ( FLA_Obj_length( A ) != 1 && FLA_Obj_width( A ) != 1 ) then
     e_val = FLA_OBJECT_NOT_VECTOR;
 
   return e_val;
 }
-*/
+
 def FLA_Check_conformal_dims( trans: FLA_Trans, A: FLA_Obj, B: FLA_Obj ): FLA_Error
 {
   var e_val: FLA_Error = FLA_SUCCESS;
@@ -455,31 +455,31 @@ FLA_Error FLA_Check_matrix_matrix_dims( FLA_Trans transa, FLA_Trans transb, FLA_
 
   return e_val;
 }
-
-FLA_Error FLA_Check_matrix_vector_dims( FLA_Trans trans, FLA_Obj A, FLA_Obj x, FLA_Obj y )
+*/
+def FLA_Check_matrix_vector_dims( trans: FLA_Trans, A: FLA_Obj, x: FLA_Obj, y: FLA_Obj ): FLA_Error
 {
-  FLA_Error e_val = FLA_SUCCESS;
+  var e_val: FLA_Error = FLA_SUCCESS;
 
   if ( trans == FLA_NO_TRANSPOSE || trans == FLA_CONJ_NO_TRANSPOSE )
   {
-    if ( FLA_Obj_width( A ) != FLA_Obj_vector_dim( x ) )
+    if ( FLA_Obj_width( A ) != FLA_Obj_vector_dim( x ) ) then
       e_val = FLA_NONCONFORMAL_DIMENSIONS;
 
-    if ( FLA_Obj_length( A ) != FLA_Obj_vector_dim( y ) )
+    if ( FLA_Obj_length( A ) != FLA_Obj_vector_dim( y ) ) then
       e_val = FLA_NONCONFORMAL_DIMENSIONS;
   }
   else
   {
-    if ( FLA_Obj_length( A ) != FLA_Obj_vector_dim( x ) )
+    if ( FLA_Obj_length( A ) != FLA_Obj_vector_dim( x ) ) then
       e_val = FLA_NONCONFORMAL_DIMENSIONS;
 
-    if ( FLA_Obj_width( A ) != FLA_Obj_vector_dim( y ) )
+    if ( FLA_Obj_width( A ) != FLA_Obj_vector_dim( y ) ) then
       e_val = FLA_NONCONFORMAL_DIMENSIONS;
   }
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_equal_vector_lengths( FLA_Obj x, FLA_Obj y )
 {
   FLA_Error e_val = FLA_SUCCESS;
@@ -972,17 +972,17 @@ def FLA_Check_nonconstant_object( A: FLA_Obj ): FLA_Error
 
   return e_val;
 }
-/*
-FLA_Error FLA_Check_identical_object_datatype( FLA_Obj A, FLA_Obj B )
-{
-  FLA_Error e_val = FLA_SUCCESS;
 
-  if ( FLA_Obj_datatype( A ) != FLA_Obj_datatype( B ) )
+def FLA_Check_identical_object_datatype( A: FLA_Obj, B: FLA_Obj ): FLA_Error
+{
+  var e_val: FLA_Error = FLA_SUCCESS;
+
+  if ( FLA_Obj_datatype( A ) != FLA_Obj_datatype( B ) ) then
     e_val = FLA_OBJECT_DATATYPES_NOT_EQUAL;
 
   return e_val;
 }
-
+/*
 FLA_Error FLA_Check_divide_by_zero( FLA_Obj alpha )
 {
   FLA_Error e_val = FLA_SUCCESS;

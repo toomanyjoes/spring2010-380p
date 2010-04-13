@@ -136,23 +136,31 @@ def FLA_Obj_width( obj: FLA_Obj ): dim_t
   return obj.n;
 }
 
+
+
+def FLA_Obj_vector_dim( obj: FLA_Obj ): dim_t
+{
+  //return ( obj.m == 1 ? obj.n
+  //                    : obj.m );
+  if obj.m == 1 then
+    return obj.n;
+  else
+    return obj.m;
+}
+
+
+
+def FLA_Obj_vector_inc( obj: FLA_Obj ): dim_t
+{
+  //return ( obj.m == 1 ? (obj.base)->cs
+  //                    : (obj.base)->rs );
+  if obj.m == 1 then
+    return obj.base.cs;
+  else
+    return obj.base.rs;
+}
+
 /*
-
-dim_t FLA_Obj_vector_dim( FLA_Obj obj )
-{
-  return ( obj.m == 1 ? obj.n
-                      : obj.m );
-}
-
-
-
-dim_t FLA_Obj_vector_inc( FLA_Obj obj )
-{
-  return ( obj.m == 1 ? (obj.base)->cs
-                      : (obj.base)->rs );
-}
-
-
 
 dim_t FLA_Obj_min_dim( FLA_Obj obj )
 {

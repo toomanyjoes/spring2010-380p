@@ -29,23 +29,26 @@
    1 University Station C0500
    Austin TX 78712
 */
-/*
-#include "FLAME.h"
 
-FLA_Error FLA_Gemv_external( FLA_Trans transa, FLA_Obj alpha, FLA_Obj A, FLA_Obj x, FLA_Obj beta, FLA_Obj y )
+//#include "FLAME.h"
+module FLA_Gemv_external_module
 {
-  FLA_Datatype datatype;
-  int          m_A, n_A;
-  int          rs_A, cs_A;
-  int          inc_x;
-  int          inc_y;
-  char         blis_transa;
-  char         blis_conjx;
+use constants, FLA_Check, FLA_Gemv_check_module, FLA_Param;
 
-  if ( FLA_Check_error_level() == FLA_FULL_ERROR_CHECKING ) 
+def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj, beta: FLA_Obj, y: FLA_Obj ): FLA_Error
+{
+  var datatype: FLA_Datatype;
+  var           m_A, n_A: uint;
+  var          rs_A, cs_A: uint;
+  var          inc_x: uint;
+  var          inc_y: uint;
+  var         blis_transa: string;
+  var         blis_conjx: string;
+
+  if ( FLA_Check_error_level() == FLA_FULL_ERROR_CHECKING ) then
     FLA_Gemv_check( transa, alpha, A, x, beta, y );
 
-  if ( FLA_Obj_has_zero_dim( A ) ) return FLA_SUCCESS;
+  if ( FLA_Obj_has_zero_dim( A ) ) then return FLA_SUCCESS;
 
   datatype = FLA_Obj_datatype( A );
 
@@ -57,8 +60,8 @@ FLA_Error FLA_Gemv_external( FLA_Trans transa, FLA_Obj alpha, FLA_Obj A, FLA_Obj
   inc_x    = FLA_Obj_vector_inc( x );
   inc_y    = FLA_Obj_vector_inc( y );
 
-  FLA_Param_map_flame_to_blis_trans( transa, &blis_transa );
-  FLA_Param_map_flame_to_blis_conj( FLA_NO_CONJUGATE, &blis_conjx );
+  blis_transa = FLA_Param_map_flame_to_blis_trans( transa, blis_transa );
+  blis_conjx = FLA_Param_map_flame_to_blis_conj( FLA_NO_CONJUGATE, blis_conjx );
 
 
   switch( datatype ){
@@ -148,8 +151,8 @@ FLA_Error FLA_Gemv_external( FLA_Trans transa, FLA_Obj alpha, FLA_Obj A, FLA_Obj
   }
 
   }
-  
+
   return FLA_SUCCESS;
 }
+} // end module
 
-*/

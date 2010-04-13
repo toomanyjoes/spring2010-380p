@@ -398,7 +398,7 @@ def FLA_Obj_create_constant( const_real: real, obj: FLA_Obj ): FLA_Error
   //temp_z->real =           const_real;
   //temp_z->imag =           0.0;
 
-  obj.buffer[1,1] = const_real;
+  obj.base.buffer[1,1] = const_real;
   return FLA_SUCCESS;
 }
 
