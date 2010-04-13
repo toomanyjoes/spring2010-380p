@@ -64,11 +64,11 @@ def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj
   blis_conjx = FLA_Param_map_flame_to_blis_conj( FLA_NO_CONJUGATE, blis_conjx );
 
 
-  switch( datatype ){
+  select datatype {
   
-  case FLA_FLOAT:
+  when FLA_FLOAT
   {
-    float *buff_A     = ( float * ) FLA_FLOAT_PTR( A );
+/*    float *buff_A     = ( float * ) FLA_FLOAT_PTR( A );
     float *buff_x     = ( float * ) FLA_FLOAT_PTR( x );
     float *buff_y     = ( float * ) FLA_FLOAT_PTR( y );
     float *buff_alpha = ( float * ) FLA_FLOAT_PTR( alpha );
@@ -83,13 +83,13 @@ def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj
                buff_x, inc_x,
                buff_beta,  
                buff_y, inc_y );
-
-    break;
+*/
+    //break;
   }
 
-  case FLA_DOUBLE:
+  when FLA_DOUBLE
   {
-    double *buff_A     = ( double * ) FLA_DOUBLE_PTR( A );
+/*    double *buff_A     = ( double * ) FLA_DOUBLE_PTR( A );
     double *buff_x     = ( double * ) FLA_DOUBLE_PTR( x );
     double *buff_y     = ( double * ) FLA_DOUBLE_PTR( y );
     double *buff_alpha = ( double * ) FLA_DOUBLE_PTR( alpha );
@@ -104,13 +104,13 @@ def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj
                buff_x, inc_x,
                buff_beta,  
                buff_y, inc_y );
-
-    break;
+*/
+    //break;
   }
 
-  case FLA_COMPLEX:
+  when FLA_COMPLEX
   {
-    scomplex *buff_A     = ( scomplex * ) FLA_COMPLEX_PTR( A );
+/*    scomplex *buff_A     = ( scomplex * ) FLA_COMPLEX_PTR( A );
     scomplex *buff_x     = ( scomplex * ) FLA_COMPLEX_PTR( x );
     scomplex *buff_y     = ( scomplex * ) FLA_COMPLEX_PTR( y );
     scomplex *buff_alpha = ( scomplex * ) FLA_COMPLEX_PTR( alpha );
@@ -125,13 +125,13 @@ def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj
                buff_x, inc_x,
                buff_beta,  
                buff_y, inc_y );
-
-    break;
+*/
+    //break;
   }
 
-  case FLA_DOUBLE_COMPLEX:
+  when FLA_DOUBLE_COMPLEX
   {
-    dcomplex *buff_A     = ( dcomplex * ) FLA_DOUBLE_COMPLEX_PTR( A );
+/*    dcomplex *buff_A     = ( dcomplex * ) FLA_DOUBLE_COMPLEX_PTR( A );
     dcomplex *buff_x     = ( dcomplex * ) FLA_DOUBLE_COMPLEX_PTR( x );
     dcomplex *buff_y     = ( dcomplex * ) FLA_DOUBLE_COMPLEX_PTR( y );
     dcomplex *buff_alpha = ( dcomplex * ) FLA_DOUBLE_COMPLEX_PTR( alpha );
@@ -146,8 +146,8 @@ def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj
                buff_x, inc_x,
                buff_beta,  
                buff_y, inc_y );
-
-    break;
+*/
+    //break;
   }
 
   }
