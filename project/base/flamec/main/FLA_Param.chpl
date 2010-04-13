@@ -172,31 +172,37 @@ void FLA_Param_map_flame_to_lapack_storev( FLA_Store storev, void* lapack_storev
 }
 
 // --- FLAME to BLIS mappings --------------------------------------------------
-
-void FLA_Param_map_flame_to_blis_trans( FLA_Trans trans, char* blis_trans )
+*/
+def FLA_Param_map_flame_to_blis_trans( trans: FLA_Trans, blis_trans: string ): string
 {
+	var returnval: string;
 	if ( trans == FLA_NO_TRANSPOSE )
 	{
-		*( ( char* ) blis_trans ) = BLIS_NO_TRANSPOSE;
+		//*( ( char* ) blis_trans ) = BLIS_NO_TRANSPOSE;
+		returnval = BLIS_NO_TRANSPOSE;
 	}
 	else if ( trans == FLA_TRANSPOSE )
 	{
-		*( ( char* ) blis_trans ) = BLIS_TRANSPOSE;
+		//*( ( char* ) blis_trans ) = BLIS_TRANSPOSE;
+		returnval = BLIS_TRANSPOSE;
 	}
 	else if ( trans == FLA_CONJ_NO_TRANSPOSE )
 	{
-		*( ( char* ) blis_trans ) = BLIS_CONJ_NO_TRANSPOSE;
+		//*( ( char* ) blis_trans ) = BLIS_CONJ_NO_TRANSPOSE;
+		returnval = BLIS_CONJ_NO_TRANSPOSE;
 	}
 	else if ( trans == FLA_CONJ_TRANSPOSE )
 	{
-		*( ( char* ) blis_trans ) = BLIS_CONJ_TRANSPOSE;
+		//*( ( char* ) blis_trans ) = BLIS_CONJ_TRANSPOSE;
+		returnval = BLIS_CONJ_TRANSPOSE;
 	}
 	else
 	{
 		FLA_Check_error_code( FLA_INVALID_TRANS );
 	}
+	return returnval;
 }
-*/
+
 def FLA_Param_map_flame_to_blis_conj( conj: FLA_Conj, blis_conj: string ): string
 {
 	var returnval: string;

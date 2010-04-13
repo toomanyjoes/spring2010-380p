@@ -29,7 +29,7 @@
    1 University Station C0500
    Austin TX 78712
 */
-use FLA_Obj, FLA_Check, FLA_Part_2x1_check_module, FLA_Repart_2x1_to_3x1_check_module;
+use FLA_Obj, FLA_Check, FLA_Part_2x1_check_module, FLA_Repart_2x1_to_3x1_check_module, FLA_Cont_with_3x1_to_2x1_check_module;
 /****************************************************************************
 
    FLA_Part_2x2( )
