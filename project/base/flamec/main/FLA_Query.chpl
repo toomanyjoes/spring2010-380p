@@ -465,6 +465,7 @@ def FLA_Obj_equals( A: FLA_Obj, B: FLA_Obj ): FLA_Bool
     if A.base.buffer(i,j) != B.base.buffer(i,j) then
       returnval = FALSE;
   }
+
   return returnval;
 
 /*

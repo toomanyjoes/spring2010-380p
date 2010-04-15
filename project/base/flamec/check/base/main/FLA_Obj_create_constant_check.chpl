@@ -32,14 +32,18 @@
 
 //#include "FLAME.h"
 
-use constants, FLA_Check;
+module FLA_Obj_create_constant_check_module
+{
+use constants;
 
-def FLA_Obj_datatype_check( obj: FLA_Obj ): FLA_Error
+def FLA_Obj_create_constant_check( const_real: real, obj: FLA_Obj ): FLA_Error
 {
   var e_val: FLA_Error;
 
   e_val = FLA_Check_null_pointer( obj );
   FLA_Check_error_code( e_val );
+
   return FLA_SUCCESS;
 }
 
+} // end moudule

@@ -211,11 +211,23 @@ enum CBLAS_SIDE      {CblasLeft=141, CblasRight=142};
 
 // constant FLA_Obj objects
 const FLA_TWO: FLA_Obj = new FLA_Obj();
-const FLA_ONE: FLA_Obj = new FLA_Obj();
-const FLA_ONE_HALF: FLA_Obj = new FLA_Obj();
-const FLA_ZERO: FLA_Obj = new FLA_Obj();
-const FLA_MINUS_ONE_HALF: FLA_Obj = new FLA_Obj();
-const FLA_MINUS_ONE: FLA_Obj = new FLA_Obj();
-const FLA_MINUS_TWO: FLA_Obj = new FLA_Obj();
+FLA_Obj_create_constant(2.0, FLA_TWO);
 
+const FLA_ONE: FLA_Obj = new FLA_Obj();
+FLA_Obj_create_constant(1.0, FLA_ONE);
+
+const FLA_ONE_HALF: FLA_Obj = new FLA_Obj();
+FLA_Obj_create_constant(0.5, FLA_ONE_HALF);
+
+const FLA_ZERO: FLA_Obj = new FLA_Obj();
+FLA_Obj_create_constant(0.0, FLA_ZERO);
+
+const FLA_MINUS_ONE_HALF: FLA_Obj = new FLA_Obj();
+FLA_Obj_create_constant(-0.5, FLA_MINUS_ONE_HALF);
+
+const FLA_MINUS_ONE: FLA_Obj = new FLA_Obj();
+FLA_Obj_create_constant(-1.0, FLA_MINUS_ONE);
+
+const FLA_MINUS_TWO: FLA_Obj = new FLA_Obj();
+FLA_Obj_create_constant(-2.0, FLA_MINUS_TWO);
 }

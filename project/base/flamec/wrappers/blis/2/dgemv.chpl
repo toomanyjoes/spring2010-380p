@@ -14,7 +14,7 @@ def blas_dgemv( m: int, n: int, alpha: real, a: [?aDom] real, lda: int, x: [?xDo
 
  	forall (i,j) in aDom
  	{
- 		y(i) += Aprime(i,j) * x(j);
+ 		y(incy,i) += Aprime(i,j) * x(incx,j);
  	}
 }
 

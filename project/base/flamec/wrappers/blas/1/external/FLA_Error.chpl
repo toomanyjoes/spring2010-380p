@@ -48,12 +48,10 @@ def FLA_Scal_external( alpha: FLA_Obj, A: FLA_Obj ): FLA_Error
   {
     FLA_Scal_check( alpha, A );
   }
-
   if FLA_Obj_has_zero_dim( A ) 
   {
     return FLA_SUCCESS;
   }
-
   if FLA_Obj_equals( alpha, FLA_ONE )
   {
     return FLA_SUCCESS;

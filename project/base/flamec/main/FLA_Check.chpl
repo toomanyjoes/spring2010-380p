@@ -34,7 +34,7 @@
 
 use constants, FLA_Query, FLA_Error_module;
 
-var fla_error_checking_level: uint = FLA_INTERNAL_ERROR_CHECKING_LEVEL;	// static unsigned int fla_error_checking_level = FLA_INTERNAL_ERROR_CHECKING_LEVEL;
+var fla_error_checking_level: uint = 2; // i.e. FLA_INTERNAL_ERROR_CHECKING_LEVEL;  using this crashed compiler // static unsigned int fla_error_checking_level = FLA_INTERNAL_ERROR_CHECKING_LEVEL;
 
 
 
@@ -62,14 +62,15 @@ def FLA_Check_error_level_set( new_level: uint ): uint
 
 def FLA_Check_error_code(code: int)
 {
-	FLA_Check_error_code_helper(code, "file", 0);
+	if(code != FLA_SUCCESS) then
+		FLA_Check_error_code_helper(code, "file", 0);
 }
 
 def FLA_Check_error_code_helper( code: int, file: string, line: int )
 {
   //if code == FLA_SUCCESS
   //  return;
-
+  writeln("Error code: ",code);
   if FLA_ERROR_CODE_MAX <= code && code <= FLA_ERROR_CODE_MIN
   {
     //FLA_Print_message( FLA_Error_string_for_code( code ),
@@ -251,9 +252,7 @@ def FLA_Check_floating_object( A: FLA_Obj ): FLA_Error
 {
   var e_val: FLA_Error = FLA_SUCCESS;
   var datatype: FLA_Datatype;
-
   datatype = FLA_Obj_datatype( A );
-
   if FLA_Check_floating_datatype( datatype ) != FLA_SUCCESS then
     e_val = FLA_OBJECT_NOT_FLOATING_POINT;
 
