@@ -32,7 +32,7 @@
 
 //#include "FLAME.h"
 
-use constants;
+use constants, FLA_Check, FLA_Obj_create_constant_check_module;
 
 
 class FLA_Base_obj
@@ -51,7 +51,8 @@ class FLA_Base_obj
   var id: dim_t;	// unsigned long id;
   var m_index: dim_t;	// dim_t         m_index;
   var n_index: dim_t;	// dim_t         n_index;
-  var buffer: [1..1, 1..1] real;	//  this array is later resized       void*         buffer;
+  var bufDomain: domain(2);
+  var buffer: [bufDomain] real;	//  this array is later resized       void*         buffer;
 
   // constructor
   def FLA_Base_obj()
@@ -64,8 +65,8 @@ class FLA_Base_obj
     cs = 0;
     rs = 0;
     elemtype = 0;
-    datatype = 0;
-    buffer = 0.0;
+    datatype = FLA_DOUBLE;
+    bufDomain = [1..1, 1..1];
   }
 }
 
@@ -118,8 +119,11 @@ def FLA_Obj_create(datatype: FLA_Datatype, m: dim_t, n: dim_t, rs: dim_t, cs: di
 }
 
 
-def FLA_Obj_create_ext( datatype: FLA_Datatype, elemtype: FLA_Elemtype, m: dim_t, n: dim_t, m_inner: dim_t, n_inner: dim_t, rs: dim_t, cs: dim_t, obj: FLA_Obj ): FLA_Error
+def FLA_Obj_create_ext( datatype: FLA_Datatype, elemtype: FLA_Elemtype, m: dim_t, n: dim_t, m_inner: dim_t, n_inner: dim_t, rs_in: dim_t, cs_in: dim_t, obj: FLA_Obj ): FLA_Error
 {
+  var rs = rs_in;
+  var cs = cs_in;
+
   var buffer_size: size_t;
 
   // Check the strides, and modify them if needed.
@@ -222,7 +226,8 @@ def FLA_Obj_create_ext( datatype: FLA_Datatype, elemtype: FLA_Elemtype, m: dim_t
 
   // Allocate the base object's element buffer.
   //obj->base->buffer = FLA_malloc( buffer_size );
-  obj.base.buffer = [1..m, 1,..n];
+  //obj.base.buffer = [1..m, 1..n];
+  obj.base.bufDomain = [1..m:int, 1..n:int];
 
   // Save the row and column strides used in the memory allocation.
   obj.base.rs = rs;	//obj->base->rs     = rs;
@@ -398,7 +403,7 @@ def FLA_Obj_create_constant( const_real: real, obj: FLA_Obj ): FLA_Error
   //temp_z->real =           const_real;
   //temp_z->imag =           0.0;
 
-  obj.base.buffer[1,1] = const_real;
+  obj.base.buffer(1,1) = const_real;
   return FLA_SUCCESS;
 }
 
