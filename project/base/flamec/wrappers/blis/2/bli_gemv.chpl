@@ -29,9 +29,10 @@
    1 University Station C0500
    Austin TX 78712
 */
-/*
-#include "FLAME.h"
 
+//#include "FLAME.h"
+use constants;
+/*
 void bli_sgemv( char transa, char conjx, int m, int n, float* alpha, float* a, int a_rs, int a_cs, float* x, int incx, float* beta, float* y, int incy )
 {
 	int lda, inca;
@@ -61,26 +62,27 @@ void bli_sgemv( char transa, char conjx, int m, int n, float* alpha, float* a, i
 	                beta,
 	                y, incy );
 }
-
-void bli_dgemv( char transa, char conjx, int m, int n, double* alpha, double* a, int a_rs, int a_cs, double* x, int incx, double* beta, double* y, int incy )
+*/
+//def bli_dgemv( char transa, char conjx, int m, int n, double* alpha, double* a, int a_rs, int a_cs, double* x, int incx, double* beta, double* y, int incy )
+def bli_dgemv( transa: string, conjx: string, m: int, n: int, alpha: real, a: [?aDom] real, a_rs: int,  a_cs: int, x: [?xDom] real, incx: int, beta: real, y: [? yDom] real, incy: int )
 {
-	int lda, inca;
+	var lda, inca: int;
 
 	// Return early if possible.
-	if ( bli_zero_dim2( m, n ) ) return;
+	if ( bli_zero_dim2( m, n ) ) then return;
 
 	// Initialize with values assuming column-major storage.
-	lda  = a_cs;
-	inca = a_rs;
+	//lda  = a_cs;
+	//inca = a_rs;
 
 	// If A is a row-major matrix, then we can use the underlying column-major
 	// BLAS implementation by fiddling with the parameters.
-	if ( bli_is_row_storage( a_rs, a_cs ) )
+	/*if ( bli_is_row_storage( a_rs, a_cs ) )
 	{
 		bli_swap_ints( m, n );
 		bli_swap_ints( lda, inca );
 		bli_toggle_trans( transa );
-	}
+	}*/
 
 	bli_dgemv_blas( transa,
 	                m,
@@ -91,7 +93,7 @@ void bli_dgemv( char transa, char conjx, int m, int n, double* alpha, double* a,
 	                beta,
 	                y, incy );
 }
-
+/*
 void bli_cgemv( char transa, char conjx, int m, int n, scomplex* alpha, scomplex* a, int a_rs, int a_cs, scomplex* x, int incx, scomplex* beta, scomplex* y, int incy )
 {
 	scomplex* buff_zero = FLA_COMPLEX_PTR( FLA_ZERO );
@@ -332,25 +334,36 @@ void bli_sgemv_blas( char transa, int m, int n, float* alpha, float* a, int lda,
 	                  y, &incy );
 #endif
 }
-
-void bli_dgemv_blas( char transa, int m, int n, double* alpha, double* a, int lda, double* x, int incx, double* beta, double* y, int incy )
+*/
+//void bli_dgemv_blas( char transa, int m, int n, double* alpha, double* a, int lda, double* x, int incx, double* beta, double* y, int incy )
+def bli_dgemv_blas( transa: string, m: int, n: int, alpha: real, a: [?aDom] real, lda: int, x: [?xDom] real, incx: int, beta: real, y: [?yDom] real, incy: int )
 {
-#ifdef FLA_ENABLE_CBLAS_INTERFACES
-	enum CBLAS_ORDER     cblas_order = CblasColMajor;
-	enum CBLAS_TRANSPOSE cblas_transa;
+//#ifdef FLA_ENABLE_CBLAS_INTERFACES
+	//enum CBLAS_ORDER    { cblas_order = CblasColMajor };
+	//enum CBLAS_TRANSPOSE { cblas_transa };
 
-	FLA_Param_map_blis_to_blas_trans( transa, &cblas_transa );
+	//FLA_Param_map_blis_to_blas_trans( transa, &cblas_transa );
+	//FLA_Param_map_blis_to_blas_trans( transa, CBLAS_TRANSPOSE );
 
-	cblas_dgemv( cblas_order,
+	/*cblas_dgemv( cblas_order,
 	             cblas_transa,
 	             m,
 	             n,
-	             *alpha,
+	             alpha,
 	             a, lda,
 	             x, incx,
-	             *beta,
+	             beta,
+	             y, incy );*/
+	blas_dgemv( //cblas_order,
+	             //cblas_transa,
+	             m,
+	             n,
+	             alpha,
+	             a, lda,
+	             x, incx,
+	             beta,
 	             y, incy );
-#else
+/*#else
 	char blas_transa;
 
 	FLA_Param_map_blis_to_blas_trans( transa, &blas_transa );
@@ -363,9 +376,9 @@ void bli_dgemv_blas( char transa, int m, int n, double* alpha, double* a, int ld
 	                  x, &incx,
 	                  beta,
 	                  y, &incy );
-#endif
+#endif*/
 }
-
+/*
 void bli_cgemv_blas( char transa, int m, int n, scomplex* alpha, scomplex* a, int lda, scomplex* x, int incx, scomplex* beta, scomplex* y, int incy )
 {
 #ifdef FLA_ENABLE_CBLAS_INTERFACES
