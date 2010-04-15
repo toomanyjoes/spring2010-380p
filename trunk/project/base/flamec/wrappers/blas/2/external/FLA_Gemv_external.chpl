@@ -33,7 +33,7 @@
 //#include "FLAME.h"
 module FLA_Gemv_external_module
 {
-use constants, FLA_Check, FLA_Gemv_check_module, FLA_Param;
+use constants, FLA_Check, FLA_Gemv_check_module, FLA_Param, bli_gemv;
 
 def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj, beta: FLA_Obj, y: FLA_Obj ): FLA_Error
 {
@@ -89,13 +89,13 @@ def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj
 
   when FLA_DOUBLE
   {
-/*    double *buff_A     = ( double * ) FLA_DOUBLE_PTR( A );
+    /*double *buff_A     = ( double * ) FLA_DOUBLE_PTR( A );
     double *buff_x     = ( double * ) FLA_DOUBLE_PTR( x );
     double *buff_y     = ( double * ) FLA_DOUBLE_PTR( y );
     double *buff_alpha = ( double * ) FLA_DOUBLE_PTR( alpha );
     double *buff_beta  = ( double * ) FLA_DOUBLE_PTR( beta );
-
-    bli_dgemv( blis_transa,
+    */
+    /*bli_dgemv( blis_transa,
                blis_conjx,
                m_A,
                n_A, 
@@ -103,8 +103,10 @@ def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj
                buff_A, rs_A, cs_A, 
                buff_x, inc_x,
                buff_beta,  
-               buff_y, inc_y );
-*/
+               buff_y, inc_y );*/
+    bli_dgemv( blis_transa, blis_conjx, m_A:int, n_A:int, 
+               alpha.base.buffer(1,1), A.base.buffer, rs_A:int,  cs_A:int, x.base.buffer, (x.offm+1):int, beta.base.buffer(1,1), y.base.buffer, (y.offm+1):int);
+
     //break;
   }
 

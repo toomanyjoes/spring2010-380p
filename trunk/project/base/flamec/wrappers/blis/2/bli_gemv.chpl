@@ -31,7 +31,7 @@
 */
 
 //#include "FLAME.h"
-use constants;
+use constants, bli_is, dgemv;
 /*
 void bli_sgemv( char transa, char conjx, int m, int n, float* alpha, float* a, int a_rs, int a_cs, float* x, int incx, float* beta, float* y, int incy )
 {
