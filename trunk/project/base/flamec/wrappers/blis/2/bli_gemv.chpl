@@ -355,7 +355,7 @@ def bli_dgemv_blas( transa: string, m: int, n: int, alpha: real, a: [?aDom] real
 	             beta,
 	             y, incy );*/
 	blas_dgemv( //cblas_order,
-	             //cblas_transa,
+	             transa,
 	             m,
 	             n,
 	             alpha,

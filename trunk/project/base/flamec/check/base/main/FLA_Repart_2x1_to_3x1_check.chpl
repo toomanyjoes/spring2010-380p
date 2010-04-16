@@ -62,13 +62,11 @@ def FLA_Repart_2x1_to_3x1_check( AT: FLA_Obj,  A0: FLA_Obj,
 
   if      ( side == FLA_TOP )
   {
-writeln("AT: ", AT);
     e_val = FLA_Check_attempted_repart_2x1( AT, mb );
     FLA_Check_error_code( e_val );
   }
   else if ( side == FLA_BOTTOM )
   {
-writeln("mb: ", mb," AB: ", AB);
     e_val = FLA_Check_attempted_repart_2x1( AB, mb );
     FLA_Check_error_code( e_val );
   }
