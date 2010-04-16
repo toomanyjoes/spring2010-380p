@@ -1,6 +1,6 @@
 // defines our main function
 
-use constants, FLA_Gemm_nn_unb_var1;
+use Time, constants, FLA_Gemm_nn_unb_var1;
 
 config var Afile: string = "";
 config var Bfile: string = "";
@@ -34,11 +34,14 @@ def main()
 	alpha.base.buffer(1,1) = alphaVal;
 	beta.base.buffer(1,1) = betaVal;
 
-	//                    alpha,  A, B,  beta,   C
+	var myTimer: Timer;
+	myTimer.start();
 	FLA_Gemm_nn_unb_var1(alpha, A, B, beta, C);
+	myTimer.stop();
 	writeln("A:\n",A.base.buffer);
 	writeln("B:\n",B.base.buffer);
 	writeln("C:\n", C.base.buffer);
+	writeln("Time: ", myTimer.elapsed());
 	writeArray(C.base.buffer, answer);
 }
 
