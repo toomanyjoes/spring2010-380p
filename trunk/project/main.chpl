@@ -67,8 +67,8 @@ def readArray(filename) {
   // able to read in the array wholesale, but this isn't currently
   // supported.
   //
-  forall i in 1..m do
-    forall j in 1..n do
+  for i in 1..m do
+    for j in 1..n do
       infile.read(X(i,j));
 
   // Close the file
