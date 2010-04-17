@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
 
   /* Timing trials for matrix sizes n=nfirst to nlast in increments 
      of ninc will be performed */
-  printf( "%% enter rows (n), and cols (m):" );
-  scanf( "%d%d", &n, &m );
-  printf( "%% %d %d\n", n, m );
+  printf( "%% enter rows (m), and cols (n):" );
+  scanf( "%d%d", &m, &n );
+  printf( "%% %d %d\n", m, n );
 
     /* Allocate space for the matrix and vectors */
 
