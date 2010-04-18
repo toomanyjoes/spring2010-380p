@@ -124,7 +124,7 @@ def FLA_Obj_create_ext( datatype: FLA_Datatype, elemtype: FLA_Elemtype, m: dim_t
   var rs = rs_in;
   var cs = cs_in;
 
-  var buffer_size: size_t;
+  var buffer_size: size_t_chpl;
 
   // Check the strides, and modify them if needed.
   if rs == 0 && cs == 0

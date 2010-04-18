@@ -34,7 +34,7 @@
 
 use constants, FLA_Query, FLA_Error_module;
 
-var fla_error_checking_level: uint = 2; // i.e. FLA_INTERNAL_ERROR_CHECKING_LEVEL;  using this crashed compiler // static unsigned int fla_error_checking_level = FLA_INTERNAL_ERROR_CHECKING_LEVEL;
+var fla_error_checking_level: uint = 0; // i.e. FLA_INTERNAL_ERROR_CHECKING_LEVEL;  using this crashed compiler // static unsigned int fla_error_checking_level = FLA_INTERNAL_ERROR_CHECKING_LEVEL;
 
 
 

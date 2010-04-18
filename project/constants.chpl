@@ -28,19 +28,17 @@ typedef int FLA_Precision;
 typedef int FLA_Domain;*/
 type dim_t = uint;	// typedef unsigned int dim_t;
 
-type size_t = int;
-
-
-/* Encodes the default level of internal error checking chosen at
-   configure-time. */
-param FLA_INTERNAL_ERROR_CHECKING_LEVEL: int = 2;	//#define FLA_INTERNAL_ERROR_CHECKING_LEVEL 2
-
+type size_t_chpl = int;
 
 
 // FLAME internal error checking level
 param FLA_FULL_ERROR_CHECKING: int = 2;	//#define FLA_FULL_ERROR_CHECKING 2
 param FLA_MIN_ERROR_CHECKING: int = 1;	//#define FLA_MIN_ERROR_CHECKING  1
 param FLA_NO_ERROR_CHECKING: int = 0;	//#define FLA_NO_ERROR_CHECKING   0
+
+/* Encodes the default level of internal error checking chosen at
+   configure-time. */
+param FLA_INTERNAL_ERROR_CHECKING_LEVEL: int = FLA_NO_ERROR_CHECKING;	//#define FLA_INTERNAL_ERROR_CHECKING_LEVEL 2
 
 
 // FLA_Elemtype

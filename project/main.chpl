@@ -38,9 +38,9 @@ def main()
 	myTimer.start();
 	FLA_Gemm_nn_unb_var1(alpha, A, B, beta, C);
 	myTimer.stop();
-	writeln("A:\n",A.base.buffer);
-	writeln("B:\n",B.base.buffer);
-	writeln("C:\n", C.base.buffer);
+//	writeln("A:\n",A.base.buffer);
+//	writeln("B:\n",B.base.buffer);
+//	writeln("C:\n", C.base.buffer);
 	writeln("Time: ", myTimer.elapsed());
 	writeArray(C.base.buffer, answer);
 }

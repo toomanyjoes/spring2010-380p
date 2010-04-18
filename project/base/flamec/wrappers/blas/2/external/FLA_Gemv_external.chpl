@@ -63,7 +63,6 @@ def FLA_Gemv_external( transa: FLA_Trans, alpha: FLA_Obj, A: FLA_Obj, x: FLA_Obj
   blis_transa = FLA_Param_map_flame_to_blis_trans( transa, blis_transa );
   blis_conjx = FLA_Param_map_flame_to_blis_conj( FLA_NO_CONJUGATE, blis_conjx );
 
-
   select datatype {
   
   when FLA_FLOAT
