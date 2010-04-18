@@ -31,66 +31,128 @@
 */
 
 //#include "FLAME.h"
-use constants, FLA_Error_wrapper, FLA_View, FLA_Gemv_external_module;
+use constants, FLA_Error_wrapper, FLA_View, FLA_Gemv_external_module, Time;
 
 //#ifdef FLA_ENABLE_NON_CRITICAL_CODE
 
 def FLA_Gemm_nn_unb_var1( alpha: FLA_Obj, A: FLA_Obj, B: FLA_Obj, beta: FLA_Obj, C:FLA_Obj ): FLA_Error
 {
-  var AT: FLA_Obj = new FLA_Obj();
-  var A0: FLA_Obj = new FLA_Obj();
-  var AB: FLA_Obj = new FLA_Obj();
-  var a1t: FLA_Obj = new FLA_Obj();
-  var A2: FLA_Obj = new FLA_Obj();
+  var AT: FLA_Obj;
+  var A0: FLA_Obj;
+  var AB: FLA_Obj;
+  var a1t: [1..A.base.bufDomain.high(1)] FLA_Obj;
+  var A2: FLA_Obj;
+  var CT: FLA_Obj;
+  var C0: FLA_Obj;
+  var CB: FLA_Obj;
+  var c1t: [1..A.base.bufDomain.high(1)] FLA_Obj;
+  var C2: FLA_Obj;
 
-  var CT: FLA_Obj = new FLA_Obj();
-  var C0: FLA_Obj = new FLA_Obj();
-  var CB: FLA_Obj = new FLA_Obj();
-  var c1t: FLA_Obj = new FLA_Obj();
-  var C2: FLA_Obj = new FLA_Obj();
+  AT = new FLA_Obj();
+  A0 = new FLA_Obj();
+  AB = new FLA_Obj();
+  A2 = new FLA_Obj();
+
+  CT = new FLA_Obj();
+  C0 = new FLA_Obj();
+  CB = new FLA_Obj();
+  C2 = new FLA_Obj();
+
+  forall i in (1..A.base.bufDomain.high(1))
+  {
+    a1t(i) = new FLA_Obj();
+    c1t(i) = new FLA_Obj();
+  }
 
   FLA_Error_wrapper.FLA_Scal_external( beta, C );
 
+  cobegin
+  {
   FLA_Part_2x1( A,    AT, 
                       AB,            0, FLA_TOP );
 
 
   FLA_Part_2x1( C,    CT, 
                       CB,            0, FLA_TOP );
+  }
+//  while FLA_Obj_length( AT ) < FLA_Obj_length( A ) {
+  for i in (1..A.base.bufDomain.high(1))
+  {
 
-  while FLA_Obj_length( AT ) < FLA_Obj_length( A ) {
-
+    cobegin
+    {
     FLA_Repart_2x1_to_3x1( AT,                A0, 
                         /* ** */            /* *** */
-                                              a1t, 
+                                              a1t(i), 
                            AB,                A2,        1, FLA_BOTTOM );
 
     FLA_Repart_2x1_to_3x1( CT,                C0, 
                         /* ** */            /* *** */
-                                              c1t, 
+                                              c1t(i), 
                            CB,                C2,        1, FLA_BOTTOM );
-
-    /*------------------------------------------------------------*/
-
-    /* c1t  = a1t * B + c1t    */
-    /* c1t' = B' * a1t' + c1t' */
-
-    FLA_Gemv_external( FLA_TRANSPOSE, alpha, B, a1t, FLA_ONE, c1t );
-
-    /*------------------------------------------------------------*/
-
+    }
+cobegin
+    {
     FLA_Cont_with_3x1_to_2x1( AT,                A0, 
-                                                  a1t, 
+                                                  a1t(i), 
                             /* ** */           /* *** */
                               AB,                A2,     FLA_TOP );
 
     FLA_Cont_with_3x1_to_2x1( CT,                C0, 
-                                                  c1t, 
+                                                  c1t(i), 
                             /* ** */           /* *** */
                               CB,                C2,     FLA_TOP );
+    }
+}
+    /*------------------------------------------------------------*/
 
+    /* c1t  = a1t * B + c1t    */
+    /* c1t' = B' * a1t' + c1t' */
+  forall i in (1..a1t(1).base.bufDomain.high(1))
+  {
+    FLA_Gemv_external( FLA_TRANSPOSE, alpha, B, a1t(i), FLA_ONE, c1t(i) );
+   
   }
 
+    /*------------------------------------------------------------*/
+
+
+ cobegin
+  {
+  FLA_Part_2x1( A,    AT, 
+                      AB,            0, FLA_TOP );
+
+
+  FLA_Part_2x1( C,    CT, 
+                      CB,            0, FLA_TOP );
+  }
+  for i in (1..a1t(1).base.bufDomain.high(1))
+  {
+    cobegin
+    {
+    FLA_Repart_2x1_to_3x1( AT,                A0, 
+                        /* ** */            /* *** */
+                                              a1t(i), 
+                           AB,                A2,        1, FLA_BOTTOM );
+
+    FLA_Repart_2x1_to_3x1( CT,                C0, 
+                        /* ** */            /* *** */
+                                              c1t(i), 
+                           CB,                C2,        1, FLA_BOTTOM );
+    }
+    cobegin
+    {
+    FLA_Cont_with_3x1_to_2x1( AT,                A0, 
+                                                  a1t(i), 
+                            /* ** */           /* *** */
+                              AB,                A2,     FLA_TOP );
+
+    FLA_Cont_with_3x1_to_2x1( CT,                C0, 
+                                                  c1t(i), 
+                            /* ** */           /* *** */
+                              CB,                C2,     FLA_TOP );
+    }
+  }
   return FLA_SUCCESS;
 }
 
