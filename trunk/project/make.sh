@@ -31,12 +31,18 @@ function makeClean()
 	done
 }
 
-if [[ $1 == "all" ]]
+if [[ $1 == "parallel" ]]
 then
 	getdir
-	echo "chpl --fast $src_files"
+	echo "chpl --fast -o flame_parallel $src_files"
 	echo
-	chpl --fast $src_files
+	chpl --fast -o flame_parallel $src_files
+elif [[ $1 == "serial" ]]
+then
+	getdir
+	echo "chpl --fast --serial -o flame_serial $src_files"
+	echo
+	chpl --fast --serial -o flame_serial $src_files
 else
 	makeClean
 fi
