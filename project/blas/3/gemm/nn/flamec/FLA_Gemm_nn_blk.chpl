@@ -35,55 +35,10 @@ Modified from $CHPL_HOME/examples/hpcc/hpl.chpl
 // locale only stores one copy of each block it requires for all of
 // its rows/columns.
 //
-use constants;
-const blkSize:int = 10;
+use constants, CyclicDist;
+// const blkSize:int = 100;
 type elemType = real;
 type indexType = int;
-/*// def schurComplement(Ab: [1..n, 1..n+1] elemType, ptOp: dim_t) {
-def schurComplement(Ab: [?AbD] elemType, ptOp: indexType) {
-  //const AbD = Ab.domain;
-
-  //
-  // Calculate location of ptSol (see diagram above)
-  //
-  const ptSol = ptOp+blkSize;
-
-  //
-  // Copy data into replicated array so every processor has a local copy
-  // of the data it will need to perform a local matrix-multiply.  These
-  // replicated distributions aren't implemented yet, but imagine that
-  // they look something like the following:
-  //
-  //var replAbD: domain(2) 
-  //            dmapped new Dimensional(BlkCyc(blkSize), Replicated)) 
-  //          = AbD[ptSol.., 1..#blkSize];
-  //
-  const replAD: domain(2) = AbD[ptSol.., ptOp..#blkSize],
-        replBD: domain(2) = AbD[ptOp..#blkSize, ptSol..];
-    
-  const replA : [replAD] elemType = Ab[ptSol.., ptOp..#blkSize],
-        replB : [replBD] elemType = Ab[ptOp..#blkSize, ptSol..];
-
-  // do local matrix-multiply on a block-by-block basis
-  forall (row,col) in AbD[ptSol.., ptSol..] by (blkSize, blkSize) {
-    //
-    // At this point, the dgemms should all be local, so assert that
-    // fact
-    //
-    local {
-      const aBlkD = replAD[row..#blkSize, ptOp..#blkSize],
-            bBlkD = replBD[ptOp..#blkSize, col..#blkSize],
-            cBlkD = AbD[row..#blkSize, col..#blkSize];
-
-      dgemm(aBlkD.dim(1).length,
-            aBlkD.dim(2).length,
-            bBlkD.dim(2).length,
-            replA(aBlkD),
-            replB(bBlkD),
-            Ab(cBlkD));
-    }
-  }
-}*/
 
 //
 // calculate C = C + A * B.
@@ -105,97 +60,51 @@ def dgemm(p: indexType,       // number of rows in A
 
 def FLA_Gemm_nn_blk( alpha: FLA_Obj, A: FLA_Obj, B: FLA_Obj, beta: FLA_Obj, C:FLA_Obj ): FLA_Error
 {
-  //const AbD = Ab.domain;
-
-  //
-  // Calculate location of ptSol (see diagram above)
-  //
-//   const ptSol = ptOp+blkSize;
-
-  //
-  // Copy data into replicated array so every processor has a local copy
-  // of the data it will need to perform a local matrix-multiply.  These
-  // replicated distributions aren't implemented yet, but imagine that
-  // they look something like the following:
-  //
-  //var replAbD: domain(2) 
-  //            dmapped new Dimensional(BlkCyc(blkSize), Replicated)) 
-  //          = AbD[ptSol.., 1..#blkSize];
-  //
-
-
-//   const replARowsD: domain(2) = A.base.bufDomain[1.., 1..#blkSize];
-//         replAColsD: domain(2) = A.base.bufDomain[1..#blkSize, 1..];
-//   const replBRowsD: domain(2) = B.base.bufDomain[1.., 1..#blkSize],
-//    const     replBColsD: domain(2) = B.base.bufDomain[1..#blkSize, 1..];
-//    const   replA : [replARowsD] elemType = A.base.buffer[1.., 1..#blkSize],
-//          replB : [replBColsD] elemType = B.base.buffer[1..#blkSize, 1..];
-// writeln("replARowsD: ",replARowsD);
-// writeln("replBColsD: ", replBColsD);
-// writeln("replA:\n", replA);
-// writeln("replB:\n", replB);
-  // do local matrix-multiply on a block-by-block basis
 // startVerboseComm();
-startCommDiagnostics();
+// startCommDiagnostics();
+   var blkSize: int;
+   if A.base.bufDomain.high(2) % numLocales == 0 then
+     blkSize = A.base.bufDomain.high(2)/numLocales;
+   else
+     blkSize = 10;
    var loc:int = -1;
-   forall (row,col) in C.base.bufDomain by (blkSize, blkSize) {
-  loc = (loc + 1) % numLocales;
-// writeln("loc: ", loc);
-  on Locales(loc) {
-//    const row = here.id * blkSize;
-    const replARowsD: domain(2) = A.base.bufDomain[row..row+blkSize-1, 1..];
-//        replAColsD: domain(2) = A.base.bufDomain[row..#blkSize, 1..];
-//  const replBRowsD: domain(2) = B.base.bufDomain[1.., col..col+blkSize-1];
-     const     replBColsD: domain(2) = B.base.bufDomain[1.., col..col+blkSize-1];
-     const     replCD: domain(2) = C.base.bufDomain[row..row+blkSize-1, col..col+blkSize-1];
-     var alphaVal: real;
-     var betaVal: real;
-     var replA : [replARowsD] elemType;
-     var replB : [replBColsD] elemType;
-     var replC : [replCD] elemType;
-     cobegin {
-       replA = A.base.buffer[row..row+blkSize-1, 1..];
-       replB = B.base.buffer[1.., col..col+blkSize-1];
+   for (row,col) in C.base.bufDomain by (blkSize, blkSize) {
+     loc = (loc + 1) % numLocales;
+     on Locales(loc) {
+       const localRow = row;
+       const localCol = col;
+       const localBlkSize = blkSize;
+       const replARowsD: domain(2) = A.base.bufDomain[localRow..localRow+localBlkSize-1, 1..];
+       const replBColsD: domain(2) = B.base.bufDomain[1.., localCol..localCol+localBlkSize-1];
+       const replCD:     domain(2) = C.base.bufDomain[localRow..localRow+localBlkSize-1, localCol..localCol+localBlkSize-1];
+       var alphaVal: real;
+       var betaVal: real;
+       var replA : [replARowsD] elemType;
+       var replB : [replBColsD] elemType;
+       var replC : [replCD] elemType;
+
+       replA = A.base.buffer(replARowsD);
+       replB = B.base.buffer(replBColsD);
        replC = C.base.buffer(replCD);
-//  writeln("id: ", here.id, " replARowsD: ", replARowsD);
-//  writeln("replBColsD: ", replBColsD);
-//  writeln("replA:\n", replA);
-//  writeln("replB:\n", replB);
-    //
-    // At this point, the dgemms should all be local, so assert that
-    // fact
-    //
        alphaVal = alpha.base.buffer(1,1);
        betaVal = beta.base.buffer(1,1);
-     }
-     var cBlkD: domain(2);
-     local {
-      const aBlkD = replARowsD[row..row+blkSize-1, 1..];
-// writeln("one");
-      const bBlkD = replBColsD[1.., col..col+blkSize-1];
-// writeln("two");
-      cBlkD = replCD[row..row+blkSize-1, col..col+blkSize-1];
-//  writeln("\naBlkD: ", aBlkD);
-//  writeln(A.base.buffer(aBlkD));
-//  writeln("bBlkD: ", bBlkD);
-//  writeln(B.base.buffer(bBlkD));
-// writeln("cBlkD: ", cBlkD);
-// writeln("row: ", row, " col: ", col, " aBlkD.dim(1).length: ",aBlkD.dim(1).length, "  aBlkD.dim(2).length: ", aBlkD.dim(2).length, " bBlkD.dim(2).length: ",bBlkD.dim(1).length, " cBlkD: ", cBlkD);
-      dgemm(aBlkD.dim(1).length,
-            aBlkD.dim(2).length,
-            bBlkD.dim(2).length,
-            replA(aBlkD),
-            replB(bBlkD),
-            replC(cBlkD), //C.base.buffer(cBlkD),
-            alphaVal,    //alpha.base.buffer(1,1),
-            betaVal);    //beta.base.buffer(1,1));
-    } // end local
-// writeln("C: \n",C.base.buffer);
-      C.base.buffer(cBlkD) = replC(cBlkD);
-    }  // end on loc
-  } // end forall
+
+       var cBlkD: domain(2);
+       local {
+         dgemm(replA.domain.dim(1).length,
+               replA.domain.dim(2).length,
+               replB.domain.dim(2).length,
+               replA,
+               replB,
+               replC, //C.base.buffer(cBlkD),
+               alphaVal,    //alpha.base.buffer(1,1),
+               betaVal);    //beta.base.buffer(1,1));
+        } // end local
+      C.base.buffer(replCD) = replC;
+      }  // end on loc
+    } // end forall
 // stopVerboseComm();
-stopCommDiagnostics();
-writeln(getCommDiagnostics());
+// stopCommDiagnostics();
+// writeln(getCommDiagnostics());
 }
 

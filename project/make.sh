@@ -17,12 +17,27 @@ function getdir()
 		getdir
 		cd ..
 	done
-}	
+}
 
-getdir
-#echo $src_files
+function makeClean()
+{
+        rm *~ 2> /dev/null
+	local loc_dirs="`ls -F | grep "/"`"
+	for subdir in $loc_dirs
+	do
+		cd $subdir
+		makeClean
+		cd ..
+	done
+}
 
-echo "chpl -O --fast $src_files"
-echo
-chpl -O --fast $src_files 
+if [[ $1 == "all" ]]
+then
+	getdir
+	echo "chpl --fast $src_files"
+	echo
+	chpl --fast $src_files
+else
+	makeClean
+fi
 

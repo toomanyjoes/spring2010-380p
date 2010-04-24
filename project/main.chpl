@@ -1,6 +1,6 @@
 // defines our main function
 
-use Time, constants, FLA_Gemm_nn_unb_var1;
+use Time, constants, FLA_Gemm_nn_unb_var1, FLA_Gemm_nn_blk;
 
 config var Afile: string = "";
 config var Bfile: string = "";
@@ -21,11 +21,13 @@ def main()
 	var A: FLA_Obj = new FLA_Obj();
 	var B: FLA_Obj = new FLA_Obj();
 	var C: FLA_Obj = new FLA_Obj();
+	var C2: FLA_Obj = new FLA_Obj();
 	var alpha: FLA_Obj = new FLA_Obj();
 	var beta: FLA_Obj = new FLA_Obj();
 	FLA_Obj_create(FLA_DOUBLE, Aarr.domain.high(1):uint, Aarr.domain.high(2):uint, 0, 0, A);
 	FLA_Obj_create(FLA_DOUBLE, Barr.domain.high(1):uint, Barr.domain.high(2):uint, 0, 0, B);
 	FLA_Obj_create(FLA_DOUBLE, Aarr.domain.high(1):uint, Barr.domain.high(2):uint, 0, 0, C);
+	FLA_Obj_create(FLA_DOUBLE, Aarr.domain.high(1):uint, Barr.domain.high(2):uint, 0, 0, C2);
 	FLA_Obj_create(FLA_DOUBLE, 1, 1, 0, 0, alpha);
 	FLA_Obj_create(FLA_DOUBLE, 1, 1, 0, 0, beta);
 
@@ -38,11 +40,28 @@ def main()
 	myTimer.start();
 	FLA_Gemm_nn_unb_var1(alpha, A, B, beta, C);
 	myTimer.stop();
+
 //	writeln("A:\n",A.base.buffer);
 //	writeln("B:\n",B.base.buffer);
 //	writeln("C:\n", C.base.buffer);
-	writeln("Time: ", myTimer.elapsed());
-	writeArray(C.base.buffer, answer);
+	writeln("Unblocked Time: ", myTimer.elapsed());
+
+	myTimer.clear();
+	myTimer.start();
+	FLA_Gemm_nn_blk(alpha, A, B, beta, C2);
+	myTimer.stop();
+	writeln("Blocked Time: ", myTimer.elapsed());
+
+	if !arraysEqual(C.base.buffer, C2.base.buffer)
+	{
+		writeln("\nBlocked and unblocked answers did not match!!\n");
+		writeArray(C.base.buffer, answer + "_unblk");
+		writeArray(C2.base.buffer, answer+ "_blk");
+	}
+	else
+	{
+		writeArray(C2.base.buffer, answer);
+	}
 }
 
 // From fileIO.chpl in Chapel tutorial
@@ -98,3 +117,13 @@ def writeArray(X, filename) {
   outfile.close();
 }
 
+def arraysEqual(C, C2): bool {
+  if C.domain.numIndices != C2.domain.numIndices then
+    return false;
+  for i in C.domain
+  {
+    if C(i) != C2(i) then
+      return false;
+  }
+  return true;
+}
