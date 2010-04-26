@@ -23,22 +23,36 @@ def main()
 	var C: [1..m, 1..p] real;
 	var Col: [1..m] real;
 	var Row: [1..p] real;
-
+	var loc1: int = -1;
+	var loc2: int = -1;
 	var myTimer: Timer;
 	myTimer.start();
 
-	forall k in (1..n)
+	for k in (1..n)
 	{
-		Col = A[1..m, k];
-		Row = B[k, 1..p];
-		forall (i,j) in C.domain do
-			C(i,j) += Col(i) * Row(j);
+		loc1 = (k + 1) % numLocales;
+		on Locales(loc1)
+		{
+			Col = A[1..m, k];
+			Row = B[k, 1..p];
+			forall (i,j) in C.domain
+			{
+				//loc2 = (i + 1) % numLocales;
+				//on Locales(loc2)
+				//{
+				//local
+				//{
+					C(i,j) += Col(i) * Row(j);
+				//}
+				//}
+			}
+		}
 	}
 	
 	myTimer.stop();
 //	writeln("A:\n",A);
 //	writeln("B:\n",B);
-//	writeln("C:\n", C);
+	writeln("C:\n", C);
 	writeln("Time: ", myTimer.elapsed());
 }
 
