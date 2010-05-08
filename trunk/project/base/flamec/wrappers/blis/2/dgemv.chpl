@@ -5,7 +5,7 @@ def blas_dgemv( transa: string, m: int, n: int, alpha: real, a: [?aDom] real, ld
 {
 	if transa == BLIS_TRANSPOSE
 	{
-		forall (i,j) in aDom
+		forall (i,j) in [1..aDom.high(2), 1..aDom.high(1)]
 		{
 			y(incy,i) = beta * y(incy,i) + (alpha * a(j,i)) * x(incx,j);
 		}
