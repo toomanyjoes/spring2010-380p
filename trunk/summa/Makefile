@@ -1,9 +1,13 @@
 CHPL=chpl
+CHPLFLAGS = -O --fast
 
 all: parallel
 
 parallel: summa.chpl
 	${CHPL} --fast -o summa_parallel summa.chpl
+
+blksumma: psumma.chpl
+	${CHPL} ${CHPLFLAGS} -o $@ psumma.chpl
 
 serial: summa.chpl
 	${CHPL} --fast --serial -o summa_serial summa.chpl
