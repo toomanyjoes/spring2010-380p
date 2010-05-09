@@ -58,17 +58,27 @@ def dgemm(p: indexType,       // number of rows in A
         C[i,j] += (alpha * A[i, k]) * (beta * B[k, j]);
 }
 
+config var blkSize: int = 0;
 def FLA_Gemm_nn_blk( alpha: FLA_Obj, A: FLA_Obj, B: FLA_Obj, beta: FLA_Obj, C:FLA_Obj ): FLA_Error
 {
 // startVerboseComm();
-// startCommDiagnostics();
-   var blkSize: int;
-   if A.base.bufDomain.high(2) % numLocales == 0 then
-     blkSize = A.base.bufDomain.high(2)/numLocales;
-   else
-     blkSize = 10;
+if blkSize == 0
+{
+writeln("blkSize == 0");
+		exit(1);
+}
+//  startCommDiagnostics();
+//    var blkSize: int;
+//    if A.base.bufDomain.high(2) % numLocales == 0 then
+//      blkSize = A.base.bufDomain.high(2)/numLocales;
+//    else
+//      blkSize = 100;
    var loc:int = -1;
+var loopct = 0;
+var lock$: single bool;
    for (row,col) in C.base.bufDomain by (blkSize, blkSize) {
+loopct += 1;
+ startCommDiagnostics();
      loc = (loc + 1) % numLocales;
      on Locales(loc) {
        const localRow = row;
@@ -102,9 +112,21 @@ def FLA_Gemm_nn_blk( alpha: FLA_Obj, A: FLA_Obj, B: FLA_Obj, beta: FLA_Obj, C:FL
         } // end local
       C.base.buffer(replCD) = replC;
       }  // end on loc
+writeln("loopct: ",loopct," row: ", row, " col: ",col);
+stopCommDiagnostics();
+  writeln(getCommDiagnostics());
     } // end forall
 // stopVerboseComm();
-// stopCommDiagnostics();
-// writeln(getCommDiagnostics());
+//   stopCommDiagnostics();
+  writeln(getCommDiagnostics());
+  var diag = getCommDiagnostics();
+  var total = 0;
+  for i in diag.domain
+  {
+    writeln(diag(i));
+    writeln(diag(i)(1) + diag(i)(2));
+    total += diag(i)(1) + diag(i)(2);
+  }
+  writeln("total: ", total);
 }
 
