@@ -1,0 +1,160 @@
+\begin{center}
+\begin{tabular}{|c | c | c|}
+\cline{1-1} \cline{3-3}
+% --------------------------------------
+\Algorithm & & libFLAME code \\ \cline{1-1} \cline{3-3}
+% --------------------------------------
+% & \\
+% --------------------------------------
+\begin{minipage}[t]{3in}
+\resetsteps      % Reset all the commands to create a blank worksheet  
+
+% Define the operation to be computed
+
+\renewcommand{\routinenameL}{ C = AB + \hat{C} \mbox{~~~~~(Variant 1, Unblocked)}}
+
+% Step 3: Loop-guard 
+
+\renewcommand{\guard}{
+  n( A_L ) < n( A )
+}
+
+% Step 4: Define Initialize 
+
+\renewcommand{\partitioningsL}{
+  $
+  A \rightarrow
+  \FlaOneByTwo{A_L}{A_R}
+  $
+,
+  $
+  B \rightarrow
+  \FlaTwoByOne{B_{T}}
+              {B_{B}}
+  $
+}
+
+\renewcommand{\partitionsizesL}{
+$ A_L $ has $ 0 $ columns,
+$ B_{T} $ has $ 0 $ rows
+}
+
+% Step 5a: Repartition the operands 
+
+\renewcommand{\repartitioningsL}{
+$
+  \FlaOneByTwo{A_L}{A_R}
+\rightarrow  \FlaOneByThreeR{A_0}{a_1}{A_2}
+$
+,
+\\
+$
+  \FlaTwoByOne{ B_T }
+              { B_B }
+\rightarrow
+  \FlaThreeByOneB{B_0}
+                 {b_1^T}
+                 {B_2}
+$
+}
+
+\renewcommand{\repartitionsizesL}{
+$ a_1 $ has $1$ column,
+$ b_1 $ has $ 1 $ row}
+
+% Step 5b: Move the double lines 
+
+\renewcommand{\moveboundariesL}{
+$
+  \FlaOneByTwo{A_L}{A_R}
+\leftarrow  \FlaOneByThreeL{A_0}{a_1}{A_2}
+$
+,
+\\
+$
+  \FlaTwoByOne{ B_T }
+              { B_B }
+\leftarrow
+  \FlaThreeByOneT{B_0}
+                 {b_1^T}
+                 {B_2}
+$
+}
+
+% Step 8: Insert the updates required to change the 
+%         state from that given in Step 6 to that given in Step 7
+% Note: The below needs editing!!!
+
+\renewcommand{\updateL}{
+$
+  \begin{array}{l}
+    C = a_1 b^T_1 + C
+  \end{array}
+$
+}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\end{minipage}
+& &
+\begin{minipage}[t]{3in}
+{\tiny
+\lstset{language=C,
+  basicstyle=\ttfamily,
+  commentstyle=\color{red},
+  emph={[1]FLA_Part_2x2,FLA_Repart_2x2_to_3x3,FLA_Cont_with_3x3_to_2x2},
+  emphstyle={[1]\color{blue}},
+  emph={[2]FLA_Syrk,FLA_Gemm,FLA_Trsm},
+  emphstyle={[2]\color{green}},
+  emph={[3]FLA_Chol_unb_external},
+  emphstyle={[3]\color{cyan}},
+}
+\begin{lstlisting}
+FLA_Error FLA_Gemm_nn_unb_var1( FLA_Obj alpha, FLA_Obj A, FLA_Obj B, FLA_Obj beta, FLA_Obj C )
+{
+  FLA_Obj AT,              A0,
+          AB,              a1t,
+                           A2;
+
+  FLA_Obj CT,              C0,
+          CB,              c1t,
+                           C2;
+
+  FLA_Scal_external( beta, C );
+
+  FLA_Part_2x1( A,    &AT, 
+                      &AB,            0, FLA_TOP );
+
+  FLA_Part_2x1( C,    &CT, 
+                      &CB,            0, FLA_TOP );
+
+  while ( FLA_Obj_length( AT ) < FLA_Obj_length( A ) ){
+
+    FLA_Repart_2x1_to_3x1( AT,                &A0, 
+                        /* ** */            /* *** */
+                                              &a1t, 
+                           AB,                &A2,        1, FLA_BOTTOM );
+                           
+    FLA_Repart_2x1_to_3x1( CT,                &C0, 
+                        /* ** */            /* *** */
+                                              &c1t, 
+                           CB,                &C2,        1, FLA_BOTTOM );
+    /*------------------------------------------------------------*/
+    /* c1t  = a1t * B + c1t    */
+    /* c1t' = B' * a1t' + c1t' */
+    FLA_Gemv_external( FLA_TRANSPOSE, alpha, B, a1t, FLA_ONE, c1t );
+    /*------------------------------------------------------------*/
+
+    FLA_Cont_with_3x1_to_2x1( &AT,                A0, 
+                                                  a1t, 
+                            /* ** */           /* *** */
+                              &AB,                A2,     FLA_TOP );
+    FLA_Cont_with_3x1_to_2x1( &CT,                C0, 
+                                                  c1t, 
+                            /* ** */           /* *** */
+                              &CB,                C2,     FLA_TOP );
+  }
+  return FLA_SUCCESS;
+}
+\end{lstlisting}
+}
+
+\end{minipage}
