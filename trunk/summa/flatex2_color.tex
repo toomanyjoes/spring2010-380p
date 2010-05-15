@@ -1,0 +1,208 @@
+\newcommand{\FlaComputeSection}[1]{
+\color{red}
+\setlength{\unitlength}{#1}
+\begin{picture}(1,0.01)
+\put(0,0){\line(1,0){1}}
+\put(0,0.01){\line(1,0){1}}
+\end{picture}
+}
+
+\newcommand{\routinenameL}{}
+\newcommand{\routinenameR}{}
+
+\newcommand{\partitioningsL}{}
+\newcommand{\partitioningsR}{}
+
+\newcommand{\partitionsizesL}{}
+\newcommand{\partitionsizesR}{}
+
+\newcommand{\repartitioningsL}{}
+\newcommand{\repartitioningsR}{}
+
+\newcommand{\repartitionsizesL}{}
+\newcommand{\repartitionsizesR}{}
+
+\newcommand{\blocksizeL}{}
+\newcommand{\blocksizeR}{}
+
+\newcommand{\moveboundariesL}{}
+\newcommand{\moveboundariesR}{}
+
+\newcommand{\updateL}{}
+\newcommand{\updateR}{}
+
+\newcommand{\WSpartitionNarrowL}{
+\begin{minipage}[t]{2.0in}
+\begin{tabbing}
+id \= id \= \kill
+{\bf \color{blue} Partition} 
+\partitioningsL \+ \\
+{\bf \color{blue} where } 
+\begin{minipage}[t]{2in}
+\partitionsizesL 
+\end{minipage}
+\end{tabbing}
+\end{minipage}
+}
+
+\newcommand{\WSpartitionNarrowR}{
+\begin{minipage}[t]{2.0in}
+\begin{tabbing}
+id \= id \= \kill
+{\bf Partition} 
+\partitioningsR \+ \\
+{\bf where} 
+\begin{minipage}[t]{2in}
+\partitionsizesR 
+\end{minipage}
+\end{tabbing}
+\end{minipage}
+}
+
+
+\newcommand{\WSrepartitionNarrowL}{
+\begin{minipage}[t]{2.05in}
+{\bf \color{blue} Repartition}
+\begin{tabbing}
+i \= i \= \+ \kill
+\repartitioningsL \+ \\
+{\bf \color{blue} where}
+\begin{minipage}[t]{2in}
+\repartitionsizesL
+\end{minipage}
+\end{tabbing}
+\end{minipage}
+}
+
+
+\newcommand{\WSrepartitionNarrowR}{
+\begin{minipage}[t]{2.05in}
+{\bf \color{blue} Repartition}
+\begin{tabbing}
+i \= i \= \+ \kill
+\repartitioningsR \+ \\
+{\bf \color{blue} where}
+\begin{minipage}[t]{2in}
+\repartitionsizesR
+\end{minipage}
+\end{tabbing}
+\end{minipage}
+}
+
+
+\newcommand{\WSblocksizeL}{
+\ifthenelse{ \equal{\blocksizeL}{1}}{}
+{%
+\ifthenelse{ \equal{\blocksizeL}{blank} }{}
+}
+{{\bf \color{blue} Determine block size $ \blocksizeL $}} 
+}
+
+\newcommand{\WSblocksizeR}{
+\ifthenelse{ \equal{\blocksizeR}{1} }{}
+{%
+\ifthenelse{ \equal{\blocksizeR}{blank} }{}
+}
+{{\bf \color{blue} Determine block size $ \blocksizeR $}} 
+}
+
+
+\newcommand{\WSmoveboundaryNarrowL}{
+\begin{minipage}[t]{2.05in}
+{\bf \color{blue} Continue with}
+\begin{tabbing}
+i \= \+ \kill
+\moveboundariesL 
+\end{tabbing}
+\end{minipage}
+}
+
+
+
+\newcommand{\WSmoveboundaryNarrowR}{
+\begin{minipage}[t]{2.05in}
+{\bf Continue with}
+\begin{tabbing}
+i \= \+ \kill
+\moveboundariesR 
+\end{tabbing}
+\end{minipage}
+}
+
+
+\newcommand{\WSupdateL}{
+\updateL
+}
+
+\newcommand{\WSupdateR}{
+\updateR
+}
+
+
+\newcommand{\FlaAlgorithmTwo}{
+\begin{center}
+\begin{tabular}{| p{3.0in} | @{}c@{} | p{3.0in} |} 
+\cline{1-1} \cline{3-3}
+% {\bf \color{blue} Algorithm:} 
+$\routinenameL$
+&
+~
+&
+% {\bf \color{blue} Algorithm:} 
+$\routinenameR$
+\\ \cline{1-1} \cline{3-3}
+\begin{tabular}{@{}l}
+\WSpartitionNarrowL
+\end{tabular}
+&
+&
+\begin{tabular}{@{}l}
+\WSpartitionNarrowR
+\end{tabular}
+\\
+{\bf \color{blue} while} \WSguard { \bf \color{blue} do} 
+&
+&
+{\bf \color{blue} while} \WSguard { \bf \color{blue} do} \\
+\ifthenelse{ \equal{\blocksizeL}{blank} }{
+\ifthenelse{ \equal{\blocksizeR}{blank} }{}
+{
+\ \hspace{0.0in} \WSblocksizeL
+&
+&
+\ \hspace{0.0in} \WSblocksizeR
+\\}
+}
+\ \hspace{0.0in} \WSrepartitionNarrowL 
+&
+&
+\ \hspace{0.0in} \WSrepartitionNarrowR 
+\\
+{\hspace{0.0in} \FlaComputeSection{2.75in} }
+&
+&
+{\hspace{0.0in} \FlaComputeSection{2.75in} }
+\\
+{\hspace{0.0in} \WSupdateL} 
+&
+&
+{\hspace{0.0in} \WSupdateR} 
+\\
+{\hspace{0.0in} \FlaComputeSection{2.75in} }
+&
+&
+{\hspace{0.0in} \FlaComputeSection{2.75in} }
+\\
+{\ \hspace{0.0in} \WSmoveboundaryNarrowL} 
+&
+&
+{\ \hspace{0.0in} \WSmoveboundaryNarrowR} 
+\\
+{{\bf \color{blue} endwhile}} 
+&
+&
+{{\bf \color{blue} endwhile}} 
+\\ \cline{1-1} \cline{3-3}
+\end{tabular}
+\end{center}
+}
