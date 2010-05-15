@@ -1,0 +1,303 @@
+% THEOREMS -------------------------------------------------------
+
+\setlength{\topsep}{0pt}
+\newtheorem{theorem}{Theorem}[chapter] % already in SIAM macros
+\newtheorem{algorithm}[theorem]{Algorithm} % already in SIAM macros
+\newtheorem{lemma}[theorem]{Lemma} % already in SIAM macros
+\newtheorem{corollary}[theorem]{Corollary} % already in SIAM macros
+%\newtheorem{example}{Example} % already in SIAM macros
+\newtheorem{example}[theorem]{Example} % already in SIAM macros
+\newtheorem{definition}[theorem]{Definition} % already in SIAM macros
+%\newtheorem{definition}{Definition} % already in SIAM macros
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{exercise}[theorem]{Exercise}
+% \renewenvironment{proof}{\noindent
+% {\bf Proof:}}
+% {\hfill {\bf endofproof}}
+
+\newenvironment{boxedexample}{
+\noindent
+\newline
+\begin{boxedminipage}[t]{\textwidth}
+\addtocounter{ourexample}{1}%
+{\bf Example \thechapter.\theourexample.}
+\em
+}
+{
+\end{boxedminipage}
+}
+
+\newenvironment{boxedexercise}{
+\noindent
+\newline
+\begin{boxedminipage}[t]{\textwidth}
+\begin{exercise}
+}
+{
+\end{exercise}
+\end{boxedminipage}
+}
+
+\newenvironment{boxit}{
+\noindent
+\newline
+\begin{boxedminipage}[t]{\textwidth}
+}
+{
+\end{boxedminipage}
+}
+
+\newenvironment{boxedremark}{%
+\noindent
+\begin{boxedminipage}[t]{\textwidth}
+%\vspace{-0.2in}
+\begin{remark}
+}
+{
+\end{remark}
+\end{boxedminipage}
+}
+
+% \newcounter{remark}
+% \newcounter{mydefinition}
+
+%%\newenvironment{boxedremark}{%
+%%%
+%%\noindent
+%%\begin{boxedminipage}[t]{\textwidth}
+%%\addtocounter{remark}{1}%
+%%{\bf Remark \thechapter.\theremark.}
+%%\em
+%%}
+%%{
+%%\end{boxedminipage}
+%%}
+
+
+\newenvironment{notetoexpert}{%
+\noindent
+\newline
+\begin{boxedminipage}[t]{\textwidth}
+\addtocounter{remark}{1}%
+{\bf Note to the skeptical expert.}
+\em
+}
+{
+\end{boxedminipage}
+}
+
+
+\newenvironment{boxeddefinition}{%
+\noindent
+\newline
+\begin{boxedminipage}[t]{\textwidth}
+\addtocounter{mydefinition}{1}%
+{\bf Definition \chapter.\themydefinition.}
+\em
+}
+{
+\end{boxedminipage}
+}
+
+\newcommand{\eop}{
+{\bf endofproof}
+}
+
+\newcommand{\I}{\mathbb{I}}
+\renewcommand{\R}{\mathbb{R}}
+\renewcommand{\C}{\mathbb{C}}
+\renewcommand{\S}{\mathbb{S}}
+
+\newcommand{\Rm}{\R^{m}}
+\newcommand{\Rn}{\R^{n}}
+\newcommand{\Rk}{\R^{k}}
+
+\newcommand{\Rmxm}{\R^{m \times m}}
+\newcommand{\Rnxn}{\R^{n \times n}}
+\newcommand{\Rmxn}{\R^{m \times n}}
+\newcommand{\Rnxm}{\R^{n \times m}}
+
+\newcommand{\Rmxk}{\R^{m \times k}}
+\newcommand{\Rkxm}{\R^{k \times m}}
+\newcommand{\Rkxn}{\R^{k \times n}}
+\newcommand{\Rnxk}{\R^{n \times k}}
+\newcommand{\Rkxk}{\R^{k \times k}}
+
+\newcommand{\Cnxn}{\C^{n \times n}}
+
+\newcommand{\Sm}{\S^{m}}
+\newcommand{\Sn}{\S^{n}}
+\newcommand{\Sk}{\S^{k}}
+\newcommand{\Sonexm}{\S^{1 \times m}}
+
+\newcommand{\Smxm}{\S^{m \times m}}
+\newcommand{\Snxn}{\S^{n \times n}}
+\newcommand{\Smxn}{\S^{m \times n}}
+\newcommand{\Snxm}{\S^{n \times m}}
+
+\newcommand{\Smxk}{\S^{m \times k}}
+\newcommand{\Skxn}{\S^{k \times n}}
+\newcommand{\Snxk}{\S^{n \times k}}
+
+\newcommand{\alert}{!!!}
+\newcommand{\row}[1]{\check{#1}}
+\newcommand{\tr}[1]{{#1}^{\mathrm{T}}}
+\newcommand{\tri}[1]{{#1}^{\mathrm{-T}}}
+\newcommand{\tc}[1]{{#1}^{\mathrm{H}}}
+\newcommand{\op}[1]{{\mathrm{op}(#1)}}
+
+\newcommand{\TrLw}[1]{\mathrm{TrLw}(#1)}
+\newcommand{\TrUp}[1]{\mathrm{TrUp}(#1)}
+\newcommand{\SyLw}[1]{\mathrm{SyLw}(#1)}
+\newcommand{\SyUp}[1]{\mathrm{SyUp}(#1)}
+\newcommand{\HeLw}[1]{\mathrm{HeLw}(#1)}
+\newcommand{\HeUp}[1]{\mathrm{HeUp}(#1)}
+
+\newcommand{\cF}{{\cal{F}}}
+\newcommand{\cG}{{\cal{G}}}
+\newcommand{\cH}{{\cal{H}}}
+
+\newcommand{\defcolvector}[2]{
+\left( 
+\begin{array}{c}
+#1_0 \\ 
+#1_1 \\ 
+\vdots \\ 
+#1_{#2-1}
+\end{array} 
+\right)
+}
+
+\newcommand{\defcolvectoratones}[2]{
+\left( 
+\begin{array}{c}
+#1_1 \\ 
+#1_2 \\ 
+\vdots \\ 
+#1_{#2}
+\end{array} 
+\right)
+}
+
+\newcommand{\defrowvector}[2]{
+\left(#1_0, #1_1, \ldots, #1_{#2-1}\right)
+}
+
+\newcommand{\defrowvectoratones}[2]{
+\left(#1_1, #1_2, \ldots, #1_{#2}\right)
+}
+%\left( 
+%\begin{array}{c c c c}
+%#1_0, & #1_1, & \ldots, & #1_{#2-1}
+%\end{array} 
+%\right)
+%}
+
+\newcommand{\defmatrix}[3]{
+\left( 
+\begin{array}{c c c c}
+#1_{00}     & #1_{01}      & \ldots & #1_{0,#3-1} \\ 
+#1_{10}     & #1_{11}      & \ldots & #1_{1,#3-1} \\ 
+\vdots      & \vdots       & \ddots & \vdots    \\ 
+#1_{#2-1,0} & #1_{#2-1,1}  & \ldots & #1_{#2-1,#3-1} \\ 
+\end{array} 
+\right)
+}
+
+\newcommand{\defmatrixatones}[3]{
+\left( 
+\begin{array}{c c c c}
+#1_{11}   & #1_{12}     & \ldots & #1_{1,#3} \\ 
+#1_{21}   & #1_{22}     & \ldots & #1_{2,#3} \\ 
+\vdots    & \vdots      & \ddots & \vdots    \\ 
+#1_{#2,1} & #1_{#2,2}   & \ldots & #1_{#2,#3} \\ 
+\end{array} 
+\right)
+}
+
+\newcommand{\deflowtrmatrix}[3]{
+\left( 
+\begin{array}{c c c c}
+#1_{00}     & 0            & \ldots & 0           \\ 
+#1_{10}     & #1_{11}      & \ldots & 0           \\ 
+\vdots      & \vdots       & \ddots & \vdots    \\ 
+#1_{#2-1,0} & #1_{#2-1,0}  & \ldots & #1_{#2-1,#3-1} \\ 
+\end{array} 
+\right)
+}
+
+
+\newcommand{\unit}{\mbox{\bf u}}
+
+\newcommand{\sign}{\mbox{\rm sign}}
+
+% \newcommand{\Chol}[1]{\mbox{\sc Chol}( #1 )}
+\newcommand{\Chol}[1]{\Gamma( #1 )}
+\newcommand{\QR}[1]{\mbox{\sc QR}( #1 )}
+\newcommand{\LU}[1]{\mbox{\sc LU}( #1 )}
+\newcommand{\LUpiv}[1]{\mbox{\sc LUpiv}( #1 )}
+\newcommand{\tril}[1]{\mbox{\sc tril}\left( #1 \right)}
+\newcommand{\triu}[1]{\mbox{\sc triu}( #1 )}
+\newcommand{\trilu}[1]{\mbox{\sc trilu}( #1 )}
+\newcommand{\triuu}[1]{\mbox{\sc triuu}( #1 )}
+\newcommand{\symml}[1]{\mbox{\sc symml}{(#1)}}
+\newcommand{\symmu}[1]{\mbox{\sc symmu}{(#1)}}
+\newcommand{\housev}[1]{\mbox{\sc Housev}( #1 )}
+
+% Operation names
+\newcommand{\scal}{\mbox{\sc scal}}
+\newcommand{\invscal}{\mbox{\sc invscal}}
+\newcommand{\add}{\mbox{\sc add}}
+\newcommand{\sdot}{\mbox{\sc dot}}
+\newcommand{\sapdot}{\mbox{\sc apdot}}
+\newcommand{\saxpy}{\mbox{\sc axpy}}
+\newcommand{\axpy}{\mbox{\sc axpy}}
+\newcommand{\matvec}{\mbox{\sc gemv}}
+\newcommand{\gemv}{\mbox{\sc gemv}}
+\newcommand{\vecmat}{\mbox{\sc gevm}}
+\newcommand{\rankone}{\mbox{\sc ger}}
+\newcommand{\trsv}{\mbox{\sc trsv}}
+\newcommand{\trmv}{\mbox{\sc trmv}}
+\newcommand{\matmat}{\mbox{\sc gemm}}
+\newcommand{\symm}{\mbox{\sc symm}}
+
+\newcommand{\symv}{\mbox{\sc symv}}
+\newcommand{\syr}{\mbox{\sc syr}}
+\newcommand{\syrtwo}{\mbox{\sc syr2}}
+\newcommand{\syrtwok}{\mbox{\sc syr2k}}
+\newcommand{\trmm}{\mbox{\sc trmm}}
+\newcommand{\trsm}{\mbox{\sc trsm}}
+\newcommand{\syrk}{\mbox{\sc syrk}}
+\newcommand{\ger}{\mbox{\sc ger}}
+
+\newcommand{\gemm}{\mbox{\sc gemm}}
+\newcommand{\apdot}{\mbox{\sc apdot}}
+\newcommand{\dddot}{\mbox{\sc dot}}
+
+% Products
+\newcommand{\matlab}{\mbox{\sc Matlab}}
+\newcommand{\octave}{\mbox{\sc Octave}}
+\newcommand{\labview}{\mbox{\sc LabView}}
+\newcommand{\mathscript}{\mbox{\sc LabView MathScript}}
+\newcommand{\haskell}{\mbox{\sc Haskell}}
+\newcommand{\mathematica}{\mbox{\sc Mathematica}}
+\newcommand{\ieee}{\mbox{\sc ieee}}
+
+\newcommand{\GFLOPS}{\mbox{GFLOPS}}
+\newcommand{\blkpan}{\mbox{\sc gebp}}
+\newcommand{\panblk}{\mbox{\sc gepb}}
+\newcommand{\pandot}{\mbox{\sc gepdot}}
+\newcommand{\panpan}{\mbox{\sc gepp}}
+\newcommand{\matpan}{\mbox{\sc gemp}}
+\newcommand{\panmat}{\mbox{\sc gepm}}
+\newcommand{\panvec}{\mbox{\sc gepv}}
+
+\newcommand{\chol}{\mbox{\sc chol}}
+\newcommand{\lu}{\mbox{\sc lu}}
+
+\newcommand{\resetcounters}{
+%\setcounter{remark}{0}
+%\setcounter{mydefinition}{0}
+}
+
+%%%%%%%%%\newcommand{\implies}{\Longrightarrow}
