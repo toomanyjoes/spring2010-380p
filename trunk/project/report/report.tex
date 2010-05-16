@@ -1,0 +1,432 @@
+%% LyX 1.6.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[11pt,english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{graphicx}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+%% LyX 1.6.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+
+\input{GEMM_packages}
+\usepackage{moreverb}
+
+\usepackage{listings}
+\lstset{language=C}
+
+\usepackage[letterpaper]{geometry}
+
+\geometry{verbose,tmargin=1in,bmargin=1in,lmargin=0.75in,rmargin=0.75in}
+
+\makeatother
+
+\usepackage{babel}
+
+\begin{document}
+
+\title{Using Chapel to Implement Dense Linear Algebra Libraries }
+
+
+\author{Joe Elizondo and Samuel Palmer \\
+ Department of Computer Science University of Texas at Austin\\
+ Email: \{elizondo, spalmer\}@cs.utexas.edu }
+\maketitle
+\begin{abstract}
+This paper evaluates the parallel global-view language Chapel's ability
+to implement dense linear algebra libraries. Both programmability
+and performance characteristics at the current stage of Chapel's implementation
+are considered but since many of Chapel's compiler optimizations are
+not implemented our emphasis is on programmability. Our conclusion
+is that in its current development state Chapel lacks the data locality
+features required to implement efficient dense linear algebra operations
+but should be considered again once the complete language and compiler
+optimizations are implemented. 
+\end{abstract}
+
+\section{Introduction \label{sec:Introduction}}
+
+For the scientific computing community interest in fast linear algebra
+libraries is alive and well because scientists are always seeking
+to reduce the computation time required to solve large problems. The
+authors of these libraries are always looking for optimizations in
+software, compilers, and hardware to make their libraries faster.
+To this select group of scientific library developers a new partitioned
+global address space language like Chapel is of interest for a number
+of reasons. One reason is the possibility for Chapel to have dense
+linear algebra functions built in that allow the programmer to write
+code quickly and exploit parallelism with little effort. If so then
+the question becomes performance. How do these operations compare
+to the performance achieved by their current library? Otherwise library
+developers might see an opportunity to implement a library on this
+new platform. Programming a parallel dense linear algebra library
+in global-view language is presumably easier than using a local-view
+language like MPI combined with C++. In addition, the most popular
+parallel dense linear algebra libraries are surprisingly inefficient
+and a library that is properly implemented can outperform these libraries,
+i.e ScaLAPACK, without many additional optimizations. If a library
+written in Chapel can achieve performance comparable to ScaLAPACK
+then ease of programming may make it preferable in cases when a matrix
+operation does not already exist in the library and the problem size
+is such that any additional computation time is negligible. For library
+developers with no formal introduction to Chapel all of these scenarios
+are possible and make experimenting with the language worthwhile.
+
+For the Formal Linear Algebra Methods Environment (FLAME) group at
+the University of Texas at Austin, Chapel poses interesting possibilities.
+Much labor has gone into writing parallel linear algebra libraries
+using MPI and C (PLAPACK\cite{PLAPACKbook}) and currently MPI and
+C++ (Elemental\cite{elemental,elemental2}). These libraries were
+built using matrix theory and methodology that results in some of
+the fastest linear algebra algorithms available. These libraries,
+however, are far from simple and if a new operation needs to be introduced
+a scientist would need a decent amount of experience and understanding
+of collective communication with MPI in order to successfully add
+the operation to the library. The FLAME framework and API is, however,
+one of the cleanest ways to express dense linear algebra operations.
+Matrix indices are abstracted away and more attractive methods are
+provided to partition matrices for computations. If libFLAME could
+be implemented in the Chapel language it already lends itself to parallelization
+through the use of matrix partitioning. The question then becomes:
+is it possible to use the FLAME approach for deriving algorithms and
+libFLAME API with Chapel to write a parallel linear algebra library?
+Finding the answer to this question is the goal of this work. We were
+informed by Chapel developers from the start that the compiler was
+not optimized so achieving comparable performance would not be possible.
+Despite this we set out to learn, under the assumption of a compiler
+that generates optimized code, if Chapel presents a good layer of
+abstraction for parallel dense linear algebra algorithms; if it allows
+us to express the formalisms of the FLAME methodology; if it allows
+us to express the necessary distributions required to partition a
+matrix over a mesh of processors for parallel computation; and if
+it allows us to express the communication required to perform matrix
+operations on matrices that have been partitioned across many processors.
+We attempt to determine if Chapel satisfies these conditions by implementing
+several variations of general matrix-matrix multiply (GEMM) algorithms
+from libFLAME and a scalable parallel matrix multiplication algorithm.
+The results of our findings are reported in this paper. Section \ref{sec:Flame-Overview}
+gives an overview of the FLAME API. Section \ref{sec:shmem-GEMM}
+discusses a Chapel shared memory implementation of a matrix multiplication
+algorithm from libFLAME. Section \ref{sec:blk-GEMM} discusses our
+attempt to implement a blocked multi-locale matrix multiplication
+algorithm in Chapel. Section \ref{sec:SUMMA-implementation} discusses
+a Chapel implementation of a scalable matrix multiplication algorithm
+called SUMMA and Section \ref{sec:Conclusions} summarizes our conclusions.
+
+
+\section{Flame Overview\label{sec:Flame-Overview}}
+
+We now discuss the FLAME API \cite{libflame_ref} and the reasons
+for implementing parallel algorithms in Chapel via the API. The algorithms
+used in the FLAME libraries are derived using a formal methodology
+and verification process. The algorithms are expressed using a notation
+that applies the mathematical specification for the routine in a step
+by step manner that is easy to visualize and understand. The API was
+designed so that the clarity of this derivation process is not lost
+once the algorithm is in code form. Using the API the algorithm can
+be coded using a high level of abstraction that hides the indices
+that would usually be involved when coding the algorithms. The code
+partitions and repartitions matrices while performing the mathematical
+computation in the same manner illustrated by the FLAME notation that
+is used to express the algorithm. This high level of abstraction makes
+it easier to think about different variations of the algorithms. The
+API also exposes the critical sections of the algorithms which provides
+hints to how they could be parallelized. Figures \ref{Flo:GEMMalgorithm}
+and \ref{Flo:GEMMFLAMEAPI} show the similarities between FLAME algorithm
+notation and code expressed in the FLAME API.
+
+Aside from the linear algebra algorithms that do the bulk of the computation,
+libFLAME's API is made up of numerous auxiliary functions, objects,
+type definitions, partitioning functions, validation functions, etc.
+All of this code had to be rewritten in Chapel. We were disappointed
+by Chapel's current level of support for calling C routines and manipulating
+C data. The insufficient support for external C code meant that we
+could not reuse any existing code and in many cases the changes that
+were made during translation were purely syntactic. 
+
+%
+\begin{figure}
+\centering{}\input{GEMM_figure}\caption{{\footnotesize Unblocked GEMM algorithm expressed in FLAME notation}}
+\label{Flo:GEMMalgorithm}
+\end{figure}
+
+
+%
+\begin{figure}
+\begin{centering}
+\input{listing_FLAMEC}
+\par\end{centering}
+
+\caption{{\footnotesize Unblocked GEMM algorithm implemented in C using the
+FLAME API}}
+\label{Flo:GEMMFLAMEAPI}
+\end{figure}
+
+
+
+\section{Shared Memory GEMM Implementation\label{sec:shmem-GEMM}}
+
+
+\subsection{Description of Algorithm}
+
+We implemented a shared memory GEMM algorithm, $C:=AB+\hat{C}$, \cite{TSoPMC}
+which partitions $A$ along its first dimension into a collection
+of vectors, $a_{i}^{T}$. The algorithm then performs a series of
+general matrix vector multiplication (GEMV) operations, $c_{i}^{T}:=a_{i}^{T}B+\hat{c_{i}^{T}}$.
+In the FLAME methodology this partitioning is done by creating {}``views''
+of the matrix which allow the programmer to treat the views as independent
+matrices or vectors. In the sequential implementation of libFLAME
+this algorithm would partition the matrix to extract one vector from
+it at a time, multiply the other matrix by this vector, and merge
+the result back into the result matrix.
+
+
+\subsection{Implementation}
+
+In order to exploit parallelism our implementation had to deviate
+from the algorithm's sequential order of execution. Our implementation,
+instead, completes all of the partitioning before it performs any
+GEMV operations. After one matrix is completely partitioned into vectors
+we use the \emph{forall} Chapel construct to assign the independent
+GEMV operations to different threads. Once the GEMV operations complete
+the results are merged back into the answer matrix. Completely partitioning
+the matrix before performing the GEMV operations requires more memory
+but allows us to execute the GEMV operations in parallel.
+
+Figure \ref{fig:shmem_speedup} shows the relative speedup when multiplying
+two $1000\times1000$ matrices using our shared memory GEMM implementation
+as the number of threads increase. The speedup is measured relative
+to the output produced when the \emph{{-}{-}serial} flag is used
+to compile the same code. The figure shows that the shared memory
+implementation does in fact exhibit speedup as the number of threads
+increases. In general, the Chapel implementation of this algorithm
+compiled with the Chapel version 1.1 compiler is much slower than
+the sequential C libFLAME implementation. The average time it took
+our Chapel GEMM implementation to multiply two $1000\times1000$ matrices
+on a 16-way SMP compute node with AMD Opteron processors clocked at
+2.3GHz was 4.7238 seconds while the average time it took the sequential
+libFLAME implementation to multiply two $1000\times1000$ matrices
+on the same hardware was 0.2658 seconds.
+
+%
+\begin{figure}
+\begin{centering}
+\includegraphics[width=3.3in]{shmemspeedup}
+\par\end{centering}
+
+\caption{{\footnotesize Relative speedup achieved as the number of threads
+increases in our shared memory implementation. Speedup is relative
+to the same Chapel code compiled with the }\emph{\footnotesize {-}{-}serial}{\footnotesize{}
+flag.\label{fig:shmem_speedup}}}
+
+\end{figure}
+
+
+
+\subsection{Issues}
+
+The initial goal did not involve rewriting the entire algorithm including
+the BLAS implementation of GEMV but upon a survey of Chapel's interoperability
+with C we concluded that it would be necessary since Chapel does not
+provide enough guarantees on the representation of data. Specifically,
+the standard BLAS GEMV requires array parameters to be passed as pointers
+which do not exist in Chapel. This forced us to write everything including
+a simplified version of the BLAS GEMV in Chapel. The immature support
+for interoperability with the C language causes us to lose the benefit
+of using highly optimized BLAS routines such as those found in the
+widely used GotoBLAS\cite{gotoblas}.
+
+
+\section{Blocked Multi-Locale GEMM Implementation\label{sec:blk-GEMM}}
+
+
+\subsection{Description of Algorithm}
+
+Even though support for multiple locales is still in its early stages
+we decided to implement a blocked GEMM algorithm, $C:=AB+\hat{C}$,
+that used multiple locales to evaluate the ease of reasoning about
+and programming with Chapel's data locality features. The blocked
+GEMM algorithm that we implemented partitions $A$ into panels along
+the first dimension and the $B$ into panels along the second dimension.
+The algorithm then performs a series of general panel panel multiplies,
+$C:=A_{i}B_{i}+\hat{C}$. According to \cite{TSoPMC} this algorithm
+performs better than the other blocked GEMM algorithms in libFLAME. 
+
+
+\subsection{Implementation and Issues}
+
+The largest roadblock that we encountered was that while the Chapel
+developers intend to add support for user defined domain maps there
+is currently only support for standard block distributions and standard
+cyclic distributions. These were inadequate for our needs so we implemented
+an algorithm that explicitly moved data between locales when necessary.
+Once the appropriate data was moved to a locale we made use of the
+\emph{local} construct in Chapel to explicitly tell the compiler that
+all data references were local. The implementation of the \emph{local}
+construct enables the compiler to perform performance optimizations
+but does not statically check if the data references will be local.
+In Chapel if a programmer makes a non-local reference inside a local
+block a runtime error will occur. The compiler should have enough
+information to be able to statically decide at compile-time if non-local
+references are made and give a compile-time error instead of a runtime
+error. The Chapel Language Specification 0.795 \cite{chplSpec} does
+not in fact define the semantics of the \emph{local} construct but
+it can be deduced from the discussion in \cite{hpcc09} that it provides
+a boost in performance to explicitly assert that all references are
+local.
+
+Using the current implementation of the Chapel compiler (version 1.1)
+our implementation induced much more data movement than we had intended.
+When multiplying two $100\times100$ matrices with a block size of
+ten our implementation induced 228,400 remote data communications.
+Without the use of user defined domain maps it is very difficult to
+reason about how many remote operations will be used to implement
+a given statement in Chapel which results in poor performance. Figure
+\ref{fig:blk_flamecomm} shows that in our implementation of the blocked
+GEMM algorithm the amount of data communication grows faster than
+the problem size. This would most likely not have been the case if
+a user defined domain map had been used to manage our data locality.
+For this reason it is too early to decide if Chapel will eventually
+be able to efficiently handle the data movement involved in this blocked
+GEMM algorithm.
+
+%
+\begin{figure}
+\begin{centering}
+\includegraphics[width=3.3in]{blkComm}
+\par\end{centering}
+
+\caption{{\footnotesize Remote communication increases faster than the problem
+size in our implementation. The red (bottom) line shows a linear increase
+and the blue (top) line shows the increase observed in our implementation.\label{fig:blk_flamecomm} }}
+
+\end{figure}
+
+
+
+\section{SUMMA Implementation\label{sec:SUMMA-implementation}}
+
+
+\subsection{Description}
+
+Though not part of libFLAME we decided to implement a scalable matrix
+multiplication algorithm called SUMMA \cite{summa}. SUMMA has a number
+of benefits in that it not only achieves high performance but is also
+relatively simple compared to its predecessors. This algorithm is
+only practical in a parallel environment so it wouldn't make sense
+for the sequential FLAME library to include it. However, the SUMMA
+algorithm tests multiple facets of Chapel's programmability so its
+implementation is a good exercise. The key to achieving performance
+benefits with the algorithm is replication. We give a high level explanation
+of the algorithm for the sake of clarity before discussing our implementation
+and issues encountered. 
+
+
+\subsubsection{Unblocked SUMMA}
+
+Assume we have a group of computation nodes that can be logically
+arranged into a $r\times c$ mesh, each node can be indexed by $P_{ij}$,
+where $i$ is the node's row and $j$ is the node's column. To simplify
+the explanation assume we have two matrices $A$ and $B$ where $A$
+is $r\times n$ and $B$ is $n\times c$. In practice this simplification
+can be removed by using a block-cyclic distribution along the rows
+and columns of nodes. We replicate row $a_{i}$ along node row $p_{i}$
+and column $b_{j}$ along node column $p_{j}$. Each node can then
+perform a rank-one update in parallel to compute $C_{ij}=a_{i}*b_{j}$.
+The idea is that the communication overhead for replicating each row
+and column should be small compared to the performance gain achieved
+by having to perform only a single rank-one update on each node. 
+
+
+\subsubsection{Blocked SUMMA}
+
+Van de Geijn and Watts \cite{summa} found that even more performance
+can be achieved by formulating the computations as matrix-matrix multiplications
+instead of rank-one updates. The idea is that communication is reduced
+because more data is being sent to each node and smaller blocks can
+take advantage of data locality better than entire rows or columns.
+Our implementation of the blocked SUMMA algorithm takes in two arguments
+for block size call them $s$ and $t$. It partitions matrix $A$
+into $m\times t$ groups of columns, or column panels, and partitions
+matrix $B$ into $t\times n$ row panels. Each panel of matrix $B$
+is replicated across its respective row in the mesh of nodes. For
+example, $B_{0}^{j}$, where j is the node column index, is replicated
+across node row $p_{0}$. The $m\times t$ panels of matrix $A$ are
+then partitioned further into $s\times t$ blocks that are block-mapped
+to their corresponding logical position in the mesh of nodes. The
+algorithm then performs a GEMM operation in parallel on each node
+to compute block $C_{ij}=A_{ij}*B_{l}^{j}$, where $l$ is the index
+of a block of rows in $B$. 
+
+
+\subsection{Issues\label{sub:SUMMA-Issues}}
+
+%
+\begin{figure}
+\begin{centering}
+\input{listing.tex}
+\par\end{centering}
+
+\centering{}\caption{{\footnotesize Example adapted from Chapel HPL HPC Challenge 2009
+entry \cite{hpcc09} demonstrating how to replicate data across locales.}}
+\label{Flo:ChapelReplications}
+\end{figure}
+We encountered significant programmability issues during all aspects
+of the algorithm's implementation. Chapel's current limitations with
+domain mapping forced us to do replication by placing data onto a
+locale (node) explicitly using the \textquotedbl{}on\textquotedbl{}
+keyword, as shown in Figure \ref{Flo:ChapelReplications}. In addition
+to being difficult to read this approach meant that to compute $C$
+all computation had to be done at every iteration of the innermost
+loop otherwise the names of the replicated data fall out of scope
+and can no longer be accessed. This also increases the communication
+required to compute an answer. We would ideally like to leave $C$
+partitioned over the mesh of nodes so that the only communication
+cost is in the replication of data. In Chapel however, if we leave
+$C$ partitioned we have no way to access $C$'s component blocks.
+In order to return an answer we have to send all the computed data
+from each node back to a single node that holds the original reference
+to $C$. Figure \ref{fig:blk_summa} shows the increase in communication
+that this incurs. Again, it would be nice to see if Chapel's user
+defined domain maps could handle this algorithm elegantly, however,
+at this stage in Chapel's development this was not possible.
+
+%
+\begin{figure}
+\begin{centering}
+\includegraphics[width=3.8in]{blksumma_comm}
+\par\end{centering}
+
+\caption{{\footnotesize Remote communication required for our blocked SUMMA
+Chapel implementation measured using the same technique as in Figure
+\ref{fig:blk_flamecomm}. Squares show the large increase in communication
+required to store $C$ on one node. Diamonds show communication for
+the ideal case where $C$ is partitioned across the mesh of nodes.\label{fig:blk_summa}}}
+
+\end{figure}
+
+
+
+\section{Conclusions\label{sec:Conclusions}}
+
+It is still too early in the development of Chapel to reach any final
+conclusions regarding Chapel's ability to implement parallel linear
+algebra libraries. The results from our shared memory GEMM implementation
+show that relative speedup is possible as the number of threads increases
+which is promising. If optimizations continue to be added to the Chapel
+compiler it may become possible to achieve performance that surpasses
+the sequential C implementation of libFLAME. The biggest deterrent
+for library developers at this point in Chapel's development is the
+lack of data locality features. The inability to create user defined
+domain maps across locales is a major issue when attempting to implement
+efficient linear algebra algorithms. Once this feature is implemented
+in the Chapel compiler another evaluation should be conducted. In
+the compiler's current state it is too difficult to manage data locality
+for some of the proven parallel GEMM algorithms.
+
+\bibliographystyle{acm} \nocite{*} \bibliographystyle{plain}
+\nocite{*}
+\bibliography{report}
+
+\end{document}

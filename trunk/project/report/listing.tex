@@ -1,0 +1,22 @@
+{\scriptsize
+\begin{verbatim}
+// replicated distributions aren't implemented yet, but imagine that
+// they look something like the following:
+// var replAbD: domain(2)
+//                       dmapped new Dimensional(BlkCyc(blkSize),Replicated))
+//                       = AbD[start.., 1..#blkSize];
+
+// actual code to achieve the distributed replication
+// Notice the replicated domains must be declared INSIDE the "on" block
+for pnl in 1..n by blkcols
+{
+  loc1 = (loc1 + 1) % numLocales;
+  loc1cnt = loc1cnt + 1;
+  on Locales(loc1)
+  {
+    var start: int = pnl;
+    var replAbD: domain(2) = AbD[1.., start..start+blkcols-1];
+    var replAb : [replAD] real = Ab[1.., start..start+blkcols-1];
+\end{verbatim}
+ $\vdots$
+}

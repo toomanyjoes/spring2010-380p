@@ -1,0 +1,22 @@
+\newcommand{\FlaAlgorithmNarrowTwo}[2]{
+\begin{tabular}{| p{#1} |} \hline
+{\bf Algorithm:} $\routinename$ 
+\\ \whline
+{\WSpartitionNarrow} \\
+{\bf while} \WSguard { \bf do} \\
+\ \hspace{0.0in} \WSrepartitionNarrow \\
+{\hspace{0.0in} \FlaStartComputeShorter} \\
+{\hspace{0.0in} \WSupdate} 
+\phantom{
+\begin{array}{l}
+~
+\\[\vpace{#2}]
+~
+\end{array}
+}
+\\
+{\hspace{0.0in} \FlaEndComputeShorter} \\
+{\ \hspace{0.0in} \WSmoveboundaryNarrow} \\
+{{\bf endwhile}} \\ \hline
+\end{tabular}
+}
