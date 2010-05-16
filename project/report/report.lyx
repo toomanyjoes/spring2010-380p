@@ -1,0 +1,1244 @@
+#LyX 1.6.4 created this file. For more info see http://www.lyx.org/
+\lyxformat 345
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+%% LyX 1.6.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+
+\input{GEMM_packages}
+\usepackage{moreverb}
+
+\usepackage{listings}
+\lstset{language=C}
+
+\usepackage[letterpaper]{geometry}
+
+\geometry{verbose,tmargin=1in,bmargin=1in,lmargin=0.75in,rmargin=0.75in}
+\end_preamble
+\use_default_options false
+\language english
+\inputencoding latin9
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_default_family default
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\paperfontsize 11
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_amsmath 0
+\use_esint 0
+\cite_engine basic
+\use_bibtopic false
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\author "" 
+\author "" 
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Using Chapel to Implement Dense Linear Algebra Libraries 
+\end_layout
+
+\begin_layout Author
+Joe Elizondo and Samuel Palmer 
+\begin_inset Newline newline
+\end_inset
+
+ Department of Computer Science University of Texas at Austin
+\begin_inset Newline newline
+\end_inset
+
+ Email: {elizondo, spalmer}@cs.utexas.edu 
+\end_layout
+
+\begin_layout Abstract
+This paper evaluates the parallel global-view language Chapel's ability
+ to implement dense linear algebra libraries.
+ Both programmability and performance characteristics at the current stage
+ of Chapel's implementation are considered but since many of Chapel's compiler
+ optimizations are not implemented our emphasis is on programmability.
+ Our conclusion is that in its current development state Chapel lacks the
+ data locality features required to implement efficient dense linear algebra
+ operations but should be considered again once the complete language and
+ compiler optimizations are implemented.
+ 
+\end_layout
+
+\begin_layout Section
+Introduction 
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Introduction"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the scientific computing community interest in fast linear algebra libraries
+ is alive and well because scientists are always seeking to reduce the computati
+on time required to solve large problems.
+ The authors of these libraries are always looking for optimizations in
+ software, compilers, and hardware to make their libraries faster.
+ To this select group of scientific library developers a new partitioned
+ global address space language like Chapel is of interest for a number of
+ reasons.
+ One reason is the possibility for Chapel to have dense linear algebra functions
+ built in that allow the programmer to write code quickly and exploit parallelis
+m with little effort.
+ If so then the question becomes performance.
+ How do these operations compare to the performance achieved by their current
+ library? Otherwise library developers might see an opportunity to implement
+ a library on this new platform.
+ Programming a parallel dense linear algebra library in global-view language
+ is presumably easier than using a local-view language like MPI combined
+ with C++.
+ In addition, the most popular parallel dense linear algebra libraries,
+ e.g.
+ ScaLAPACK, are surprisingly inefficient and a library that is properly
+ implemented can outperform these libraries without many additional optimization
+s
+\begin_inset CommandInset citation
+LatexCommand cite
+key "elemental"
+
+\end_inset
+
+.
+ If a library written in Chapel can achieve performance comparable to ScaLAPACK
+ then ease of programming may make it preferable in cases when a matrix
+ operation does not already exist in the library and the problem size is
+ such that any additional computation time is negligible.
+ For library developers with no formal introduction to Chapel all of these
+ scenarios are possible and make experimenting with the language worthwhile.
+\end_layout
+
+\begin_layout Standard
+For the Formal Linear Algebra Methods Environment (FLAME) group at the Universit
+y of Texas at Austin, Chapel poses interesting possibilities.
+ Much labor has gone into writing parallel linear algebra libraries using
+ MPI and C (PLAPACK
+\begin_inset CommandInset citation
+LatexCommand cite
+key "PLAPACKbook"
+
+\end_inset
+
+) and currently MPI and C++ (Elemental
+\begin_inset CommandInset citation
+LatexCommand cite
+key "elemental,elemental2"
+
+\end_inset
+
+).
+ These libraries were built using matrix theory and methodology that results
+ in some of the fastest linear algebra algorithms available.
+ These libraries, however, are far from simple and if a new operation needs
+ to be introduced a user would need a decent amount of experience and understand
+ing of collective communication with MPI in order to successfully add the
+ operation to the library.
+ The FLAME framework and API is, however, one of the cleanest ways to express
+ dense linear algebra operations.
+ Matrix indices are abstracted away and more attractive methods are provided
+ to partition matrices for computations.
+ libFLAME already lends itself to parallelization through the use of matrix
+ partitioning so it seems natural to implement it in a parallel language
+ like Chapel.
+ The question then becomes: is it possible to use the FLAME approach for
+ deriving algorithms and FLAME/C API with Chapel to write a parallel linear
+ algebra library? Finding the answer to this question is the goal of this
+ work.
+ We were informed by Chapel developers from the start that the compiler
+ was not optimized so achieving comparable performance would not be possible
+ and competing against any benchmark (including ScaLAPACK) would not be
+ valuable.
+ Despite this we set out to learn, under the assumption of a compiler that
+ generates optimized code, whether Chapel presents a good layer of abstraction
+ for parallel dense linear algebra algorithms; whether it allows us to express
+ the formalisms of the FLAME methodology; whether it allows us to express
+ the necessary distributions required to partition a matrix over a mesh
+ of processors for parallel computation; and whether it allows us to express
+ the communication required to perform matrix operations on matrices that
+ have been partitioned across many processors.
+ We attempt to determine if Chapel satisfies these conditions by implementing
+ several variations of general matrix-matrix multiply (GEMM) algorithms
+ from libFLAME and a scalable matrix multiplication algorithm.
+ The results of our findings are reported in this paper.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Flame-Overview"
+
+\end_inset
+
+ gives an overview of the FLAME API.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:shmem-GEMM"
+
+\end_inset
+
+ discusses a Chapel shared memory implementation of a matrix multiplication
+ algorithm from libFLAME.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:blk-GEMM"
+
+\end_inset
+
+ discusses our attempt to implement a blocked multi-locale matrix multiplication
+ algorithm in Chapel.
+ Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:SUMMA-implementation"
+
+\end_inset
+
+ discusses a Chapel implementation of a scalable matrix multiplication algorithm
+ called SUMMA and Section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Conclusions"
+
+\end_inset
+
+ summarizes our conclusions.
+\end_layout
+
+\begin_layout Section
+FLAME Overview
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Flame-Overview"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We now discuss the FLAME API 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "libflame_ref"
+
+\end_inset
+
+ and the reasons for implementing parallel algorithms in Chapel via the
+ API.
+ The algorithms used in the FLAME libraries are derived using a formal methodolo
+gy and verification process.
+ The algorithms are expressed using a notation that applies the mathematical
+ specification for the routine in a step by step manner that is easy to
+ visualize and understand.
+ The API was designed so that the clarity of this derivation process is
+ not lost once the algorithm is in code form.
+ Using the API the algorithm can be coded using a high level of abstraction
+ that hides the indices that would usually be involved when coding the algorithm
+s.
+ The code partitions and repartitions matrices while performing the mathematical
+ computation in the same manner illustrated by the FLAME notation that is
+ used to express the algorithm.
+ This high level of abstraction makes it easier to think about different
+ variations of the algorithms.
+ The API also exposes the critical sections of the algorithms which provides
+ hints to how they could be parallelized.
+ Figures 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Flo:GEMMalgorithm"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Flo:GEMMFLAMEAPI"
+
+\end_inset
+
+ show the similarities between FLAME algorithm notation and code expressed
+ in the FLAME API.
+\end_layout
+
+\begin_layout Standard
+Aside from the linear algebra algorithms that do the bulk of the computation,
+ libFLAME's API is made up of numerous auxiliary functions, objects, type
+ definitions, partitioning functions, validation functions, etc.
+ All of this code had to be rewritten in Chapel.
+ We were disappointed by Chapel's current level of support for calling C
+ routines and manipulating C data.
+ The insufficient support for external C code meant that we could not reuse
+ any existing code and in many cases the changes that were made during translati
+on were purely syntactic.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{GEMM_figure}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Unblocked GEMM algorithm expressed in FLAME notation
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "Flo:GEMMalgorithm"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{listing_FLAMEC}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Unblocked GEMM algorithm implemented in C using the FLAME API
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "Flo:GEMMFLAMEAPI"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Shared Memory GEMM Implementation
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:shmem-GEMM"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Description of Algorithm
+\end_layout
+
+\begin_layout Standard
+We implemented a shared memory GEMM algorithm, 
+\begin_inset Formula $C:=AB+\hat{C}$
+\end_inset
+
+, 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "TSoPMC"
+
+\end_inset
+
+ which partitions 
+\begin_inset Formula $A$
+\end_inset
+
+ along its first dimension into a collection of vectors, 
+\begin_inset Formula $a_{i}^{T}$
+\end_inset
+
+.
+ The algorithm then performs a series of general matrix vector multiplication
+ (GEMV) operations, 
+\begin_inset Formula $c_{i}^{T}:=a_{i}^{T}B+\hat{c_{i}^{T}}$
+\end_inset
+
+.
+ In the FLAME methodology this partitioning is done by creating 
+\begin_inset Quotes eld
+\end_inset
+
+views
+\begin_inset Quotes erd
+\end_inset
+
+ of the matrix which allow the programmer to treat the views as independent
+ matrices or vectors
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bientinesi:2005:RLA"
+
+\end_inset
+
+.
+ In the sequential implementation of libFLAME this algorithm would partition
+ the matrix to extract one vector from it at a time, multiply the other
+ matrix by this vector, and merge the result back into the result matrix.
+\end_layout
+
+\begin_layout Subsection
+Implementation
+\end_layout
+
+\begin_layout Standard
+In order to exploit parallelism our implementation had to deviate from the
+ algorithm's sequential order of execution.
+ Our implementation, instead, completes all of the partitioning before it
+ performs any GEMV operations.
+ After one matrix is completely partitioned into vectors we use the 
+\emph on
+forall
+\emph default
+ Chapel construct to assign the independent GEMV operations to different
+ threads.
+ Once the GEMV operations complete the results are merged back into the
+ answer matrix.
+ Completely partitioning the matrix before performing the GEMV operations
+ requires more memory but allows us to execute the GEMV operations in parallel.
+\end_layout
+
+\begin_layout Standard
+Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:shmem_speedup"
+
+\end_inset
+
+ shows the relative speedup when multiplying two 
+\begin_inset Formula $1000\times1000$
+\end_inset
+
+ matrices using our shared memory GEMM implementation as the number of threads
+ increase.
+ The speedup is measured relative to the output produced when the 
+\emph on
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{-}{-}serial
+\end_layout
+
+\end_inset
+
+
+\emph default
+ flag is used to compile the same code.
+ The figure shows that the shared memory implementation does in fact exhibit
+ speedup as the number of threads increases.
+ In general, the Chapel implementation of this algorithm compiled with the
+ Chapel version 1.1 compiler is much slower than the sequential C libFLAME
+ implementation.
+ The average time it took our Chapel GEMM implementation to multiply two
+ 
+\begin_inset Formula $1000\times1000$
+\end_inset
+
+ matrices on a 16-way SMP compute node with AMD Opteron processors clocked
+ at 2.3GHz was 4.7238 seconds while the average time it took the sequential
+ libFLAME implementation to multiply two 
+\begin_inset Formula $1000\times1000$
+\end_inset
+
+ matrices on the same hardware was 0.2658 seconds.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename shmemspeedup.tif
+	width 3.3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Relative speedup achieved as the number of threads increases in our shared
+ memory implementation.
+ Speedup is relative to the same Chapel code compiled with the 
+\emph on
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{-}{-}serial
+\end_layout
+
+\end_inset
+
+
+\emph default
+ flag.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:shmem_speedup"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Issues
+\end_layout
+
+\begin_layout Standard
+The initial goal did not involve rewriting the entire algorithm including
+ the BLAS implementation of GEMV but upon a survey of Chapel's interoperability
+ with C we concluded that it would be necessary since Chapel does not provide
+ enough guarantees on the representation of data.
+ Specifically, the standard BLAS GEMV requires array parameters to be passed
+ as pointers which do not exist in Chapel.
+ This forced us to write everything including a simplified version of the
+ BLAS GEMV in Chapel.
+ The immature support for interoperability with the C language causes us
+ to lose the benefit of using highly optimized BLAS routines such as those
+ found in the widely used GotoBLAS
+\begin_inset CommandInset citation
+LatexCommand cite
+key "gotoblas"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Blocked Multi-Locale GEMM Implementation
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:blk-GEMM"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Description of Algorithm
+\end_layout
+
+\begin_layout Standard
+Even though support for multiple locales is still in its early stages we
+ decided to implement a blocked GEMM algorithm, 
+\begin_inset Formula $C:=AB+\hat{C}$
+\end_inset
+
+, that used multiple locales to evaluate the ease of reasoning about and
+ programming with Chapel's data locality features.
+ The blocked GEMM algorithm that we implemented partitions 
+\begin_inset Formula $A$
+\end_inset
+
+ into panels along the first dimension and 
+\begin_inset Formula $B$
+\end_inset
+
+ into panels along the second dimension.
+ The algorithm then performs a series of general panel-panel multiplies,
+ 
+\begin_inset Formula $C:=A_{i}B_{i}+\hat{C}$
+\end_inset
+
+.
+ According to 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "TSoPMC"
+
+\end_inset
+
+ this algorithm performs better than the other blocked GEMM algorithms in
+ libFLAME.
+ 
+\end_layout
+
+\begin_layout Subsection
+Implementation and Issues
+\end_layout
+
+\begin_layout Standard
+The largest roadblock that we encountered was that while the Chapel developers
+ intend to add support for user defined domain maps there is currently only
+ support for standard block distributions and standard cyclic distributions.
+ These were inadequate for our needs so we implemented an algorithm that
+ explicitly moved data between locales when necessary.
+ Once the appropriate data was moved to a locale we made use of the 
+\emph on
+local
+\emph default
+ construct in Chapel to explicitly tell the compiler that all data references
+ were local.
+ The implementation of the 
+\emph on
+local
+\emph default
+ construct enables the compiler to perform performance optimizations but
+ does not statically check if the data references will be local.
+ In Chapel if a programmer makes a non-local reference inside a local block
+ a runtime error will occur.
+ The compiler should have enough information to be able to statically decide
+ at compile-time if non-local references are made and give a compile-time
+ error instead of a runtime error.
+ The Chapel Language Specification 0.795 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "chplSpec"
+
+\end_inset
+
+ does not in fact define the semantics of the 
+\emph on
+local
+\emph default
+ construct but it can be deduced from the discussion in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hpcc09"
+
+\end_inset
+
+ that it provides a boost in performance to explicitly assert that all reference
+s are local.
+\end_layout
+
+\begin_layout Standard
+Using the current implementation of the Chapel compiler (version 1.1) our
+ implementation induced much more data movement than we had intended.
+ When multiplying two 
+\begin_inset Formula $100\times100$
+\end_inset
+
+ matrices with a block size of ten our implementation induced 228,400 remote
+ data communications.
+ Without the use of user defined domain maps it is very difficult to reason
+ about how many remote operations will be used to implement a given statement
+ in Chapel which results in poor performance.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:blk_flamecomm"
+
+\end_inset
+
+ shows that in our implementation of the blocked GEMM algorithm the amount
+ of data communication grows faster than the problem size.
+ This would most likely not have been the case if a user defined domain
+ map had been used to manage our data locality.
+ For this reason it is too early to decide if Chapel will eventually be
+ able to efficiently handle the data movement involved in this blocked GEMM
+ algorithm.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename blkComm.tif
+	width 3.3in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Remote communication increases faster than the problem size in our implementatio
+n.
+ The red (bottom) line shows a linear increase and the blue (top) line shows
+ the increase observed in our implementation.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:blk_flamecomm"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+SUMMA Implementation
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:SUMMA-implementation"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Description
+\end_layout
+
+\begin_layout Standard
+Though not part of libFLAME we decided to implement a scalable matrix multiplica
+tion algorithm called SUMMA 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "summa"
+
+\end_inset
+
+.
+ SUMMA has a number of benefits in that it not only achieves high performance
+ but is also relatively simple compared to its predecessors.
+ This algorithm is only practical in a parallel environment so it wouldn't
+ make sense for the sequential FLAME library to include it.
+ However, the SUMMA algorithm tests multiple facets of Chapel's programmability
+ so its implementation is a good exercise.
+ The key to achieving performance benefits with the algorithm is replication.
+ We give a high level explanation of the algorithm for the sake of clarity
+ before discussing our implementation and issues encountered.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Unblocked SUMMA
+\end_layout
+
+\begin_layout Standard
+Assume we have a group of computation nodes that can be logically arranged
+ into a 
+\begin_inset Formula $r\times c$
+\end_inset
+
+ mesh, each node can be indexed by 
+\begin_inset Formula $P_{ij}$
+\end_inset
+
+, where 
+\begin_inset Formula $i$
+\end_inset
+
+ is the node's row and 
+\begin_inset Formula $j$
+\end_inset
+
+ is the node's column.
+ To simplify the explanation assume we have two matrices 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ where 
+\begin_inset Formula $A$
+\end_inset
+
+ is 
+\begin_inset Formula $r\times n$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ is 
+\begin_inset Formula $n\times c$
+\end_inset
+
+.
+ In practice this simplification can be removed by using a block-cyclic
+ distribution along the rows and columns of nodes.
+ We replicate row 
+\begin_inset Formula $a_{i}$
+\end_inset
+
+ along node row 
+\begin_inset Formula $p_{i}$
+\end_inset
+
+ and column 
+\begin_inset Formula $b_{j}$
+\end_inset
+
+ along node column 
+\begin_inset Formula $p_{j}$
+\end_inset
+
+.
+ Each node can then perform a rank-one update in parallel to compute 
+\begin_inset Formula $C_{ij}=a_{i}*b_{j}$
+\end_inset
+
+.
+ The idea is that the communication overhead for replicating each row and
+ column should be small compared to the performance gain achieved by having
+ to perform only a single rank-one update on each node.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Blocked SUMMA
+\end_layout
+
+\begin_layout Standard
+Van de Geijn and Watts 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "summa"
+
+\end_inset
+
+ found that even better performance can be achieved by formulating the computati
+ons as matrix-matrix multiplications instead of rank-one updates.
+ The idea is that communication is reduced because more data is being sent
+ to each node and smaller blocks can take advantage of data locality better
+ than entire rows or columns.
+ Our implementation of the blocked SUMMA algorithm takes in two arguments
+ for block size call them 
+\begin_inset Formula $s$
+\end_inset
+
+ and 
+\begin_inset Formula $t$
+\end_inset
+
+.
+ It partitions matrix 
+\begin_inset Formula $A$
+\end_inset
+
+ into 
+\begin_inset Formula $m\times t$
+\end_inset
+
+ groups of columns, or column panels, and partitions matrix 
+\begin_inset Formula $B$
+\end_inset
+
+ into 
+\begin_inset Formula $t\times n$
+\end_inset
+
+ row panels.
+ Each panel of matrix 
+\begin_inset Formula $B$
+\end_inset
+
+ is replicated across its respective row in the mesh of nodes.
+ For example, 
+\begin_inset Formula $B_{0}^{j}$
+\end_inset
+
+, where j is the node column index, is replicated across node row 
+\begin_inset Formula $p_{0}$
+\end_inset
+
+.
+ The 
+\begin_inset Formula $m\times t$
+\end_inset
+
+ panels of matrix 
+\begin_inset Formula $A$
+\end_inset
+
+ are then partitioned further into 
+\begin_inset Formula $s\times t$
+\end_inset
+
+ blocks that are block-mapped to their corresponding logical position in
+ the mesh of nodes.
+ The algorithm then performs a GEMM operation in parallel on each node to
+ compute block 
+\begin_inset Formula $C_{ij}=A_{ij}*B_{l}^{j}$
+\end_inset
+
+, where 
+\begin_inset Formula $l$
+\end_inset
+
+ is the index of a block of rows in 
+\begin_inset Formula $B$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsection
+Issues
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:SUMMA-Issues"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+input{listing.tex}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Example adapted from Chapel HPL HPC Challenge 2009 entry 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hpcc09"
+
+\end_inset
+
+ demonstrating how to replicate data across locales.
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "Flo:ChapelReplications"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+We encountered significant programmability issues during all aspects of
+ the algorithm's implementation.
+ Chapel's current limitations with domain mapping forced us to do replication
+ by placing data onto a locale (node) explicitly using the "on" keyword,
+ as shown in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Flo:ChapelReplications"
+
+\end_inset
+
+.
+ In addition to being difficult to read this approach meant that to compute
+ 
+\begin_inset Formula $C$
+\end_inset
+
+ all computation had to be done at every iteration of the innermost loop
+ otherwise the names of the replicated data fall out of scope and can no
+ longer be accessed.
+ This also increases the communication required to compute an answer.
+ We would ideally like to leave 
+\begin_inset Formula $C$
+\end_inset
+
+ partitioned over the mesh of nodes so that the only communication cost
+ is in the replication of data.
+ In Chapel however, if we leave 
+\begin_inset Formula $C$
+\end_inset
+
+ partitioned we have no way to access 
+\begin_inset Formula $C$
+\end_inset
+
+'s component blocks.
+ In order to return an answer we have to send all the computed data from
+ each node back to a single node that holds the original reference to 
+\begin_inset Formula $C$
+\end_inset
+
+.
+ Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:blk_summa"
+
+\end_inset
+
+ shows the increase in communication that this incurs.
+ Again, it would be nice to see if Chapel's user defined domain maps and
+ replicated distributions could handle this algorithm elegantly, however,
+ at this stage in Chapel's development this was not possible.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename blksumma_comm.tif
+	width 3.8in
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\size footnotesize
+Remote communication required for our blocked SUMMA Chapel implementation
+ measured using the same technique as in Figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:blk_flamecomm"
+
+\end_inset
+
+.
+ Squares show the large increase in communication required to store 
+\begin_inset Formula $C$
+\end_inset
+
+ on one node.
+ Diamonds show communication for the ideal case where 
+\begin_inset Formula $C$
+\end_inset
+
+ is partitioned across the mesh of nodes.
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:blk_summa"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Conclusions
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Conclusions"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is still too early in the development of Chapel to reach any final conclusion
+s regarding Chapel's ability to implement parallel linear algebra libraries.
+ The results from our shared memory GEMM implementation show that relative
+ speedup is possible as the number of threads increases which is promising.
+ If optimizations continue to be added to the Chapel compiler it may become
+ possible to achieve performance that surpasses the sequential C implementation
+ of libFLAME.
+ From a programmability point of view the biggest deterrent for library
+ developers at this point in Chapel's development is the lack of data locality
+ features.
+ The inability to create user defined domain maps across locales is a major
+ issue when attempting to implement efficient linear algebra algorithms.
+ Once this feature is implemented in the Chapel compiler another evaluation
+ should be conducted.
+ In the compiler's current state it is too difficult to manage data locality
+ for some of the proven parallel GEMM algorithms.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+bibliographystyle{acm}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+nocite{*}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+btprint "btPrintAll"
+bibfiles "report"
+options "plain"
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
