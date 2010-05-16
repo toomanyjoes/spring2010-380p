@@ -61,14 +61,14 @@ the question becomes performance. How do these operations compare
 to the performance achieved by their current library? Otherwise library
 developers might see an opportunity to implement a library on this
 new platform. Programming a parallel dense linear algebra library
-in global-view language is presumably easier than using a local-view
+in a global-view language is presumably easier than using a local-view
 language like MPI combined with C++. In addition, the most popular
 parallel dense linear algebra libraries, e.g. ScaLAPACK, are surprisingly
 inefficient and a library that is properly implemented can outperform
 these libraries without many additional optimizations\cite{elemental}.
 If a library written in Chapel can achieve performance comparable
 to ScaLAPACK then ease of programming may make it preferable in cases
-when a matrix operation does not already exist in the library and
+where a matrix operation does not already exist in the library and
 the problem size is such that any additional computation time is negligible.
 For library developers with no formal introduction to Chapel all of
 these scenarios are possible and make experimenting with the language
@@ -84,14 +84,14 @@ the fastest linear algebra algorithms available. These libraries,
 however, are far from simple and if a new operation needs to be introduced
 a user would need a decent amount of experience and understanding
 of collective communication with MPI in order to successfully add
-the operation to the library. The FLAME framework and API is, however,
+the operation to the library. The FLAME framework and API, however, is
 one of the cleanest ways to express dense linear algebra operations.
 Matrix indices are abstracted away and more attractive methods are
 provided to partition matrices for computations. libFLAME already
 lends itself to parallelization through the use of matrix partitioning
 so it seems natural to implement it in a parallel language like Chapel.
 The question then becomes: is it possible to use the FLAME approach
-for deriving algorithms and FLAME/C API with Chapel to write a parallel
+for deriving algorithms and the FLAME/C API with Chapel to write a parallel
 linear algebra library? Finding the answer to this question is the
 goal of this work. We were informed by Chapel developers from the
 start that the compiler was not optimized so achieving comparable
@@ -110,36 +110,35 @@ several variations of general matrix-matrix multiply (GEMM) algorithms
 from libFLAME and a scalable matrix multiplication algorithm. The
 results of our findings are reported in this paper. Section \ref{sec:Flame-Overview}
 gives an overview of the FLAME API. Section \ref{sec:shmem-GEMM}
-discusses a Chapel shared memory implementation of a matrix multiplication
+discusses our Chapel shared memory implementation of a matrix multiplication
 algorithm from libFLAME. Section \ref{sec:blk-GEMM} discusses our
 attempt to implement a blocked multi-locale matrix multiplication
 algorithm in Chapel. Section \ref{sec:SUMMA-implementation} discusses
-a Chapel implementation of a scalable matrix multiplication algorithm
+our Chapel implementation of a scalable matrix multiplication algorithm
 called SUMMA and Section \ref{sec:Conclusions} summarizes our conclusions.
 
 
 \section{FLAME Overview\label{sec:Flame-Overview}}
 
-We now discuss the FLAME API \cite{libflame_ref} and the reasons
+We now discuss the FLAME API \cite{libflame_ref} and the motivation
 for implementing parallel algorithms in Chapel via the API. The algorithms
 used in the FLAME libraries are derived using a formal methodology
-and verification process. The algorithms are expressed using a notation
+and verification process. They are expressed using a notation
 that applies the mathematical specification for the routine in a step
 by step manner that is easy to visualize and understand. The API was
 designed so that the clarity of this derivation process is not lost
-once the algorithm is in code form. Using the API the algorithm can
+when notation is translated to code form. Using the API the algorithm can
 be coded using a high level of abstraction that hides the indices
 that would usually be involved when coding the algorithms. The code
 partitions and repartitions matrices while performing the mathematical
-computation in the same manner illustrated by the FLAME notation that
-is used to express the algorithm. This high level of abstraction makes
-it easier to think about different variations of the algorithms. The
-API also exposes the critical sections of the algorithms which provides
+computation in the same manner expressed by the FLAME notation. This high 
+level of abstraction makes it easier to think about different variations
+of the algorithms. The API also exposes critical sections in the code which provides
 hints to how they could be parallelized. Figures \ref{Flo:GEMMalgorithm}
 and \ref{Flo:GEMMFLAMEAPI} show the similarities between FLAME algorithm
 notation and code expressed in the FLAME API.
 
-Aside from the linear algebra algorithms that do the bulk of the computation,
+Aside from the linear algebra routines that do the bulk of the computation,
 libFLAME's API is made up of numerous auxiliary functions, objects,
 type definitions, partitioning functions, validation functions, etc.
 All of this code had to be rewritten in Chapel. We were disappointed
@@ -176,9 +175,9 @@ FLAME API}}
 We implemented a shared memory GEMM algorithm, $C:=AB+\hat{C}$, \cite{TSoPMC}
 which partitions $A$ along its first dimension into a collection
 of vectors, $a_{i}^{T}$. The algorithm then performs a series of
-general matrix vector multiplication (GEMV) operations, $c_{i}^{T}:=a_{i}^{T}B+\hat{c_{i}^{T}}$.
+general matrix vector multiplication (GEMV) operations, $c_{i}^{T}:=a_{i}^{T}B+\hat{c_{i}^{T}}$, to compute the result.
 In the FLAME methodology this partitioning is done by creating {}``views''
-of the matrix which allow the programmer to treat the views as independent
+of the matrix which allow the programmer to treat partitioned blocks as independent
 matrices or vectors\cite{Bientinesi:2005:RLA}. In the sequential
 implementation of libFLAME this algorithm would partition the matrix
 to extract one vector from it at a time, multiply the other matrix
@@ -318,10 +317,10 @@ multiplication algorithm called SUMMA \cite{summa}. SUMMA has a number
 of benefits in that it not only achieves high performance but is also
 relatively simple compared to its predecessors. This algorithm is
 only practical in a parallel environment so it wouldn't make sense
-for the sequential FLAME library to include it. However, the SUMMA
-algorithm tests multiple facets of Chapel's programmability so its
+for the sequential FLAME library to include it. However, SUMMA
+tests multiple facets of Chapel's programmability so its
 implementation is a good exercise. The key to achieving performance
-benefits with the algorithm is replication. We give a high level explanation
+benefits is replication. We give a high level explanation
 of the algorithm for the sake of clarity before discussing our implementation
 and issues encountered. 
 
