@@ -4,7 +4,8 @@ use Time;
 
 config var Afile: string = "";
 config var Bfile: string = "";
-config var blksize: int = -1;
+config var blkrows: int = -1;
+config var blkcols: int = -1;
 config var answer: string = "answer";
 config var alphaVal: real = 1.0;
 config var betaVal: real = 1.0;
@@ -35,9 +36,9 @@ def main()
 		writeln("Must provide 2 files containing matrices.");
 		exit(1);
 	}
-	if blksize == -1 
+	if blkrows == -1 || blkcols == -1
 	{
-		writeln("Must enter a blocksize 'i.e. --blksize 3'");
+		writeln("Must enter a blocksize 'i.e. --blkrows 3 --blkcols 3'");
 		exit(1);
 	}
 	var A = readArray(Afile);
@@ -58,22 +59,25 @@ def main()
 	var myTimer: Timer;
 	myTimer.start();
 
-	for pnl in 1..n by blksize
+	for pnl in 1..n by blkcols
 	{
+	
+ 		//startCommDiagnostics();
 		loc1 = (loc1 + 1) % numLocales;
 		loc1cnt = loc1cnt + 1;
 		on Locales(loc1)
 		{
 			var start: int = pnl;
-			var replAD: domain(2) = AD[.., start..start+blksize-1],
-				 replBD: domain(2) = BD[start..start+blksize-1, ..],				 
-				 replCD: domain(2) = CD[start..start+blksize-1, ..];
+			//writeln(start, " -> ", "[",start%(m+1)+1,", ", (start+blksize-1)%(m+1)+1,"]");
+			var replAD: domain(2) = AD[.., start..start+blkcols-1],
+				 replBD: domain(2) = BD[start..start+blkcols-1, ..];			 
+				 //replCD: domain(2) = CD[start..start+blksize-1, ..];
 		
-			var replA : [replAD] real = A[.., start..start+blksize-1],
-				 replB : [replBD] real = B[start..start+blksize-1, ..],				 
-				 replC : [replCD] real = C[start..start+blksize-1, ..];
+			var replA : [replAD] real = A[.., start..start+blkcols-1],
+				 replB : [replBD] real = B[start..start+blkcols-1, ..];				 
+				 //replC : [replCD] real = C[start..start+blksize-1, ..];
 		
-			for blk in 1..m by blksize
+			for blk in 1..m by blkrows
 			{		
 				loc2 = (loc2 + 1) % numLocales;
 				loc2cnt = loc2cnt + 1;
@@ -81,13 +85,13 @@ def main()
 			   {
 					var start1: int = blk;
 					
-					var aBlkD: domain(2) = replAD[start1..start1+blksize-1, ..],							   
+					var aBlkD: domain(2) = replAD[start1..start1+blkrows-1, ..],							   
 						 repl2BD: domain(2) = replBD,
-						 repl2CD: domain(2) = replCD;
+						 replCD: domain(2) = CD[start1..start1+blkrows-1, ..];
 					
-					var aBlk : [aBlkD] real = replA[start1..start1+blksize-1, ..],
+					var aBlk : [aBlkD] real = replA[start1..start1+blkrows-1, ..],
 				 		 repl2B : [repl2BD] real = replB,
-				 		 repl2C : [repl2CD] real;
+				 		 replC : [replCD] real;
 				 		 
 					local {
 						dgemm(aBlk.domain.dim(1).length,
@@ -95,22 +99,42 @@ def main()
 					   repl2B.domain.dim(2).length,
 					   aBlk,
 					   repl2B,
-					   repl2C,
+					   replC,
 					   1.0,
 					   1.0);  
 					} 
 					
-					C[loc2cnt%blksize*blksize+1..(loc2cnt%blksize*blksize)+blksize, ..] += repl2C;
+					//writeln(loc2, "aBlk: ", aBlk, "\n\n");
+					//writeln("replB: ", repl2B, "\n\n");
+					//writeln("replC: ", replC, "\n\n");
+					C[loc2cnt%(m/blkrows)*blkrows+1..(loc2cnt%(m/blkrows)*blkrows)+blkrows, ..] += replC;
+					//writeln(loc2, "C: ", C, "\n\n");
 				}
 			}
 		} 	
+		//stopCommDiagnostics();
+  		//writeln(getCommDiagnostics());
 	}
-	
 	myTimer.stop();
 	//writeln("A:\n",A);
 	//writeln("B:\n",B);
-	writeln("C:\n",C);
+	//writeln("C:\n",C);
+	writeArray(C, answer);
 	writeln("Time: ", myTimer.elapsed());
+	
+// end forall
+// stopVerboseComm();
+//   stopCommDiagnostics();
+  //writeln(getCommDiagnostics());
+  //var diag = getCommDiagnostics();
+  //var total = 0;
+  //for i in diag.domain
+  //{
+    //writeln(diag(i));
+    //writeln(diag(i)(1) + diag(i)(2));
+  //  total += diag(i)(1) + diag(i)(2);
+  //}
+  //writeln("total: ", total);
 }
 
 def dgemm(p: indexType,       // number of rows in A
