@@ -63,15 +63,16 @@ developers might see an opportunity to implement a library on this
 new platform. Programming a parallel dense linear algebra library
 in global-view language is presumably easier than using a local-view
 language like MPI combined with C++. In addition, the most popular
-parallel dense linear algebra libraries are surprisingly inefficient
-and a library that is properly implemented can outperform these libraries,
-i.e ScaLAPACK, without many additional optimizations. If a library
-written in Chapel can achieve performance comparable to ScaLAPACK
-then ease of programming may make it preferable in cases when a matrix
-operation does not already exist in the library and the problem size
-is such that any additional computation time is negligible. For library
-developers with no formal introduction to Chapel all of these scenarios
-are possible and make experimenting with the language worthwhile.
+parallel dense linear algebra libraries, e.g. ScaLAPACK, are surprisingly
+inefficient and a library that is properly implemented can outperform
+these libraries without many additional optimizations\cite{elemental}.
+If a library written in Chapel can achieve performance comparable
+to ScaLAPACK then ease of programming may make it preferable in cases
+when a matrix operation does not already exist in the library and
+the problem size is such that any additional computation time is negligible.
+For library developers with no formal introduction to Chapel all of
+these scenarios are possible and make experimenting with the language
+worthwhile.
 
 For the Formal Linear Algebra Methods Environment (FLAME) group at
 the University of Texas at Austin, Chapel poses interesting possibilities.
@@ -81,31 +82,33 @@ C++ (Elemental\cite{elemental,elemental2}). These libraries were
 built using matrix theory and methodology that results in some of
 the fastest linear algebra algorithms available. These libraries,
 however, are far from simple and if a new operation needs to be introduced
-a scientist would need a decent amount of experience and understanding
+a user would need a decent amount of experience and understanding
 of collective communication with MPI in order to successfully add
 the operation to the library. The FLAME framework and API is, however,
 one of the cleanest ways to express dense linear algebra operations.
 Matrix indices are abstracted away and more attractive methods are
-provided to partition matrices for computations. If libFLAME could
-be implemented in the Chapel language it already lends itself to parallelization
-through the use of matrix partitioning. The question then becomes:
-is it possible to use the FLAME approach for deriving algorithms and
-libFLAME API with Chapel to write a parallel linear algebra library?
-Finding the answer to this question is the goal of this work. We were
-informed by Chapel developers from the start that the compiler was
-not optimized so achieving comparable performance would not be possible.
-Despite this we set out to learn, under the assumption of a compiler
-that generates optimized code, if Chapel presents a good layer of
-abstraction for parallel dense linear algebra algorithms; if it allows
-us to express the formalisms of the FLAME methodology; if it allows
-us to express the necessary distributions required to partition a
-matrix over a mesh of processors for parallel computation; and if
-it allows us to express the communication required to perform matrix
-operations on matrices that have been partitioned across many processors.
-We attempt to determine if Chapel satisfies these conditions by implementing
+provided to partition matrices for computations. libFLAME already
+lends itself to parallelization through the use of matrix partitioning
+so it seems natural to implement it in a parallel language like Chapel.
+The question then becomes: is it possible to use the FLAME approach
+for deriving algorithms and FLAME/C API with Chapel to write a parallel
+linear algebra library? Finding the answer to this question is the
+goal of this work. We were informed by Chapel developers from the
+start that the compiler was not optimized so achieving comparable
+performance would not be possible and competing against any benchmark
+(including ScaLAPACK) would not be valuable. Despite this we set out
+to learn, under the assumption of a compiler that generates optimized
+code, whether Chapel presents a good layer of abstraction for parallel
+dense linear algebra algorithms; whether it allows us to express the
+formalisms of the FLAME methodology; whether it allows us to express
+the necessary distributions required to partition a matrix over a
+mesh of processors for parallel computation; and whether it allows
+us to express the communication required to perform matrix operations
+on matrices that have been partitioned across many processors. We
+attempt to determine if Chapel satisfies these conditions by implementing
 several variations of general matrix-matrix multiply (GEMM) algorithms
-from libFLAME and a scalable parallel matrix multiplication algorithm.
-The results of our findings are reported in this paper. Section \ref{sec:Flame-Overview}
+from libFLAME and a scalable matrix multiplication algorithm. The
+results of our findings are reported in this paper. Section \ref{sec:Flame-Overview}
 gives an overview of the FLAME API. Section \ref{sec:shmem-GEMM}
 discusses a Chapel shared memory implementation of a matrix multiplication
 algorithm from libFLAME. Section \ref{sec:blk-GEMM} discusses our
@@ -115,7 +118,7 @@ a Chapel implementation of a scalable matrix multiplication algorithm
 called SUMMA and Section \ref{sec:Conclusions} summarizes our conclusions.
 
 
-\section{Flame Overview\label{sec:Flame-Overview}}
+\section{FLAME Overview\label{sec:Flame-Overview}}
 
 We now discuss the FLAME API \cite{libflame_ref} and the reasons
 for implementing parallel algorithms in Chapel via the API. The algorithms
@@ -176,10 +179,10 @@ of vectors, $a_{i}^{T}$. The algorithm then performs a series of
 general matrix vector multiplication (GEMV) operations, $c_{i}^{T}:=a_{i}^{T}B+\hat{c_{i}^{T}}$.
 In the FLAME methodology this partitioning is done by creating {}``views''
 of the matrix which allow the programmer to treat the views as independent
-matrices or vectors. In the sequential implementation of libFLAME
-this algorithm would partition the matrix to extract one vector from
-it at a time, multiply the other matrix by this vector, and merge
-the result back into the result matrix.
+matrices or vectors\cite{Bientinesi:2005:RLA}. In the sequential
+implementation of libFLAME this algorithm would partition the matrix
+to extract one vector from it at a time, multiply the other matrix
+by this vector, and merge the result back into the result matrix.
 
 
 \subsection{Implementation}
@@ -248,8 +251,8 @@ we decided to implement a blocked GEMM algorithm, $C:=AB+\hat{C}$,
 that used multiple locales to evaluate the ease of reasoning about
 and programming with Chapel's data locality features. The blocked
 GEMM algorithm that we implemented partitions $A$ into panels along
-the first dimension and the $B$ into panels along the second dimension.
-The algorithm then performs a series of general panel panel multiplies,
+the first dimension and $B$ into panels along the second dimension.
+The algorithm then performs a series of general panel-panel multiplies,
 $C:=A_{i}B_{i}+\hat{C}$. According to \cite{TSoPMC} this algorithm
 performs better than the other blocked GEMM algorithms in libFLAME. 
 
@@ -341,7 +344,7 @@ by having to perform only a single rank-one update on each node.
 
 \subsubsection{Blocked SUMMA}
 
-Van de Geijn and Watts \cite{summa} found that even more performance
+Van de Geijn and Watts \cite{summa} found that even better performance
 can be achieved by formulating the computations as matrix-matrix multiplications
 instead of rank-one updates. The idea is that communication is reduced
 because more data is being sent to each node and smaller blocks can
@@ -389,8 +392,9 @@ In order to return an answer we have to send all the computed data
 from each node back to a single node that holds the original reference
 to $C$. Figure \ref{fig:blk_summa} shows the increase in communication
 that this incurs. Again, it would be nice to see if Chapel's user
-defined domain maps could handle this algorithm elegantly, however,
-at this stage in Chapel's development this was not possible.
+defined domain maps and replicated distributions could handle this
+algorithm elegantly, however, at this stage in Chapel's development
+this was not possible.
 
 %
 \begin{figure}
@@ -416,14 +420,15 @@ algebra libraries. The results from our shared memory GEMM implementation
 show that relative speedup is possible as the number of threads increases
 which is promising. If optimizations continue to be added to the Chapel
 compiler it may become possible to achieve performance that surpasses
-the sequential C implementation of libFLAME. The biggest deterrent
-for library developers at this point in Chapel's development is the
-lack of data locality features. The inability to create user defined
-domain maps across locales is a major issue when attempting to implement
-efficient linear algebra algorithms. Once this feature is implemented
-in the Chapel compiler another evaluation should be conducted. In
-the compiler's current state it is too difficult to manage data locality
-for some of the proven parallel GEMM algorithms.
+the sequential C implementation of libFLAME. From a programmability
+point of view the biggest deterrent for library developers at this
+point in Chapel's development is the lack of data locality features.
+The inability to create user defined domain maps across locales is
+a major issue when attempting to implement efficient linear algebra
+algorithms. Once this feature is implemented in the Chapel compiler
+another evaluation should be conducted. In the compiler's current
+state it is too difficult to manage data locality for some of the
+proven parallel GEMM algorithms.
 
 \bibliographystyle{acm} \nocite{*} \bibliographystyle{plain}
 \nocite{*}
