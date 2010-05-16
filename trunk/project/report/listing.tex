@@ -1,4 +1,7 @@
-{\scriptsize
+\centering
+\scriptsize
+\begin{tabular}{| m{13cm} |}
+\hline\\
 \begin{verbatim}
 // replicated distributions aren't implemented yet, but imagine that
 // they look something like the following:
@@ -17,6 +20,8 @@ for pnl in 1..n by blkcols
     var start: int = pnl;
     var replAbD: domain(2) = AbD[1.., start..start+blkcols-1];
     var replAb : [replAD] real = Ab[1.., start..start+blkcols-1];
+
 \end{verbatim}
+\centering
  $\vdots$
-}
+\end{tabular}
