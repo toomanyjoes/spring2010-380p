@@ -1,0 +1,77 @@
+CS380P Project  Samuel Palmer and Joe Elizondo
+
+=============================================================
+Building Our Project:
+=============================================================
+
+The current version of our code compiles and runs with version 1.1 of the Chapel compiler.
+Our project currently builds on the UTCS machines with the following Chapel variables:
+
+CHPL_HOST_PLATFORM: linux32
+CHPL_HOST_COMPILER: gnu
+CHPL_TARGET_PLATFORM: linux32
+CHPL_TARGET_COMPILER: gnu
+CHPL_COMM: gasnet
+  CHPL_COMM_SUBSTRATE: udp
+  CHPL_GASNET_SEGMENT: everything
+CHPL_TASKS: fifo
+CHPL_THREADS: pthreads
+CHPL_LAUNCHER: amudprun
+CHPL_TIMERS: generic
+CHPL_MEM: default
+CHPL_MAKE: make
+
+The shared memory portion of our code compiles and runs on TACC's Ranger cluster with the following Chapel variables:
+
+CHPL_HOST_PLATFORM: linux64
+CHPL_HOST_COMPILER: gnu
+CHPL_TARGET_PLATFORM: linux64
+CHPL_TARGET_COMPILER: gnu
+CHPL_COMM: none
+CHPL_TASKS: fifo
+CHPL_THREADS: pthreads
+CHPL_LAUNCHER: none
+CHPL_TIMERS: generic
+CHPL_MEM: default
+CHPL_MAKE: gmake
+
+
+
+The following make targets are defined in our makefile:
+parallel      (Compiles our project with the --fast compiler flag. Outputs "flame_parallel" and "flame_parallel_real")
+serial        (Compiles our project with the --serial and --fast compiler flags. Outputs "flame_serial" and "flame_serial_real")
+all           (Builds "parallel" and "serial" targets. This is the default target.)
+clean         (Removes "flame_parallel" "flame_parallel_real" "flame_serial" and "flame_serial_real")
+
+
+
+=============================================================
+Running Our Project:
+=============================================================
+
+To run our project you must specify the following parameters on the command line:
+--Afile A_matrix.txt
+--Bfile B_matrix.txt
+--blkSize [int]    (specifies the block size for the blocked GEMM)
+-nl [int]          (specifies the number of locales)
+
+The following parameter is optional:
+--answer answer_matrix.txt   (specifies the file to write the result matrix. Defaults to "answer")
+
+Examples:
+./flame_parallel --Afile testmatrixA100x100.txt --Bfile testmatrixB100x100.txt --answer answer.txt --blkSize 10 -nl 2
+./flame_serial --Afile testmatrixA100x100.txt --Bfile testmatrixB100x100.txt --answer answer.txt --blkSize 10 -nl 2
+
+
+Where testmatrixA100x100.txt and testmatrixB100x100.txt have the following structure (excluding the comments):
+m n
+1 2 3 4 ... n        <===========  row 1 of the matrix
+. 
+. 
+.
+1 2 3 4 ... n        <===========  row m of the matrix
+
+
+
+
+
